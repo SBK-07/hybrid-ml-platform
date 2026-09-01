@@ -7,9 +7,9 @@ if __name__ == "__main__":
     print("  Q-MED: HYBRID QUANTUM-CLASSICAL DISEASE DETECTION PLATFORM")
     print("  SIH 2026 Problem Statement 139 Implementation")
     print("=" * 70)
-    print("  🚀 Starting FastAPI Server & Frontend Dashboard...")
-    print("  🌐 Open in Browser: http://localhost:8000/app")
-    print("  📚 REST API Docs:   http://localhost:8000/docs")
+    print("  [*] Starting FastAPI Server & Frontend Dashboard...")
+    print("  [*] Open in Browser: http://localhost:8000/app")
+    print("  [*] REST API Docs:   http://localhost:8000/docs")
     print("=" * 70)
 
     # Change working dir to backend directory

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q-Med | Hybrid Quantum-Classical Early Disease Detection Platform</title>
+    <title>Q-Med AI Studio | Hybrid Quantum-Classical ML Platform</title>
     <!-- Google Fonts & Chart.js -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,237 +13,87 @@
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar Navigation (Modern AI Workspace) -->
         <aside class="sidebar">
             <div class="brand">
                 <div class="logo-icon">⚛</div>
                 <div>
-                    <h2>Q-Med Platform</h2>
+                    <h2>Q-Med AI Studio</h2>
                     <span class="badge-sih">SIH 2026 PS 139</span>
                 </div>
             </div>
 
-            <!-- Persistent Dataset Selector -->
-            <div class="dataset-card">
-                <label for="datasetSelect">Active Dataset</label>
-                <select id="datasetSelect" class="form-select">
-                    <option value="heart.csv">UCI Heart Disease (13 Feat)</option>
-                    <option value="diabetes.csv">PIMA Diabetes (8 Feat)</option>
-                    <option value="parkinsons.csv">Parkinson's Voice (13 Feat)</option>
-                </select>
+            <!-- Active Dataset Pill -->
+            <div class="active-dataset-pill">
+                <span class="pill-label">Active Dataset:</span>
+                <span id="activeDatasetName" class="pill-value">UCI Heart Disease</span>
             </div>
 
             <nav class="nav-menu">
-                <button class="nav-item active" data-stage="1"><span class="step-num">1</span> Overview & Pipeline</button>
-                <button class="nav-item" data-stage="2"><span class="step-num">2</span> Data Ingestion</button>
-                <button class="nav-item" data-stage="3"><span class="step-num">3</span> PCA & Compression</button>
-                <button class="nav-item" data-stage="4"><span class="step-num">4</span> Hybrid Training</button>
-                <button class="nav-item" data-stage="5"><span class="step-num">5</span> Benchmarking</button>
-                <button class="nav-item" data-stage="6"><span class="step-num">6</span> Explainability (SHAP)</button>
-                <button class="nav-item" data-stage="7"><span class="step-num">7</span> Live Prediction</button>
+                <button class="nav-item active" data-hub="studio">
+                    <span class="nav-icon">⚡</span> Model Studio
+                </button>
+                <button class="nav-item" data-hub="datasets">
+                    <span class="nav-icon">📂</span> Datasets Hub
+                </button>
+                <button class="nav-item" data-hub="library">
+                    <span class="nav-icon">📚</span> Model Library
+                </button>
+                <button class="nav-item" data-hub="inference">
+                    <span class="nav-icon">🔬</span> Single-Value Testing
+                </button>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="quantum-status">
-                    <span class="status-dot"></span> Simulator: PennyLane Aer
+                    <span class="status-dot"></span> PennyLane QML Simulator
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Main Workspace Area -->
         <main class="main-content">
-            <!-- Stage 1: Overview -->
-            <section id="stage-1" class="stage-section active">
+
+            <!-- HUB 1: MODEL STUDIO & DASHBOARD -->
+            <section id="hub-studio" class="hub-section active">
                 <div class="section-header">
-                    <h1>Hybrid Quantum-Classical Disease Detection</h1>
-                    <p class="subtitle">Early identification of complex pathologies by mapping clinical feature spaces onto quantum Hilbert states.</p>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card hero-card">
-                        <h3>Why Hybrid QML for Healthcare?</h3>
-                        <p>Classical ML models struggle to capture non-linear correlation structures in high-dimensional biomedical data. Q-Med leverages <strong>Angle-Encoded Quantum Kernels (QSVM)</strong> and <strong>Variational Quantum Circuits (VQC)</strong> combined with classical ensembles to achieve superior diagnostic sensitivity.</p>
-                        <div class="hero-stats">
-                            <div class="stat-box">
-                                <span class="stat-val" id="stat-datasets">3</span>
-                                <span class="stat-lbl">Biomedical Datasets</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-val">4 Qubits</span>
-                                <span class="stat-lbl">Circuit Capacity</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-val">98.3%</span>
-                                <span class="stat-lbl">Peak Hybrid AUC</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>End-to-End Pipeline Architecture</h3>
-                        <div class="pipeline-flow">
-                            <div class="pipe-step"><span>1</span> Raw Clinical Data</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>2</span> SMOTE Rebalance & PCA Compression</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>3</span> Parallel Classical & Quantum Circuit Training</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>4</span> Comparative Benchmarking & SHAP Explainability</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step highlight"><span>5</span> Live 3-Way Patient Inference</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 2: Data Ingestion -->
-            <section id="stage-2" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 2: Data Ingestion & Inspection</h1>
-                    <p class="subtitle">Validating raw biomedical records and evaluating baseline class balance.</p>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Loaded Dataset Metrics</h3>
-                        <div class="metrics-row" id="ingest-stats">
-                            <div class="metric-chip">Rows: <strong id="ingest-rows">--</strong></div>
-                            <div class="metric-chip">Original Features: <strong id="ingest-cols">--</strong></div>
-                            <div class="metric-chip">Target Column: <strong id="ingest-target">--</strong></div>
-                        </div>
-                        <h4 style="margin-top:20px;">First 5 Sample Records</h4>
-                        <div class="table-container">
-                            <table id="previewTable" class="data-table"></table>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>Raw Class Distribution</h3>
-                        <div class="chart-box">
-                            <canvas id="classBalanceChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 3: Preprocessing & PCA Compression -->
-            <section id="stage-3" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 3: Preprocessing & Quantum Feature Compression</h1>
-                    <p class="subtitle">Bridging classical medical features into 4-qubit Hilbert space via SMOTE + PCA.</p>
-                </div>
-
-                <div class="card full-width">
-                    <div class="action-bar">
-                        <div>
-                            <h3>PCA Compression Configuration</h3>
-                            <p>Compress high-dimensional features down to <strong>4 Quantum Attributes</strong> (matching simulator qubit limits).</p>
-                        </div>
-                        <button id="btnRunPreprocess" class="btn btn-primary">⚡ Run Compression Pipeline</button>
-                    </div>
-
-                    <div class="grid-2" style="margin-top:20px;">
-                        <div class="card inner-card">
-                            <h4>Feature Space Reduction</h4>
-                            <div class="compression-display">
-                                <div class="comp-box">
-                                    <span class="comp-num" id="comp-before">13</span>
-                                    <span>Original Features</span>
-                                </div>
-                                <div class="comp-arrow">➔</div>
-                                <div class="comp-box highlight">
-                                    <span class="comp-num" id="comp-after">4</span>
-                                    <span>Target Qubits</span>
-                                </div>
-                            </div>
-                            <p style="margin-top:15px; font-size: 0.9rem; color: #a0aec0;">
-                                Total Explained Variance Retained: <strong id="explainedVar" style="color:#00f2fe;">--%</strong>
-                            </p>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>2D PCA Feature Projection</h4>
-                            <div class="chart-box">
-                                <canvas id="pcaScatterChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 4: Hybrid Model Training -->
-            <section id="stage-4" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 4: Hybrid Model Training Engine</h1>
-                    <p class="subtitle">Executing Classical Baselines (LR, RF, SVM, XGBoost) and QML Circuits (QSVM, VQC).</p>
-                </div>
-
-                <div class="card full-width">
-                    <div class="action-bar">
-                        <div>
-                            <h3>Training Control Panel</h3>
-                            <p>Train classical learners and PennyLane quantum statevector circuits on compressed qubit features.</p>
-                        </div>
-                        <button id="btnTrainModels" class="btn btn-accent">▶ Start Training Pipeline</button>
-                    </div>
-
-                    <div id="trainProgressBox" class="progress-box hidden">
-                        <div class="progress-bar-bg"><div id="trainProgressBar" class="progress-bar-fill"></div></div>
-                        <p id="trainStatusTxt">Training PennyLane Quantum Kernel (QSVM) & Variational Quantum Circuit (VQC)...</p>
-                    </div>
-
-                    <div class="grid-3" style="margin-top: 25px;">
-                        <div class="card inner-card">
-                            <h4>Classical Models</h4>
-                            <ul class="algo-list">
-                                <li>✔ Logistic Regression</li>
-                                <li>✔ Random Forest Classifier</li>
-                                <li>✔ Support Vector Machine (RBF)</li>
-                                <li>✔ XGBoost Classifier</li>
-                            </ul>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>Quantum Models (PennyLane)</h4>
-                            <ul class="algo-list">
-                                <li>✔ QSVM (Angle-Encoded Kernel)</li>
-                                <li>✔ VQC (Parameterized Circuit, Depth 2)</li>
-                            </ul>
-                            <div class="q-chips">
-                                <span class="chip">4 Qubits</span>
-                                <span class="chip">RY-RZ State Preparation</span>
-                            </div>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>Hybrid Fusion Engine</h4>
-                            <ul class="algo-list">
-                                <li>✔ Soft Voting Meta-Learner</li>
-                                <li>✔ Ensembles Classical RF + QSVM Quantum Probabilities</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 5: Benchmarking Dashboard -->
-            <section id="stage-5" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 5: Benchmarking Dashboard (Centerpiece)</h1>
-                    <p class="subtitle">Direct performance matrix evaluation proving classical vs quantum vs hybrid performance.</p>
-                </div>
-
-                <!-- Reality Check Banner -->
-                <div class="banner reality-banner">
-                    <div class="banner-icon">💡</div>
                     <div>
-                        <strong>Honest Hardware Disclosure (Literature Gap Solution)</strong>
-                        <p id="realityCheckTxt">Models currently execute on PennyLane statevector simulator backend (`default.qubit`). High simulated metrics reflect quantum Hilbert space expressivity on noiseless states.</p>
+                        <h1>Model Studio & Interactive Dashboard</h1>
+                        <p class="subtitle">Select your tabular dataset, execute Classical, Quantum (PennyLane QSVM/VQC), and Hybrid pipelines, and benchmark performance in real-time.</p>
+                    </div>
+                    <button id="btnTrainModels" class="btn btn-accent pulse-btn">▶ Start Training Pipeline</button>
+                </div>
+
+                <!-- Active Control Banner -->
+                <div class="card active-control-card">
+                    <div class="control-row">
+                        <div class="control-info">
+                            <span class="label">Target Dataset:</span>
+                            <select id="datasetSelect" class="form-select-inline"></select>
+                        </div>
+                        <div class="control-info">
+                            <span class="label">Quantum Encoding:</span>
+                            <span class="val-highlight">4 Qubits (Angle RY-RZ)</span>
+                        </div>
+                        <div class="control-info">
+                            <span class="label">Engine Status:</span>
+                            <span id="engineStatusTxt" class="val-badge ready">Ready</span>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Live Training Progress Bar -->
+                <div id="trainProgressBox" class="progress-box hidden">
+                    <div class="progress-bar-bg"><div id="trainProgressBar" class="progress-bar-fill"></div></div>
+                    <p id="trainStatusTxt">Training PennyLane Quantum Kernel (QSVM) & Variational Quantum Circuit (VQC)...</p>
+                </div>
+
+                <!-- Benchmarking Matrix Table -->
                 <div class="card full-width">
-                    <h3>Performance Evaluation Matrix</h3>
+                    <div class="card-header-bar">
+                        <h3>Performance Benchmarking Matrix</h3>
+                        <button id="btnSaveToLibrary" class="btn btn-sm btn-outline" disabled>💾 Save Run to Library</button>
+                    </div>
                     <div class="table-container" style="margin-top: 15px;">
                         <table id="benchmarkTable" class="data-table">
                             <thead>
@@ -260,61 +110,92 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td colspan="9" style="text-align:center; color:#718096;">No benchmark results yet. Click "Start Training Pipeline" in Stage 4.</td></tr>
+                                <tr><td colspan="9" style="text-align:center; color:#718096;">No trained model results yet. Click "Start Training Pipeline" above.</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="card full-width" style="margin-top: 20px;">
-                    <h3>Comparative Metrics Visualization</h3>
-                    <div class="chart-box-large">
-                        <canvas id="benchmarkBarChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 6: Explainability -->
-            <section id="stage-6" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 6: Explainability & Clinical Interpretability</h1>
-                    <p class="subtitle">Opening the black box: SHAP feature attributions and clinician-facing summaries.</p>
-                </div>
-
-                <div class="grid-2">
+                <!-- Visual Charts Section -->
+                <div class="grid-2" style="margin-top: 20px;">
                     <div class="card">
-                        <h3>SHAP Feature Importance</h3>
+                        <h3>Comparative Metrics Visualization</h3>
+                        <div class="chart-box">
+                            <canvas id="benchmarkBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>SHAP Feature Importance (Explainable AI)</h3>
                         <div class="chart-box">
                             <canvas id="shapBarChart"></canvas>
                         </div>
                     </div>
+                </div>
 
-                    <div class="card">
-                        <h3>Clinician Interpretation Guide</h3>
-                        <p>Explainable AI (XAI) is critical for clinical adoption. The chart on the left highlights feature attribution scores derived using SHAP (SHapley Additive exPlanations).</p>
-                        <div class="xai-info-box">
-                            <h4>Key Takeaways for Medical Practitioners:</h4>
-                            <ul>
-                                <li>Features with high SHAP values exert the strongest influence on disease probability.</li>
-                                <li>Quantum circuits preserve global multi-feature correlations while remaining interpretable through baseline feature mappings.</li>
-                            </ul>
-                        </div>
+                <!-- Hardware Disclosure Banner -->
+                <div class="banner reality-banner" style="margin-top: 20px;">
+                    <div class="banner-icon">💡</div>
+                    <div>
+                        <strong>Honest Hardware Disclosure (Literature Gap Solution)</strong>
+                        <p id="realityCheckTxt">Models execute on PennyLane statevector simulator backend (`default.qubit`). High simulated metrics reflect quantum Hilbert space expressivity on noiseless states.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 7: Live Prediction -->
-            <section id="stage-7" class="stage-section">
+
+            <!-- HUB 2: DATASETS HUB -->
+            <section id="hub-datasets" class="hub-section">
                 <div class="section-header">
-                    <h1>Stage 7: Live Patient Risk Inference</h1>
-                    <p class="subtitle">Interactive 3-way diagnostic evaluation: Classical vs Quantum vs Hybrid Fusion.</p>
+                    <div>
+                        <h1>Tabular Datasets Repository</h1>
+                        <p class="subtitle">Manage existing biomedical datasets or upload custom tabular CSV data for quantum-classical training.</p>
+                    </div>
+                    <button id="btnOpenUploadModal" class="btn btn-primary">+ Upload New CSV Dataset</button>
+                </div>
+
+                <!-- Datasets Grid -->
+                <div id="datasetsGrid" class="grid-3">
+                    <!-- Loaded dynamically via app.js -->
+                </div>
+            </section>
+
+
+            <!-- HUB 3: MODEL LIBRARY -->
+            <section id="hub-library" class="hub-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Trained Model Library</h1>
+                        <p class="subtitle">Repository of saved model runs. Click any model to inspect full diagnostic metrics, hyperparameter specs, and training dataset provenance.</p>
+                    </div>
+                </div>
+
+                <!-- Model Cards Grid -->
+                <div id="libraryGrid" class="grid-3">
+                    <!-- Loaded dynamically via app.js -->
+                </div>
+            </section>
+
+
+            <!-- HUB 4: SINGLE-SAMPLE INFERENCE -->
+            <section id="hub-inference" class="hub-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Single-Value Patient Risk Inference</h1>
+                        <p class="subtitle">Input a single patient clinical record to get instant diagnostic predictions across Classical, Quantum, and Hybrid models.</p>
+                    </div>
+                    <div class="preset-buttons">
+                        <button id="btnLoadNormal" class="btn btn-sm btn-outline-success">⚡ Load Normal Sample</button>
+                        <button id="btnLoadHighRisk" class="btn btn-sm btn-outline-danger">⚠️ Load High-Risk Sample</button>
+                    </div>
                 </div>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3>Patient Clinical Attributes Form</h3>
-                        <form id="patientForm" class="form-grid">
-                            <!-- Dynamic form fields populated by JS -->
+                        <h3>Patient Clinical Feature Inputs</h3>
+                        <p class="form-subtext" id="inferDatasetName">Active Dataset: UCI Heart Disease</p>
+                        <form id="patientForm" class="form-grid" style="margin-top:15px;">
+                            <!-- Populated dynamically based on active dataset features -->
                         </form>
                         <button id="btnPredict" class="btn btn-primary full-width" style="margin-top:20px;">🔬 Run Patient Risk Inference</button>
                     </div>
@@ -323,20 +204,71 @@
                         <div class="card">
                             <h3>3-Way Side-by-Side Diagnostic Result</h3>
                             <div id="predictionCards" class="pred-cards-grid">
-                                <div class="pred-placeholder">Fill patient form and click "Run Patient Risk Inference" to compare models.</div>
+                                <div class="pred-placeholder">Fill clinical attributes and click "Run Patient Risk Inference" to evaluate.</div>
                             </div>
                         </div>
 
                         <div class="card" style="margin-top:20px;">
-                            <h3>Clinician Diagnostic Report</h3>
+                            <h3>Clinician Executive Diagnostic Report</h3>
                             <div id="clinicianReport" class="report-box">
-                                Summary report will generate here after inference.
+                                Diagnostic executive summary report will generate here after inference.
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
+
         </main>
+    </div>
+
+    <!-- MODAL: CSV Dataset Upload -->
+    <div id="uploadModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Upload New Tabular CSV Dataset</h3>
+                <button class="modal-close" id="btnCloseUploadModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Upload a standard tabular CSV dataset. Ensure the last column contains target binary classification labels (0 or 1).</p>
+                <div class="dropzone" id="csvDropzone">
+                    <div class="dropzone-icon">📄</div>
+                    <p>Drag & drop your CSV file here or <strong>browse</strong></p>
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                </div>
+                <div id="uploadProgress" class="upload-status hidden">Uploading and validating CSV...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Model Detail View -->
+    <div id="modelDetailModal" class="modal-overlay hidden">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalModelName">Model Name</h3>
+                    <span id="modalModelCategory" class="badge-paradigm">Paradigm</span>
+                </div>
+                <button class="modal-close" id="btnCloseDetailModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalModelBody">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Data Preview -->
+    <div id="dataPreviewModal" class="modal-overlay hidden">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h3 id="previewModalTitle">Dataset Preview</h3>
+                <button class="modal-close" id="btnClosePreviewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table id="dataPreviewTable" class="data-table"></table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

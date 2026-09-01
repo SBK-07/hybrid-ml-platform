@@ -86,6 +86,40 @@ def list_datasets():
             })
     return {"datasets": datasets}
 
+@app.post("/api/upload_dataset")
+async def upload_dataset(file: UploadFile = File(...)):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are supported.")
+    
+    filename = file.filename.replace(" ", "_")
+    file_path = os.path.join(DATASETS_DIR, filename)
+    
+    contents = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(contents)
+        
+    try:
+        df = pd.read_csv(file_path)
+        if len(df.columns) < 2:
+            os.remove(file_path)
+            raise HTTPException(status_code=400, detail="Uploaded CSV must contain at least 1 feature column and 1 target column.")
+    except Exception as e:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=400, detail=f"Invalid CSV format: {str(e)}")
+        
+    return {
+        "status": "success",
+        "message": f"Dataset '{filename}' uploaded successfully.",
+        "dataset": {
+            "id": filename,
+            "name": filename.replace(".csv", "").replace("_", " ").title(),
+            "samples": len(df),
+            "features": len(df.columns) - 1,
+            "target_column": df.columns[-1]
+        }
+    }
+
 class PreprocessRequest(BaseModel):
     dataset_id: str
     n_qubits: int = 4
