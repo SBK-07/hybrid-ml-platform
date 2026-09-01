@@ -27,10 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Frontend static assets if available
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
-os.makedirs(frontend_dir, exist_ok=True)
-app.mount("/app", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+# Mount Frontend static assets (React build in frontend/dist if present, else frontend)
+frontend_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
+frontend_dist = os.path.join(frontend_root, "dist")
+target_static_dir = frontend_dist if os.path.exists(frontend_dist) else frontend_root
+app.mount("/app", StaticFiles(directory=target_static_dir, html=True), name="frontend")
 
 
 

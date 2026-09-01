@@ -8,6 +8,19 @@ __pycache__/
 .venv/
 venv/
 ENV/
+.env
+.env*
+frontend/.env*
+
+# Node & Build artifacts
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+
+# Logs
+*.log
 
 # OS specific files
 desktop.ini
