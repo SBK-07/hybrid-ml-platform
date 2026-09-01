@@ -1,0 +1,15 @@
+{
+    "dataset_name": "UCI Heart Disease",
+    "dataset_key": "Cardiovascular",
+    "n_qubits": 4,
+    "pca_components": 4,
+    "cumulative_explained_variance": 0.38949037137741727,
+    "component_variance_ratios": [
+        0.10958768949108018,
+        0.10158856624317782,
+        0.09344835568563953,
+        0.08486575995751978
+    ],
+    "quantum_angle_range": "[0, pi]",
+    "random_state": 42
+}
