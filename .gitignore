@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# OS specific files
+desktop.ini
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+.gemini/
