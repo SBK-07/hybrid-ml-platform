@@ -7,7 +7,7 @@
     <!-- Google Fonts & Chart.js -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,29 +23,28 @@
                 </div>
             </div>
 
-            <!-- Persistent Dataset Selector -->
+            <!-- Active Dataset Selector -->
             <div class="dataset-card">
-                <label for="datasetSelect">Active Dataset</label>
+                <label for="datasetSelect">Active Pathology Study</label>
                 <select id="datasetSelect" class="form-select">
-                    <option value="heart.csv">UCI Heart Disease (13 Feat)</option>
-                    <option value="diabetes.csv">PIMA Diabetes (8 Feat)</option>
-                    <option value="parkinsons.csv">Parkinson's Voice (13 Feat)</option>
+                    <option value="cancer">Breast Cancer WDBC (30 Feat → 4 Qubits)</option>
+                    <option value="cardiovascular">UCI Heart Disease (13 Feat → 4 Qubits)</option>
                 </select>
             </div>
 
             <nav class="nav-menu">
-                <button class="nav-item active" data-stage="1"><span class="step-num">1</span> Overview & Pipeline</button>
-                <button class="nav-item" data-stage="2"><span class="step-num">2</span> Data Ingestion</button>
-                <button class="nav-item" data-stage="3"><span class="step-num">3</span> PCA & Compression</button>
-                <button class="nav-item" data-stage="4"><span class="step-num">4</span> Hybrid Training</button>
-                <button class="nav-item" data-stage="5"><span class="step-num">5</span> Benchmarking</button>
-                <button class="nav-item" data-stage="6"><span class="step-num">6</span> Explainability (SHAP)</button>
-                <button class="nav-item" data-stage="7"><span class="step-num">7</span> Live Prediction</button>
+                <button class="nav-item active" data-stage="1"><span class="step-num">1</span> Overview & Architecture</button>
+                <button class="nav-item" data-stage="2"><span class="step-num">2</span> Scientific EDA & Quality</button>
+                <button class="nav-item" data-stage="3"><span class="step-num">3</span> Leak-Free Preprocessing</button>
+                <button class="nav-item" data-stage="4"><span class="step-num">4</span> Classical SVM Baselines</button>
+                <button class="nav-item" data-stage="5"><span class="step-num">5</span> Quantum Kernel (QSVM)</button>
+                <button class="nav-item" data-stage="6"><span class="step-num">6</span> Benchmark & Verdict</button>
+                <button class="nav-item" data-stage="7"><span class="step-num">7</span> Live Patient Inference</button>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="quantum-status">
-                    <span class="status-dot"></span> Simulator: PennyLane Aer
+                    <span class="status-dot"></span> Qiskit 2.5+ Simulator Ready
                 </div>
             </div>
         </aside>
@@ -56,281 +55,355 @@
             <section id="stage-1" class="stage-section active">
                 <div class="section-header">
                     <h1>Hybrid Quantum-Classical Disease Detection</h1>
-                    <p class="subtitle">Early identification of complex pathologies by mapping clinical feature spaces onto quantum Hilbert states.</p>
+                    <p class="subtitle">Benchmarking classical kernel learners against parameterized Quantum Hilbert statevectors for early diagnostic screening.</p>
                 </div>
 
                 <div class="grid-2">
                     <div class="card hero-card">
-                        <h3>Why Hybrid QML for Healthcare?</h3>
-                        <p>Classical ML models struggle to capture non-linear correlation structures in high-dimensional biomedical data. Q-Med leverages <strong>Angle-Encoded Quantum Kernels (QSVM)</strong> and <strong>Variational Quantum Circuits (VQC)</strong> combined with classical ensembles to achieve superior diagnostic sensitivity.</p>
+                        <h3>Why Quantum Kernels for Biomedical Diagnostics?</h3>
+                        <p>High-dimensional clinical phenotypes (such as 30 FNA nuclear morphometrics or 13 hemodynamic attributes) exhibit non-linear feature collinearities. Q-Med compresses features to <strong>4 orthogonal quantum features</strong> and evaluates exact fidelity overlaps:</p>
+                        
+                        <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--accent-cyan); padding: 10px 14px; margin: 14px 0; border-radius: 4px; font-family:'JetBrains Mono', monospace; font-size: 0.85rem;">
+                            K_Q(x, z) = |⟨ϕ(x)|ϕ(z)⟩|²
+                        </div>
+
                         <div class="hero-stats">
                             <div class="stat-box">
-                                <span class="stat-val" id="stat-datasets">3</span>
-                                <span class="stat-lbl">Biomedical Datasets</span>
+                                <span class="stat-val" id="stat-samples">569</span>
+                                <span class="stat-lbl">Validated Patients</span>
                             </div>
                             <div class="stat-box">
                                 <span class="stat-val">4 Qubits</span>
-                                <span class="stat-lbl">Circuit Capacity</span>
+                                <span class="stat-lbl">Quantum Architecture</span>
                             </div>
                             <div class="stat-box">
-                                <span class="stat-val">98.3%</span>
-                                <span class="stat-lbl">Peak Hybrid AUC</span>
+                                <span class="stat-val" id="stat-peak-acc">98.2%</span>
+                                <span class="stat-lbl">Peak Benchmark Acc</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3>End-to-End Pipeline Architecture</h3>
-                        <div class="pipeline-flow">
-                            <div class="pipe-step"><span>1</span> Raw Clinical Data</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>2</span> SMOTE Rebalance & PCA Compression</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>3</span> Parallel Classical & Quantum Circuit Training</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step"><span>4</span> Comparative Benchmarking & SHAP Explainability</div>
-                            <div class="pipe-arrow">↓</div>
-                            <div class="pipe-step highlight"><span>5</span> Live 3-Way Patient Inference</div>
+                        <h3>4-Stage Scientific Pipeline Architecture</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                            <div class="inner-card" style="border-left: 3px solid #3b82f6;">
+                                <strong>01. Data Engineering & Quality Layer</strong>
+                                <p style="font-size:0.8rem; color:var(--text-secondary);">Outlier audit, duplicate detection, zero-leakage 80/20 train/test stratified split.</p>
+                            </div>
+                            <div class="inner-card" style="border-left: 3px solid #10b981;">
+                                <strong>02. Classical SVM Baseline Suite</strong>
+                                <p style="font-size:0.8rem; color:var(--text-secondary);">Linear, RBF, and Polynomial kernels with 5-Fold Stratified CV & GridSearch (μ ± σ).</p>
+                            </div>
+                            <div class="inner-card" style="border-left: 3px solid #8b5cf6;">
+                                <strong>03. Quantum Kernel SVM (QSVM) Engine</strong>
+                                <p style="font-size:0.8rem; color:var(--text-secondary);">ZZFeatureMap entanglement, Qubit Scaling (2, 4, 6, 8), and Noise Sensitivity (1%, 3%, 5%).</p>
+                            </div>
+                            <div class="inner-card" style="border-left: 3px solid #00f2fe;">
+                                <strong>04. Statistical Evaluation & Advantage Verdict</strong>
+                                <p style="font-size:0.8rem; color:var(--text-secondary);">Paired t-test (p-value, Cohen's d), sensitivity/specificity tradeoff, and evidence-based verdict.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 2: Data Ingestion -->
+            <!-- Stage 2: Data Ingestion & Scientific EDA -->
             <section id="stage-2" class="stage-section">
                 <div class="section-header">
-                    <h1>Stage 2: Data Ingestion & Inspection</h1>
-                    <p class="subtitle">Validating raw biomedical records and evaluating baseline class balance.</p>
+                    <h1>Stage 2: Scientific Data Quality & EDA Layer</h1>
+                    <p class="subtitle">Validating raw biomedical records, schema consistency, missing-value audits, and collinearity structures.</p>
+                </div>
+
+                <div class="grid-4" style="margin-bottom:20px;">
+                    <div class="stat-box">
+                        <span class="stat-val" id="eda-samples">--</span>
+                        <span class="stat-lbl">Total Samples</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="eda-features">--</span>
+                        <span class="stat-lbl">Raw Attributes</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="eda-prevalence">--%</span>
+                        <span class="stat-lbl">Disease Prevalence</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="eda-duplicates">0</span>
+                        <span class="stat-lbl">Duplicate Records</span>
+                    </div>
                 </div>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3>Loaded Dataset Metrics</h3>
-                        <div class="metrics-row" id="ingest-stats">
-                            <div class="metric-chip">Rows: <strong id="ingest-rows">--</strong></div>
-                            <div class="metric-chip">Original Features: <strong id="ingest-cols">--</strong></div>
-                            <div class="metric-chip">Target Column: <strong id="ingest-target">--</strong></div>
+                        <h3>Target Class Balance & Clinical Prevalence</h3>
+                        <div class="chart-box">
+                            <canvas id="classBalanceChart"></canvas>
                         </div>
-                        <h4 style="margin-top:20px;">First 5 Sample Records</h4>
-                        <div class="table-container">
-                            <table id="previewTable" class="data-table"></table>
+                        <div class="metrics-row" style="margin-top:14px;" id="eda-balance-chips">
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3>Raw Class Distribution</h3>
-                        <div class="chart-box">
-                            <canvas id="classBalanceChart"></canvas>
+                        <h3>Feature Correlation Matrix Heatmap</h3>
+                        <img id="figCorrelationMatrix" class="figure-preview" src="" alt="Correlation Matrix" style="max-height: 260px; object-fit: contain;">
+                    </div>
+                </div>
+
+                <div class="card full-width" style="margin-top:20px;">
+                    <h3>Primary Differentiating Features & Distributions</h3>
+                    <div class="grid-2" style="margin-top:10px;">
+                        <img id="figFeatureDistributions" class="figure-preview" src="" alt="Feature Distributions" style="max-height: 280px; object-fit: contain;">
+                        <div>
+                            <h4>Top Positive Target Collinearities</h4>
+                            <div id="topPosCorrList" style="margin-bottom:14px; font-size:0.85rem;"></div>
+                            <h4>Top Negative Target Collinearities</h4>
+                            <div id="topNegCorrList" style="font-size:0.85rem;"></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 3: Preprocessing & PCA Compression -->
+            <!-- Stage 3: Preprocessing & Quantum Compression -->
             <section id="stage-3" class="stage-section">
                 <div class="section-header">
-                    <h1>Stage 3: Preprocessing & Quantum Feature Compression</h1>
-                    <p class="subtitle">Bridging classical medical features into 4-qubit Hilbert space via SMOTE + PCA.</p>
+                    <h1>Stage 3: Zero-Leakage Preprocessing & Quantum Encoding</h1>
+                    <p class="subtitle">Compressing continuous biomedical features into 4-qubit Hilbert space rotation angles without data leakage.</p>
                 </div>
 
-                <div class="card full-width">
-                    <div class="action-bar">
-                        <div>
-                            <h3>PCA Compression Configuration</h3>
-                            <p>Compress high-dimensional features down to <strong>4 Quantum Attributes</strong> (matching simulator qubit limits).</p>
+                <div class="banner reality-banner">
+                    <div class="banner-icon">🛡️</div>
+                    <div>
+                        <strong>Strict Zero-Data-Leakage Rule</strong>
+                        <p>All Scalers (StandardScaler) and PCA estimators are fitted <em>strictly on the 80% training partition</em>. The 20% test partition remains out-of-sample and is transformed using pre-fitted parameters.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Feature Space Compression Flow</h3>
+                        <div class="compression-display">
+                            <div class="comp-box">
+                                <span class="comp-num" id="comp-raw-num">30</span>
+                                <span>Raw Attributes</span>
+                            </div>
+                            <div class="comp-arrow">➔</div>
+                            <div class="comp-box highlight">
+                                <span class="comp-num">4</span>
+                                <span>Quantum Qubits</span>
+                            </div>
                         </div>
-                        <button id="btnRunPreprocess" class="btn btn-primary">⚡ Run Compression Pipeline</button>
+                        <p style="margin-top:15px; font-size: 0.9rem; color: #a0aec0;">
+                            Cumulative Explained Variance: <strong id="comp-explained-var" style="color:var(--accent-cyan);">--%</strong>
+                        </p>
                     </div>
 
-                    <div class="grid-2" style="margin-top:20px;">
-                        <div class="card inner-card">
-                            <h4>Feature Space Reduction</h4>
-                            <div class="compression-display">
-                                <div class="comp-box">
-                                    <span class="comp-num" id="comp-before">13</span>
-                                    <span>Original Features</span>
-                                </div>
-                                <div class="comp-arrow">➔</div>
-                                <div class="comp-box highlight">
-                                    <span class="comp-num" id="comp-after">4</span>
-                                    <span>Target Qubits</span>
-                                </div>
-                            </div>
-                            <p style="margin-top:15px; font-size: 0.9rem; color: #a0aec0;">
-                                Total Explained Variance Retained: <strong id="explainedVar" style="color:#00f2fe;">--%</strong>
-                            </p>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>2D PCA Feature Projection</h4>
-                            <div class="chart-box">
-                                <canvas id="pcaScatterChart"></canvas>
-                            </div>
-                        </div>
+                    <div class="card">
+                        <h3>PCA Explained Variance Ratio</h3>
+                        <img id="figPcaVariance" class="figure-preview" src="" alt="PCA Variance" style="max-height: 240px; object-fit: contain;">
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 4: Hybrid Model Training -->
+            <!-- Stage 4: Classical SVM Baselines -->
             <section id="stage-4" class="stage-section">
                 <div class="section-header">
-                    <h1>Stage 4: Hybrid Model Training Engine</h1>
-                    <p class="subtitle">Executing Classical Baselines (LR, RF, SVM, XGBoost) and QML Circuits (QSVM, VQC).</p>
+                    <h1>Stage 4: Classical SVM Baseline Suite</h1>
+                    <p class="subtitle">5-Fold Stratified Cross Validation and GridSearchCV hyperparameter tuning across Linear, RBF, and Polynomial kernels.</p>
                 </div>
 
                 <div class="card full-width">
-                    <div class="action-bar">
-                        <div>
-                            <h3>Training Control Panel</h3>
-                            <p>Train classical learners and PennyLane quantum statevector circuits on compressed qubit features.</p>
-                        </div>
-                        <button id="btnTrainModels" class="btn btn-accent">▶ Start Training Pipeline</button>
-                    </div>
-
-                    <div id="trainProgressBox" class="progress-box hidden">
-                        <div class="progress-bar-bg"><div id="trainProgressBar" class="progress-bar-fill"></div></div>
-                        <p id="trainStatusTxt">Training PennyLane Quantum Kernel (QSVM) & Variational Quantum Circuit (VQC)...</p>
-                    </div>
-
-                    <div class="grid-3" style="margin-top: 25px;">
-                        <div class="card inner-card">
-                            <h4>Classical Models</h4>
-                            <ul class="algo-list">
-                                <li>✔ Logistic Regression</li>
-                                <li>✔ Random Forest Classifier</li>
-                                <li>✔ Support Vector Machine (RBF)</li>
-                                <li>✔ XGBoost Classifier</li>
-                            </ul>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>Quantum Models (PennyLane)</h4>
-                            <ul class="algo-list">
-                                <li>✔ QSVM (Angle-Encoded Kernel)</li>
-                                <li>✔ VQC (Parameterized Circuit, Depth 2)</li>
-                            </ul>
-                            <div class="q-chips">
-                                <span class="chip">4 Qubits</span>
-                                <span class="chip">RY-RZ State Preparation</span>
-                            </div>
-                        </div>
-
-                        <div class="card inner-card">
-                            <h4>Hybrid Fusion Engine</h4>
-                            <ul class="algo-list">
-                                <li>✔ Soft Voting Meta-Learner</li>
-                                <li>✔ Ensembles Classical RF + QSVM Quantum Probabilities</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stage 5: Benchmarking Dashboard -->
-            <section id="stage-5" class="stage-section">
-                <div class="section-header">
-                    <h1>Stage 5: Benchmarking Dashboard (Centerpiece)</h1>
-                    <p class="subtitle">Direct performance matrix evaluation proving classical vs quantum vs hybrid performance.</p>
-                </div>
-
-                <!-- Reality Check Banner -->
-                <div class="banner reality-banner">
-                    <div class="banner-icon">💡</div>
-                    <div>
-                        <strong>Honest Hardware Disclosure (Literature Gap Solution)</strong>
-                        <p id="realityCheckTxt">Models currently execute on PennyLane statevector simulator backend (`default.qubit`). High simulated metrics reflect quantum Hilbert space expressivity on noiseless states.</p>
-                    </div>
-                </div>
-
-                <div class="card full-width">
-                    <h3>Performance Evaluation Matrix</h3>
+                    <h3>Classical Model Performance Matrix (5-Fold CV: μ ± σ)</h3>
                     <div class="table-container" style="margin-top: 15px;">
-                        <table id="benchmarkTable" class="data-table">
+                        <table id="classicalTable" class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Model Name</th>
-                                    <th>Category</th>
-                                    <th>Accuracy</th>
+                                    <th>Model & Kernel</th>
+                                    <th>Feature Repr</th>
+                                    <th>Best Hyperparameters</th>
+                                    <th>5-Fold CV Accuracy</th>
+                                    <th>Test Accuracy</th>
                                     <th>Sensitivity (Recall)</th>
                                     <th>Specificity</th>
-                                    <th>Precision</th>
-                                    <th>F1-Score</th>
-                                    <th>AUC-ROC</th>
-                                    <th>Train Time</th>
+                                    <th>ROC-AUC</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td colspan="9" style="text-align:center; color:#718096;">No benchmark results yet. Click "Start Training Pipeline" in Stage 4.</td></tr>
+                            <tbody id="classicalTableBody">
+                                <!-- Populated dynamically -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="card full-width" style="margin-top: 20px;">
-                    <h3>Comparative Metrics Visualization</h3>
-                    <div class="chart-box-large">
-                        <canvas id="benchmarkBarChart"></canvas>
+                <div class="grid-3" style="margin-top:20px;">
+                    <div class="card">
+                        <h3>ROC Curves</h3>
+                        <img id="figClassicalRoc" class="figure-preview" src="" alt="ROC Curves" style="max-height: 240px; object-fit: contain;">
+                    </div>
+                    <div class="card">
+                        <h3>Confusion Matrices</h3>
+                        <img id="figClassicalCm" class="figure-preview" src="" alt="Confusion Matrix" style="max-height: 240px; object-fit: contain;">
+                    </div>
+                    <div class="card">
+                        <h3>5-Fold CV Stability</h3>
+                        <img id="figClassicalCv" class="figure-preview" src="" alt="CV Performance" style="max-height: 240px; object-fit: contain;">
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 6: Explainability -->
+            <!-- Stage 5: Quantum Kernel SVM (QSVM) -->
+            <section id="stage-5" class="stage-section">
+                <div class="section-header">
+                    <h1>Stage 5: Quantum Kernel SVM (QSVM) Engine</h1>
+                    <p class="subtitle">Parameterized ZZFeatureMap state preparation, Quantum Gram matrix computation, Qubit scaling, and Noise sensitivity.</p>
+                </div>
+
+                <div class="grid-4" style="margin-bottom:20px;">
+                    <div class="stat-box">
+                        <span class="stat-val" id="q-qubits">4</span>
+                        <span class="stat-lbl">Qubits</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="q-depth">19</span>
+                        <span class="stat-lbl">Circuit Depth</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="q-cnots">12</span>
+                        <span class="stat-lbl">2-Qubit CNOTs</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="q-kernel-time">-- s</span>
+                        <span class="stat-lbl">Gram Matrix Time</span>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <h3>Quantum Gram Heatmaps</h3>
+                        <img id="figQuantumHeatmap" class="figure-preview" src="" alt="Quantum Kernel Heatmaps" style="max-height: 240px; object-fit: contain;">
+                    </div>
+                    <div class="card">
+                        <h3>Qubit Scaling (2, 4, 6, 8 Qubits)</h3>
+                        <img id="figQubitScaling" class="figure-preview" src="" alt="Qubit Scaling" style="max-height: 240px; object-fit: contain;">
+                    </div>
+                    <div class="card">
+                        <h3>Depolarizing Noise Sensitivity</h3>
+                        <img id="figNoiseSensitivity" class="figure-preview" src="" alt="Noise Sensitivity" style="max-height: 240px; object-fit: contain;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stage 6: Benchmarking & Research Verdict -->
             <section id="stage-6" class="stage-section">
                 <div class="section-header">
-                    <h1>Stage 6: Explainability & Clinical Interpretability</h1>
-                    <p class="subtitle">Opening the black box: SHAP feature attributions and clinician-facing summaries.</p>
+                    <h1>Stage 6: Master Benchmark & Quantum Advantage Verdict</h1>
+                    <p class="subtitle">Rigorous statistical evaluation (p-value, Cohen's d), sensitivity/specificity trade-off, and honest scientific inference.</p>
                 </div>
 
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>SHAP Feature Importance</h3>
-                        <div class="chart-box">
-                            <canvas id="shapBarChart"></canvas>
-                        </div>
+                <!-- Quantum Advantage Verdict Banner -->
+                <div id="verdictBanner" class="banner verdict-banner">
+                    <div class="banner-icon">⚖️</div>
+                    <div>
+                        <strong id="verdictStatus">QUANTUM ADVANTAGE VERDICT</strong>
+                        <p id="verdictSummary">Evaluating statistical significance across 5-fold partitions...</p>
                     </div>
+                </div>
 
+                <div class="card full-width">
+                    <h3>Classical vs Quantum Master Benchmark Table</h3>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table id="benchmarkTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Model Architecture</th>
+                                    <th>Accuracy</th>
+                                    <th>Sensitivity (Recall)</th>
+                                    <th>Specificity</th>
+                                    <th>Precision</th>
+                                    <th>F1-Score</th>
+                                    <th>ROC-AUC</th>
+                                    <th>Train Latency</th>
+                                    <th>Qubits</th>
+                                    <th>Depth</th>
+                                </tr>
+                            </thead>
+                            <tbody id="benchmarkTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top:20px;">
                     <div class="card">
-                        <h3>Clinician Interpretation Guide</h3>
-                        <p>Explainable AI (XAI) is critical for clinical adoption. The chart on the left highlights feature attribution scores derived using SHAP (SHapley Additive exPlanations).</p>
-                        <div class="xai-info-box">
-                            <h4>Key Takeaways for Medical Practitioners:</h4>
-                            <ul>
-                                <li>Features with high SHAP values exert the strongest influence on disease probability.</li>
-                                <li>Quantum circuits preserve global multi-feature correlations while remaining interpretable through baseline feature mappings.</li>
-                            </ul>
-                        </div>
+                        <h3>Multi-Dimensional Clinical Profile (Radar Chart)</h3>
+                        <img id="figRadarChart" class="figure-preview" src="" alt="Radar Chart" style="max-height: 280px; object-fit: contain;">
+                    </div>
+                    <div class="card">
+                        <h3>Clinical Error Breakdown (FN vs FP)</h3>
+                        <img id="figConfusionSideBySide" class="figure-preview" src="" alt="Confusion Matrix Comparison" style="max-height: 280px; object-fit: contain;">
+                    </div>
+                </div>
+
+                <div class="card full-width" style="margin-top:20px;">
+                    <h3>Complete Scientific Research Inference & Statistical Significance</h3>
+                    <div id="researchInferenceBox" class="verdict-box">
+                        Loading research inference...
                     </div>
                 </div>
             </section>
 
-            <!-- Stage 7: Live Prediction -->
+            <!-- Stage 7: Live Patient Inference -->
             <section id="stage-7" class="stage-section">
                 <div class="section-header">
                     <h1>Stage 7: Live Patient Risk Inference</h1>
-                    <p class="subtitle">Interactive 3-way diagnostic evaluation: Classical vs Quantum vs Hybrid Fusion.</p>
+                    <p class="subtitle">Real-time interactive 3-way diagnostic evaluation: Classical RBF SVM vs Quantum Kernel SVM vs Hybrid Consensus.</p>
                 </div>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3>Patient Clinical Attributes Form</h3>
+                        <div class="action-bar">
+                            <h3>Patient Clinical Attributes</h3>
+                            <div class="preset-bar">
+                                <button class="btn-preset" id="btnPresetPositive">⚠️ High Risk Case</button>
+                                <button class="btn-preset" id="btnPresetNegative">✅ Normal Case</button>
+                            </div>
+                        </div>
                         <form id="patientForm" class="form-grid">
-                            <!-- Dynamic form fields populated by JS -->
+                            <!-- Dynamically populated feature inputs -->
                         </form>
-                        <button id="btnPredict" class="btn btn-primary full-width" style="margin-top:20px;">🔬 Run Patient Risk Inference</button>
+                        <button id="btnPredict" class="btn btn-primary full-width" style="margin-top:20px; width:100%;">🔬 Run Quantum-Classical Inference</button>
                     </div>
 
                     <div>
                         <div class="card">
-                            <h3>3-Way Side-by-Side Diagnostic Result</h3>
+                            <h3>3-Way Side-by-Side Diagnostic Evaluation</h3>
                             <div id="predictionCards" class="pred-cards-grid">
-                                <div class="pred-placeholder">Fill patient form and click "Run Patient Risk Inference" to compare models.</div>
+                                <div class="pred-card">
+                                    <div class="pred-title">Classical RBF SVM</div>
+                                    <div class="pred-badge badge-healthy" id="predClassBadge">--</div>
+                                    <div class="pred-prob" id="predClassProb">--%</div>
+                                    <small style="color:var(--text-muted);">Full Feature Space</small>
+                                </div>
+                                <div class="pred-card">
+                                    <div class="pred-title">Quantum Kernel (4-Qubit)</div>
+                                    <div class="pred-badge badge-healthy" id="predQuantBadge">--</div>
+                                    <div class="pred-prob" id="predQuantProb">--%</div>
+                                    <small style="color:var(--text-muted);">Hilbert Statevector Overlap</small>
+                                </div>
+                                <div class="pred-card highlight">
+                                    <div class="pred-title">Hybrid Consensus</div>
+                                    <div class="pred-badge badge-healthy" id="predHybridBadge">--</div>
+                                    <div class="pred-prob" id="predHybridProb">--%</div>
+                                    <small style="color:var(--text-muted);">Ensemble Soft Voting</small>
+                                </div>
                             </div>
                         </div>
 
                         <div class="card" style="margin-top:20px;">
-                            <h3>Clinician Diagnostic Report</h3>
-                            <div id="clinicianReport" class="report-box">
-                                Summary report will generate here after inference.
+                            <h3>Clinician Diagnostic Summary</h3>
+                            <div id="clinicianReport" style="font-size:0.88rem; color:var(--text-secondary); line-height:1.6;">
+                                Click "Run Quantum-Classical Inference" to generate real-time patient risk stratification.
                             </div>
                         </div>
                     </div>
