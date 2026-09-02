@@ -333,6 +333,9 @@ def predict_patient(req: PredictionRequest):
     }
 
 
-# Mount Frontend directory to root
-if os.path.exists(FRONTEND_DIR):
-    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+# Mount Frontend static assets (React build in frontend/dist if present, else frontend)
+FRONTEND_DIST = os.path.join(FRONTEND_DIR, "dist")
+target_frontend_dir = FRONTEND_DIST if os.path.exists(FRONTEND_DIST) else FRONTEND_DIR
+if os.path.exists(target_frontend_dir):
+    app.mount("/", StaticFiles(directory=target_frontend_dir, html=True), name="frontend")
+
