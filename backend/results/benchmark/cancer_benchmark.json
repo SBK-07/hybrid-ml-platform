@@ -1,0 +1,92 @@
+{
+    "dataset_name": "Breast Cancer Wisconsin Diagnostic",
+    "dataset_key": "cancer",
+    "comparison_table": [
+        {
+            "Model": "Linear SVM (Full)",
+            "Accuracy": 0.9824561403508771,
+            "Precision": 1.0,
+            "Sensitivity": 0.9523809523809523,
+            "Specificity": 1.0,
+            "F1_Score": 0.975609756097561,
+            "ROC_AUC": 0.9963624338624338,
+            "Train_Time_s": 0.00432,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "RBF SVM (Full)",
+            "Accuracy": 0.9736842105263158,
+            "Precision": 1.0,
+            "Sensitivity": 0.9285714285714286,
+            "Specificity": 1.0,
+            "F1_Score": 0.9629629629629629,
+            "ROC_AUC": 0.9957010582010581,
+            "Train_Time_s": 0.01633,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "Polynomial SVM (Full)",
+            "Accuracy": 0.9385964912280702,
+            "Precision": 1.0,
+            "Sensitivity": 0.8333333333333334,
+            "Specificity": 1.0,
+            "F1_Score": 0.9090909090909091,
+            "ROC_AUC": 0.9980158730158729,
+            "Train_Time_s": 0.01573,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "RBF SVM (4-PCA Parity)",
+            "Accuracy": 0.956140350877193,
+            "Precision": 1.0,
+            "Sensitivity": 0.8809523809523809,
+            "Specificity": 1.0,
+            "F1_Score": 0.9367088607594937,
+            "ROC_AUC": 0.9976851851851852,
+            "Train_Time_s": 0.01517,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "Quantum Kernel SVM (QSVM)",
+            "Accuracy": 0.8508771929824561,
+            "Precision": 0.8205128205128205,
+            "Sensitivity": 0.7619047619047619,
+            "Specificity": 0.9027777777777778,
+            "F1_Score": 0.7901234567901234,
+            "ROC_AUC": 0.9156746031746033,
+            "Train_Time_s": 0.40462,
+            "Kernel_Time_s": 0.40462,
+            "Qubits": 4,
+            "Circuit_Depth": 19,
+            "CNOT_Count": 12
+        }
+    ],
+    "statistical_test_vs_rbf_pca": {
+        "mean_difference": -0.10659864122318885,
+        "std_difference": 0.004914435115384135,
+        "t_statistic": -48.5023817565511,
+        "p_value": 1.0811084155227475e-06,
+        "is_statistically_significant": true,
+        "cohens_d": -21.690924535658784,
+        "ci_95": [
+            -0.11270071837746969,
+            -0.10049656406890801
+        ]
+    },
+    "quantum_advantage_verdict": {
+        "status": "CLASSICAL ADVANTAGE (RBF KERNEL SUPERIOR)",
+        "summary": "The classical RBF kernel outperformed the Quantum Kernel by 10.53% in accuracy and achieved faster execution without requiring Hilbert-space embedding."
+    }
+}

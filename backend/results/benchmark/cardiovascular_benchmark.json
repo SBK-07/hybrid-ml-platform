@@ -1,0 +1,92 @@
+{
+    "dataset_name": "UCI Heart Disease",
+    "dataset_key": "cardiovascular",
+    "comparison_table": [
+        {
+            "Model": "Linear SVM (Full)",
+            "Accuracy": 0.9180327868852459,
+            "Precision": 0.9272727272727272,
+            "Sensitivity": 0.9807692307692307,
+            "Specificity": 0.5555555555555556,
+            "F1_Score": 0.9532710280373832,
+            "ROC_AUC": 0.9487179487179487,
+            "Train_Time_s": 0.01184,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "RBF SVM (Full)",
+            "Accuracy": 0.8524590163934426,
+            "Precision": 0.8524590163934426,
+            "Sensitivity": 1.0,
+            "Specificity": 0.0,
+            "F1_Score": 0.9203539823008849,
+            "ROC_AUC": 0.9508547008547008,
+            "Train_Time_s": 0.01607,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "Polynomial SVM (Full)",
+            "Accuracy": 0.8688524590163934,
+            "Precision": 0.8928571428571429,
+            "Sensitivity": 0.9615384615384616,
+            "Specificity": 0.3333333333333333,
+            "F1_Score": 0.9259259259259259,
+            "ROC_AUC": 0.9273504273504273,
+            "Train_Time_s": 0.0,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "RBF SVM (4-PCA Parity)",
+            "Accuracy": 0.8360655737704918,
+            "Precision": 0.875,
+            "Sensitivity": 0.9423076923076923,
+            "Specificity": 0.2222222222222222,
+            "F1_Score": 0.9074074074074074,
+            "ROC_AUC": 0.7542735042735043,
+            "Train_Time_s": 0.00601,
+            "Kernel_Time_s": "\u2014",
+            "Qubits": "\u2014",
+            "Circuit_Depth": "\u2014",
+            "CNOT_Count": "\u2014"
+        },
+        {
+            "Model": "Quantum Kernel SVM (QSVM)",
+            "Accuracy": 0.8360655737704918,
+            "Precision": 0.85,
+            "Sensitivity": 0.9807692307692307,
+            "Specificity": 0.0,
+            "F1_Score": 0.9107142857142857,
+            "ROC_AUC": 0.7628205128205128,
+            "Train_Time_s": 0.21607,
+            "Kernel_Time_s": 0.21607,
+            "Qubits": 4,
+            "Circuit_Depth": 19,
+            "CNOT_Count": 12
+        }
+    ],
+    "statistical_test_vs_rbf_pca": {
+        "mean_difference": -0.01638958870917202,
+        "std_difference": 0.025541010310699153,
+        "t_statistic": -1.4348780267951926,
+        "p_value": 0.2246435248973487,
+        "is_statistically_significant": false,
+        "cohens_d": -0.641696961466963,
+        "ci_95": [
+            -0.04810294168971829,
+            0.01532376427137425
+        ]
+    },
+    "quantum_advantage_verdict": {
+        "status": "STATISTICALLY COMPARABLE (NO QUANTUM ADVANTAGE UNDER TESTED CONDITIONS)",
+        "summary": "The quantum kernel achieved comparable classification performance (Accuracy: 83.61% vs Classical: 83.61%) to the classical RBF kernel. Paired t-test confirms the difference is not statistically significant (p=0.2246 >= 0.05). However, quantum kernel simulation introduced a 36.0x computational overhead. Therefore, quantum advantage is NOT established in this configuration."
+    }
+}

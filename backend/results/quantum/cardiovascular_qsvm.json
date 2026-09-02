@@ -1,0 +1,137 @@
+{
+    "dataset_name": "UCI Heart Disease",
+    "dataset_key": "cardiovascular",
+    "quantum_architecture": {
+        "feature_map": "ZZFeatureMap",
+        "n_qubits": 4,
+        "reps": 2,
+        "entanglement": "linear",
+        "circuit_depth": 19,
+        "total_gate_count": 34,
+        "cnot_count": 12,
+        "gate_operations": {
+            "p": 14,
+            "cx": 12,
+            "h": 8
+        }
+    },
+    "cv_performance": {
+        "accuracy_mean": 0.8553571428571429,
+        "accuracy_std": 0.0014580296087995056,
+        "accuracy_formatted": "85.54% +/- 0.15%",
+        "roc_auc_mean": 0.6006968641114983,
+        "roc_auc_std": 0.16074010193389834
+    },
+    "test_metrics": {
+        "accuracy": 0.8360655737704918,
+        "precision": 0.85,
+        "sensitivity": 0.9807692307692307,
+        "specificity": 0.0,
+        "f1_score": 0.9107142857142857,
+        "roc_auc": 0.7628205128205128,
+        "confusion_matrix": {
+            "TP": 51,
+            "FP": 9,
+            "TN": 0,
+            "FN": 1
+        },
+        "training_time_sec": 0.21607,
+        "kernel_train_time_sec": 0.21607,
+        "kernel_test_time_sec": 0.22098,
+        "inference_time_sec": 0.0
+    },
+    "experimental_studies": {
+        "qubit_scaling": {
+            "2_qubits": {
+                "n_qubits": 2,
+                "circuit_depth": 10,
+                "gate_count": 14,
+                "cnot_count": 4,
+                "kernel_time_sec": 0.178,
+                "accuracy": 0.8524590163934426,
+                "roc_auc": 0.29914529914529914,
+                "sensitivity": 1.0,
+                "specificity": 0.0
+            },
+            "4_qubits": {
+                "n_qubits": 4,
+                "circuit_depth": 19,
+                "gate_count": 34,
+                "cnot_count": 12,
+                "kernel_time_sec": 0.3936,
+                "accuracy": 0.8360655737704918,
+                "roc_auc": 0.7628205128205128,
+                "sensitivity": 0.9807692307692307,
+                "specificity": 0.0
+            },
+            "6_qubits": {
+                "n_qubits": 6,
+                "circuit_depth": 25,
+                "gate_count": 54,
+                "cnot_count": 20,
+                "kernel_time_sec": 0.6332,
+                "accuracy": 0.8524590163934426,
+                "roc_auc": 0.5833333333333334,
+                "sensitivity": 1.0,
+                "specificity": 0.0
+            },
+            "8_qubits": {
+                "n_qubits": 8,
+                "circuit_depth": 31,
+                "gate_count": 74,
+                "cnot_count": 28,
+                "kernel_time_sec": 1.0118,
+                "accuracy": 0.8524590163934426,
+                "roc_auc": 0.391025641025641,
+                "sensitivity": 1.0,
+                "specificity": 0.0
+            }
+        },
+        "feature_map_comparison": {
+            "zz": {
+                "name": "ZZFeatureMap",
+                "circuit_depth": 19,
+                "accuracy": 0.8360655737704918,
+                "roc_auc": 0.7628205128205128,
+                "f1_score": 0.9107142857142857
+            },
+            "pauli": {
+                "name": "PAULIFeatureMap",
+                "circuit_depth": 37,
+                "accuracy": 0.8524590163934426,
+                "roc_auc": 0.41452991452991456,
+                "f1_score": 0.9203539823008849
+            }
+        },
+        "noise_sensitivity": {
+            "ideal": {
+                "noise_level": 0.0,
+                "accuracy": 0.8360655737704918,
+                "roc_auc": 0.7628205128205128,
+                "delta_accuracy": 0.0,
+                "delta_auc": 0.0
+            },
+            "level_1_mild (1%)": {
+                "noise_level": 0.01,
+                "accuracy": 0.6666666666666666,
+                "roc_auc": 0.8,
+                "delta_accuracy": -0.1694,
+                "delta_auc": 0.0372
+            },
+            "level_2_mod (3%)": {
+                "noise_level": 0.03,
+                "accuracy": 0.6666666666666666,
+                "roc_auc": 0.42,
+                "delta_accuracy": -0.1694,
+                "delta_auc": -0.3428
+            },
+            "level_3_high (5%)": {
+                "noise_level": 0.05,
+                "accuracy": 0.6666666666666666,
+                "roc_auc": 0.42,
+                "delta_accuracy": -0.1694,
+                "delta_auc": -0.3428
+            }
+        }
+    }
+}

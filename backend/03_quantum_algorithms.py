@@ -38,6 +38,8 @@ import warnings
 warnings.filterwarnings('ignore')
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
@@ -129,28 +131,16 @@ def compute_quantum_kernel_matrix(X1, X2, feature_map, backend_mode="ideal", noi
     t0 = time.time()
     
     if backend_mode == "ideal":
-        # Fast exact Statevector computation
-        sv_list_1 = []
-        for x in X1:
-            qc = feature_map.assign_parameters(x)
-            sv_list_1.append(Statevector.from_instruction(qc))
-            
+        # Fast exact Statevector computation via vectorized Hilbert space matrix multiplication
+        sv_matrix_1 = np.array([Statevector.from_instruction(feature_map.assign_parameters(x)).data for x in X1])
         if is_symmetric:
-            sv_list_2 = sv_list_1
+            sv_matrix_2 = sv_matrix_1
         else:
-            sv_list_2 = []
-            for x in X2:
-                qc = feature_map.assign_parameters(x)
-                sv_list_2.append(Statevector.from_instruction(qc))
-                
-        K = np.zeros((n_samples_1, n_samples_2))
-        for i in range(n_samples_1):
-            start_j = i if is_symmetric else 0
-            for j in range(start_j, n_samples_2):
-                overlap = np.abs(np.vdot(sv_list_1[i].data, sv_list_2[j].data)) ** 2
-                K[i, j] = overlap
-                if is_symmetric:
-                    K[j, i] = overlap
+            sv_matrix_2 = np.array([Statevector.from_instruction(feature_map.assign_parameters(x)).data for x in X2])
+            
+        # Vectorized Gram Matrix K_ij = |<psi_1_i | psi_2_j>|^2
+        M = sv_matrix_1 @ sv_matrix_2.conj().T
+        K = np.abs(M) ** 2
                     
     elif backend_mode in ["shots", "noisy"]:
         # Circuit overlap via U(x2)^dagger U(x1) |0> -> measure |0000>
@@ -163,6 +153,9 @@ def compute_quantum_kernel_matrix(X1, X2, feature_map, backend_mode="ideal", noi
             sim = AerSimulator()
             
         K = np.zeros((n_samples_1, n_samples_2))
+        circuits_to_run = []
+        indices = []
+        
         for i in range(n_samples_1):
             qc_1 = feature_map.assign_parameters(X1[i])
             start_j = i if is_symmetric else 0
@@ -175,8 +168,15 @@ def compute_quantum_kernel_matrix(X1, X2, feature_map, backend_mode="ideal", noi
                 test_circuit.compose(qc_1, inplace=True)
                 test_circuit.compose(qc_2.inverse(), inplace=True)
                 test_circuit.measure_all()
+                circuits_to_run.append(test_circuit)
+                indices.append((i, j))
                 
-                counts = sim.run(test_circuit, shots=shots).result().get_counts()
+        if circuits_to_run:
+            # Batch execute in one shot for maximum C++ speed
+            job = sim.run(circuits_to_run, shots=shots)
+            results = job.result()
+            for idx, (i, j) in enumerate(indices):
+                counts = results.get_counts(idx)
                 overlap = counts.get(zero_state_str, 0) / shots
                 K[i, j] = overlap
                 if is_symmetric:
@@ -378,8 +378,8 @@ def run_qsvm_pipeline(dataset_key, dataset_name):
     }
     
     # Subsampled subset for rapid noise simulation benchmarks
-    n_sub = min(40, len(X_train))
-    n_sub_test = min(20, len(X_test))
+    n_sub = min(30, len(X_train))
+    n_sub_test = min(15, len(X_test))
     X_tr_sub = X_train[:n_sub]
     y_tr_sub = y_train[:n_sub]
     X_te_sub = X_test[:n_sub_test]
@@ -387,8 +387,8 @@ def run_qsvm_pipeline(dataset_key, dataset_name):
     
     for level_name, noise_val in [("level_1_mild (1%)", 0.01), ("level_2_mod (3%)", 0.03), ("level_3_high (5%)", 0.05)]:
         print(f" [*] Simulating with depolarizing noise {level_name}...")
-        Kt_n, _ = compute_quantum_kernel_matrix(X_tr_sub, X_tr_sub, feature_map, backend_mode="noisy", noise_level=noise_val, shots=2048)
-        Kte_n, _ = compute_quantum_kernel_matrix(X_te_sub, X_tr_sub, feature_map, backend_mode="noisy", noise_level=noise_val, shots=2048)
+        Kt_n, _ = compute_quantum_kernel_matrix(X_tr_sub, X_tr_sub, feature_map, backend_mode="noisy", noise_level=noise_val, shots=1024)
+        Kte_n, _ = compute_quantum_kernel_matrix(X_te_sub, X_tr_sub, feature_map, backend_mode="noisy", noise_level=noise_val, shots=1024)
         
         clf_n = SVC(kernel="precomputed", probability=True, C=1.0, random_state=RANDOM_STATE)
         clf_n.fit(Kt_n, y_tr_sub)
@@ -406,7 +406,7 @@ def run_qsvm_pipeline(dataset_key, dataset_name):
             "delta_accuracy": delta_acc,
             "delta_auc": delta_auc
         }
-        print(f"     -> {level_name}: Acc = {m_n['accuracy']*100:.2f}% (Δ {delta_acc*100:+.2f}%) | AUC = {m_n['roc_auc']:.4f}")
+        print(f"     -> {level_name}: Acc = {m_n['accuracy']*100:.2f}% (Delta {delta_acc*100:+.2f}%) | AUC = {m_n['roc_auc']:.4f}")
 
     # Compile Final Structured Quantum Results
     quantum_results = {
