@@ -35,9 +35,9 @@
             "TN": 65,
             "FN": 10
         },
-        "training_time_sec": 0.40462,
-        "kernel_train_time_sec": 0.40462,
-        "kernel_test_time_sec": 0.39402,
+        "training_time_sec": 1.83883,
+        "kernel_train_time_sec": 1.79843,
+        "kernel_test_time_sec": 2.21672,
         "inference_time_sec": 0.0
     },
     "experimental_studies": {
@@ -47,7 +47,7 @@
                 "circuit_depth": 10,
                 "gate_count": 14,
                 "cnot_count": 4,
-                "kernel_time_sec": 0.3409,
+                "kernel_time_sec": 1.772,
                 "accuracy": 0.8771929824561403,
                 "roc_auc": 0.9712301587301587,
                 "sensitivity": 0.7380952380952381,
@@ -58,7 +58,7 @@
                 "circuit_depth": 19,
                 "gate_count": 34,
                 "cnot_count": 12,
-                "kernel_time_sec": 0.7189,
+                "kernel_time_sec": 4.1002,
                 "accuracy": 0.8508771929824561,
                 "roc_auc": 0.9156746031746033,
                 "sensitivity": 0.7619047619047619,
@@ -69,7 +69,7 @@
                 "circuit_depth": 25,
                 "gate_count": 54,
                 "cnot_count": 20,
-                "kernel_time_sec": 1.2245,
+                "kernel_time_sec": 6.2807,
                 "accuracy": 0.8508771929824561,
                 "roc_auc": 0.8902116402116402,
                 "sensitivity": 0.6190476190476191,
@@ -80,7 +80,7 @@
                 "circuit_depth": 31,
                 "gate_count": 74,
                 "cnot_count": 28,
-                "kernel_time_sec": 1.617,
+                "kernel_time_sec": 8.7729,
                 "accuracy": 0.7982456140350878,
                 "roc_auc": 0.9001322751322751,
                 "sensitivity": 0.47619047619047616,
@@ -114,23 +114,23 @@
             "level_1_mild (1%)": {
                 "noise_level": 0.01,
                 "accuracy": 0.8666666666666667,
-                "roc_auc": 0.06,
+                "roc_auc": 0.09999999999999998,
                 "delta_accuracy": 0.0158,
-                "delta_auc": -0.8557
+                "delta_auc": -0.8157
             },
             "level_2_mod (3%)": {
                 "noise_level": 0.03,
-                "accuracy": 0.8,
-                "roc_auc": 0.10999999999999999,
-                "delta_accuracy": -0.0509,
-                "delta_auc": -0.8057
+                "accuracy": 0.7333333333333333,
+                "roc_auc": 0.09999999999999998,
+                "delta_accuracy": -0.1175,
+                "delta_auc": -0.8157
             },
             "level_3_high (5%)": {
                 "noise_level": 0.05,
-                "accuracy": 0.4666666666666667,
-                "roc_auc": 0.4600000000000001,
-                "delta_accuracy": -0.3842,
-                "delta_auc": -0.4557
+                "accuracy": 0.5333333333333333,
+                "roc_auc": 0.35,
+                "delta_accuracy": -0.3175,
+                "delta_auc": -0.5657
             }
         }
     }

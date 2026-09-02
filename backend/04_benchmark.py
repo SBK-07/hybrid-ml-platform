@@ -49,22 +49,39 @@ def create_directories():
 
 
 def load_dataset_results(dataset_key):
-    """Load pre-computed JSON results for classical and quantum models."""
-    class_file = os.path.join(RESULTS_CLASSICAL_DIR, f"{dataset_key.lower()}_classical_svm.json")
-    quant_file = os.path.join(RESULTS_QUANTUM_DIR, f"{dataset_key.lower()}_qsvm.json")
-    
-    if not os.path.exists(class_file) or not os.path.exists(quant_file):
+    """Load pre-computed JSON results for classical and quantum models (SVM, MLP, QSVM, QNN)."""
+    # Required files
+    class_svm_file = os.path.join(RESULTS_CLASSICAL_DIR, f"{dataset_key.lower()}_classical_svm.json")
+    qsvm_file = os.path.join(RESULTS_QUANTUM_DIR, f"{dataset_key.lower()}_qsvm.json")
+
+    # Optional files (MLP and QNN)
+    class_mlp_file = os.path.join(RESULTS_CLASSICAL_DIR, f"{dataset_key.lower()}_classical_mlp.json")
+    qnn_file = os.path.join(RESULTS_QUANTUM_DIR, f"{dataset_key.lower()}_qnn.json")
+
+    if not os.path.exists(class_svm_file) or not os.path.exists(qsvm_file):
         raise FileNotFoundError(
-            f"Missing result artifacts for '{dataset_key}'. "
+            f"Missing core result artifacts for '{dataset_key}'. "
             f"Please run 02_classical_algorithms.py and 03_quantum_algorithms.py first."
         )
-        
-    with open(class_file, "r") as f:
-        class_data = json.load(f)
-    with open(quant_file, "r") as f:
-        quant_data = json.load(f)
-        
-    return class_data, quant_data
+
+    with open(class_svm_file, "r") as f:
+        class_svm_data = json.load(f)
+    with open(qsvm_file, "r") as f:
+        qsvm_data = json.load(f)
+
+    # Load MLP results if available
+    class_mlp_data = None
+    if os.path.exists(class_mlp_file):
+        with open(class_mlp_file, "r") as f:
+            class_mlp_data = json.load(f)
+
+    # Load QNN results if available
+    qnn_data = None
+    if os.path.exists(qnn_file):
+        with open(qnn_file, "r") as f:
+            qnn_data = json.load(f)
+
+    return class_svm_data, qsvm_data, class_mlp_data, qnn_data
 
 
 def compute_statistical_comparison(class_folds_acc, quant_folds_acc):
@@ -190,25 +207,26 @@ def benchmark_single_dataset(dataset_key, dataset_name):
     print(f"\n" + "=" * 70)
     print(f" EVALUATION ENGINE: BENCHMARK & INFERENCE - {dataset_name.upper()}")
     print("=" * 70)
-    
-    class_data, quant_data = load_dataset_results(dataset_key)
-    
-    # Extract Models
-    lin_full = class_data["models_full_features"]["linear"]
-    rbf_full = class_data["models_full_features"]["rbf"]
-    poly_full = class_data["models_full_features"]["poly"]
-    rbf_pca = class_data["models_pca_features"]["rbf"]  # 1:1 parity baseline
-    
+
+    class_svm_data, qsvm_data, class_mlp_data, qnn_data = load_dataset_results(dataset_key)
+
+    # Extract SVM Models
+    lin_full = class_svm_data["models_full_features"]["linear"]
+    rbf_full = class_svm_data["models_full_features"]["rbf"]
+    poly_full = class_svm_data["models_full_features"]["poly"]
+    rbf_pca = class_svm_data["models_pca_features"]["rbf"]  # 1:1 parity baseline
+
     # Statistical comparison between 4-PCA RBF and QSVM across 5 folds
     class_folds = [f["accuracy"] for f in rbf_pca["cv_folds"]]
     # QSVM 5-fold from cv_performance or sample fold data
-    quant_folds = [quant_data["cv_performance"]["accuracy_mean"] + np.random.RandomState(42).normal(0, quant_data["cv_performance"]["accuracy_std"]*0.5) for _ in range(5)]
+    quant_folds = [qsvm_data["cv_performance"]["accuracy_mean"] + np.random.RandomState(42).normal(0, qsvm_data["cv_performance"]["accuracy_std"]*0.5) for _ in range(5)]
     stat_test = compute_statistical_comparison(class_folds, quant_folds)
-    
+
     # Compile Master Comparison Table
     comparison_table = [
         {
             "Model": "Linear SVM (Full)",
+            "Type": "Classical-SVM",
             "Accuracy": lin_full["test_metrics"]["accuracy"],
             "Precision": lin_full["test_metrics"]["precision"],
             "Sensitivity": lin_full["test_metrics"]["sensitivity"],
@@ -223,6 +241,7 @@ def benchmark_single_dataset(dataset_key, dataset_name):
         },
         {
             "Model": "RBF SVM (Full)",
+            "Type": "Classical-SVM",
             "Accuracy": rbf_full["test_metrics"]["accuracy"],
             "Precision": rbf_full["test_metrics"]["precision"],
             "Sensitivity": rbf_full["test_metrics"]["sensitivity"],
@@ -237,6 +256,7 @@ def benchmark_single_dataset(dataset_key, dataset_name):
         },
         {
             "Model": "Polynomial SVM (Full)",
+            "Type": "Classical-SVM",
             "Accuracy": poly_full["test_metrics"]["accuracy"],
             "Precision": poly_full["test_metrics"]["precision"],
             "Sensitivity": poly_full["test_metrics"]["sensitivity"],
@@ -251,6 +271,7 @@ def benchmark_single_dataset(dataset_key, dataset_name):
         },
         {
             "Model": "RBF SVM (4-PCA Parity)",
+            "Type": "Classical-SVM",
             "Accuracy": rbf_pca["test_metrics"]["accuracy"],
             "Precision": rbf_pca["test_metrics"]["precision"],
             "Sensitivity": rbf_pca["test_metrics"]["sensitivity"],
@@ -265,36 +286,93 @@ def benchmark_single_dataset(dataset_key, dataset_name):
         },
         {
             "Model": "Quantum Kernel SVM (QSVM)",
-            "Accuracy": quant_data["test_metrics"]["accuracy"],
-            "Precision": quant_data["test_metrics"]["precision"],
-            "Sensitivity": quant_data["test_metrics"]["sensitivity"],
-            "Specificity": quant_data["test_metrics"]["specificity"],
-            "F1_Score": quant_data["test_metrics"]["f1_score"],
-            "ROC_AUC": quant_data["test_metrics"]["roc_auc"],
-            "Train_Time_s": quant_data["test_metrics"]["training_time_sec"],
-            "Kernel_Time_s": quant_data["test_metrics"]["kernel_train_time_sec"],
-            "Qubits": quant_data["quantum_architecture"]["n_qubits"],
-            "Circuit_Depth": quant_data["quantum_architecture"]["circuit_depth"],
-            "CNOT_Count": quant_data["quantum_architecture"]["cnot_count"]
+            "Type": "Quantum-SVM",
+            "Accuracy": qsvm_data["test_metrics"]["accuracy"],
+            "Precision": qsvm_data["test_metrics"]["precision"],
+            "Sensitivity": qsvm_data["test_metrics"]["sensitivity"],
+            "Specificity": qsvm_data["test_metrics"]["specificity"],
+            "F1_Score": qsvm_data["test_metrics"]["f1_score"],
+            "ROC_AUC": qsvm_data["test_metrics"]["roc_auc"],
+            "Train_Time_s": qsvm_data["test_metrics"]["training_time_sec"],
+            "Kernel_Time_s": qsvm_data["test_metrics"]["kernel_train_time_sec"],
+            "Qubits": qsvm_data["quantum_architecture"]["n_qubits"],
+            "Circuit_Depth": qsvm_data["quantum_architecture"]["circuit_depth"],
+            "CNOT_Count": qsvm_data["quantum_architecture"]["cnot_count"]
         }
     ]
-    
+
+    # Add MLP if available
+    if class_mlp_data:
+        mlp_full = class_mlp_data["models_full_features"]["mlp"]
+        mlp_pca = class_mlp_data["models_pca_features"]["mlp"]
+
+        comparison_table.extend([
+            {
+                "Model": "MLP Neural Network (Full)",
+                "Type": "Classical-NN",
+                "Accuracy": mlp_full["test_metrics"]["accuracy"],
+                "Precision": mlp_full["test_metrics"]["precision"],
+                "Sensitivity": mlp_full["test_metrics"]["sensitivity"],
+                "Specificity": mlp_full["test_metrics"]["specificity"],
+                "F1_Score": mlp_full["test_metrics"]["f1_score"],
+                "ROC_AUC": mlp_full["test_metrics"]["roc_auc"],
+                "Train_Time_s": mlp_full["test_metrics"]["training_time_sec"],
+                "Kernel_Time_s": "—",
+                "Qubits": "—",
+                "Circuit_Depth": "—",
+                "CNOT_Count": "—"
+            },
+            {
+                "Model": "MLP Neural Network (4-PCA)",
+                "Type": "Classical-NN",
+                "Accuracy": mlp_pca["test_metrics"]["accuracy"],
+                "Precision": mlp_pca["test_metrics"]["precision"],
+                "Sensitivity": mlp_pca["test_metrics"]["sensitivity"],
+                "Specificity": mlp_pca["test_metrics"]["specificity"],
+                "F1_Score": mlp_pca["test_metrics"]["f1_score"],
+                "ROC_AUC": mlp_pca["test_metrics"]["roc_auc"],
+                "Train_Time_s": mlp_pca["test_metrics"]["training_time_sec"],
+                "Kernel_Time_s": "—",
+                "Qubits": "—",
+                "Circuit_Depth": "—",
+                "CNOT_Count": "—"
+            }
+        ])
+
+    # Add QNN if available
+    if qnn_data:
+        comparison_table.append({
+            "Model": "Quantum Neural Network (VQC)",
+            "Type": "Quantum-NN",
+            "Accuracy": qnn_data["test_metrics"]["accuracy"],
+            "Precision": qnn_data["test_metrics"]["precision"],
+            "Sensitivity": qnn_data["test_metrics"]["sensitivity"],
+            "Specificity": qnn_data["test_metrics"]["specificity"],
+            "F1_Score": qnn_data["test_metrics"]["f1_score"],
+            "ROC_AUC": qnn_data["test_metrics"]["roc_auc"],
+            "Train_Time_s": qnn_data["test_metrics"]["training_time_sec"],
+            "Kernel_Time_s": "—",
+            "Qubits": qnn_data["quantum_architecture"]["n_qubits"],
+            "Circuit_Depth": qnn_data["quantum_architecture"]["circuit_depth"],
+            "CNOT_Count": qnn_data["quantum_architecture"]["cnot_count"]
+        })
+
     # Print formatted table
     df_table = pd.DataFrame(comparison_table)
     print("\n--- MASTER CLASSICAL VS QUANTUM BENCHMARK TABLE ---")
-    print(df_table[["Model", "Accuracy", "Sensitivity", "Specificity", "ROC_AUC", "Train_Time_s", "Qubits", "Circuit_Depth"]].to_string(index=False))
-    
+    print(df_table[["Model", "Type", "Accuracy", "Sensitivity", "Specificity", "ROC_AUC", "Train_Time_s"]].to_string(index=False))
+
     # Generate Research Verdict & Inference
     verdict_status, verdict_summary, inference_text = generate_research_inference_and_verdict(
-        dataset_name, rbf_pca, quant_data, stat_test
+        dataset_name, rbf_pca, qsvm_data, stat_test
     )
     print("\n" + inference_text)
-    
+
     # Save Inference Text File
     inf_file = os.path.join(RESULTS_BENCHMARK_DIR, f"{dataset_key.lower()}_research_inference.txt")
     with open(inf_file, "w", encoding="utf-8") as f:
         f.write(inference_text)
-        
+
     # Save Benchmark JSON
     benchmark_json = {
         "dataset_name": dataset_name,
@@ -304,19 +382,21 @@ def benchmark_single_dataset(dataset_key, dataset_name):
         "quantum_advantage_verdict": {
             "status": verdict_status,
             "summary": verdict_summary
-        }
+        },
+        "has_mlp": class_mlp_data is not None,
+        "has_qnn": qnn_data is not None
     }
     json_path = os.path.join(RESULTS_BENCHMARK_DIR, f"{dataset_key.lower()}_benchmark.json")
     with open(json_path, "w") as f:
         json.dump(benchmark_json, f, indent=4)
-        
+
     # Generate Visualizations
-    generate_benchmark_visualizations(comparison_table, class_data, quant_data, dataset_key, dataset_name)
-    
+    generate_benchmark_visualizations(comparison_table, class_svm_data, qsvm_data, dataset_key, dataset_name, class_mlp_data, qnn_data)
+
     return benchmark_json
 
 
-def generate_benchmark_visualizations(comparison_table, class_data, quant_data, dataset_key, dataset_name):
+def generate_benchmark_visualizations(comparison_table, class_data, quant_data, dataset_key, dataset_name, class_mlp_data=None, qnn_data=None):
     """Generate high-resolution radar chart, grouped metric comparison, and confusion matrix plots."""
     # 1. Grouped Bar Chart of Core Medical Metrics
     df = pd.DataFrame(comparison_table)

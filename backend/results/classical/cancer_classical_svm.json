@@ -124,8 +124,8 @@
                     "TN": 72,
                     "FN": 2
                 },
-                "training_time_sec": 0.00432,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.01833,
+                "inference_time_sec": 0.00612
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_linear_full_svm.joblib"
         },
@@ -250,8 +250,8 @@
                     "TN": 72,
                     "FN": 3
                 },
-                "training_time_sec": 0.01633,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.01771,
+                "inference_time_sec": 0.002
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_rbf_full_svm.joblib"
         },
@@ -377,7 +377,7 @@
                     "TN": 72,
                     "FN": 7
                 },
-                "training_time_sec": 0.01573,
+                "training_time_sec": 0.01577,
                 "inference_time_sec": 0.0
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_poly_full_svm.joblib"
@@ -504,8 +504,8 @@
                     "TN": 72,
                     "FN": 3
                 },
-                "training_time_sec": 0.01075,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.04502,
+                "inference_time_sec": 0.00377
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_linear_pca_svm.joblib"
         },
@@ -630,7 +630,7 @@
                     "TN": 72,
                     "FN": 5
                 },
-                "training_time_sec": 0.01517,
+                "training_time_sec": 0.022,
                 "inference_time_sec": 0.0
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_rbf_pca_svm.joblib"
@@ -757,8 +757,8 @@
                     "TN": 72,
                     "FN": 5
                 },
-                "training_time_sec": 0.00701,
-                "inference_time_sec": 0.002
+                "training_time_sec": 0.02006,
+                "inference_time_sec": 0.0
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_poly_pca_svm.joblib"
         }

@@ -124,8 +124,8 @@
                     "TN": 5,
                     "FN": 1
                 },
-                "training_time_sec": 0.01184,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.03737,
+                "inference_time_sec": 0.00421
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_linear_full_svm.joblib"
         },
@@ -250,7 +250,7 @@
                     "TN": 0,
                     "FN": 0
                 },
-                "training_time_sec": 0.01607,
+                "training_time_sec": 0.01799,
                 "inference_time_sec": 0.0
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_rbf_full_svm.joblib"
@@ -377,8 +377,8 @@
                     "TN": 3,
                     "FN": 2
                 },
-                "training_time_sec": 0.0,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.01775,
+                "inference_time_sec": 0.00151
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_poly_full_svm.joblib"
         }
@@ -504,8 +504,8 @@
                     "TN": 0,
                     "FN": 0
                 },
-                "training_time_sec": 0.00451,
-                "inference_time_sec": 0.0
+                "training_time_sec": 0.00928,
+                "inference_time_sec": 0.00716
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_linear_pca_svm.joblib"
         },
@@ -630,8 +630,8 @@
                     "TN": 2,
                     "FN": 3
                 },
-                "training_time_sec": 0.00601,
-                "inference_time_sec": 0.00174
+                "training_time_sec": 0.02307,
+                "inference_time_sec": 0.00177
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_rbf_pca_svm.joblib"
         },
@@ -757,7 +757,7 @@
                     "TN": 2,
                     "FN": 1
                 },
-                "training_time_sec": 1.00309,
+                "training_time_sec": 1.91236,
                 "inference_time_sec": 0.0
             },
             "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_poly_pca_svm.joblib"

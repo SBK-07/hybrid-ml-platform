@@ -1,0 +1,278 @@
+{
+    "dataset_name": "UCI Heart Disease",
+    "dataset_key": "cardiovascular",
+    "full_feature_dimension": 13,
+    "pca_feature_dimension": 4,
+    "models_full_features": {
+        "mlp": {
+            "best_params": {
+                "activation": "relu",
+                "alpha": 0.0001,
+                "hidden_layer_sizes": [
+                    32,
+                    16,
+                    8
+                ],
+                "learning_rate_init": 0.01
+            },
+            "cv_summary": {
+                "accuracy_mean": 0.9011054421768707,
+                "accuracy_std": 0.029313433514741284,
+                "accuracy_formatted": "90.11% +/- 2.93%",
+                "precision_mean": 0.9117752273566226,
+                "precision_std": 0.02831834170281767,
+                "precision_formatted": "91.18% +/- 2.83%",
+                "sensitivity_mean": 0.980836236933798,
+                "sensitivity_std": 0.027787319912720387,
+                "sensitivity_formatted": "98.08% +/- 2.78%",
+                "specificity_mean": 0.42857142857142855,
+                "specificity_std": 0.22131333406899523,
+                "specificity_formatted": "42.86% +/- 22.13%",
+                "f1_score_mean": 0.9444447116950536,
+                "f1_score_std": 0.015898617887088354,
+                "f1_score_formatted": "94.44% +/- 1.59%",
+                "roc_auc_mean": 0.9345943255350921,
+                "roc_auc_std": 0.03570241207590244,
+                "roc_auc_formatted": "93.46% +/- 3.57%"
+            },
+            "cv_folds": [
+                {
+                    "accuracy": 0.8775510204081632,
+                    "precision": 0.9285714285714286,
+                    "sensitivity": 0.9285714285714286,
+                    "specificity": 0.5714285714285714,
+                    "f1_score": 0.9285714285714286,
+                    "roc_auc": 0.9183673469387755,
+                    "log_loss": 0.3285475276907585,
+                    "confusion_matrix": {
+                        "TP": 39,
+                        "FP": 3,
+                        "TN": 4,
+                        "FN": 3
+                    },
+                    "fold": 1
+                },
+                {
+                    "accuracy": 0.8571428571428571,
+                    "precision": 0.8571428571428571,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9230769230769231,
+                    "roc_auc": 0.9183673469387755,
+                    "log_loss": 0.2603842602260482,
+                    "confusion_matrix": {
+                        "TP": 42,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 2
+                },
+                {
+                    "accuracy": 0.9166666666666666,
+                    "precision": 0.9302325581395349,
+                    "sensitivity": 0.975609756097561,
+                    "specificity": 0.5714285714285714,
+                    "f1_score": 0.9523809523809523,
+                    "roc_auc": 0.8850174216027874,
+                    "log_loss": 0.3188036545106257,
+                    "confusion_matrix": {
+                        "TP": 40,
+                        "FP": 3,
+                        "TN": 4,
+                        "FN": 1
+                    },
+                    "fold": 3
+                },
+                {
+                    "accuracy": 0.9166666666666666,
+                    "precision": 0.9111111111111111,
+                    "sensitivity": 1.0,
+                    "specificity": 0.42857142857142855,
+                    "f1_score": 0.9534883720930233,
+                    "roc_auc": 0.9790940766550522,
+                    "log_loss": 0.19352843140683643,
+                    "confusion_matrix": {
+                        "TP": 41,
+                        "FP": 4,
+                        "TN": 3,
+                        "FN": 0
+                    },
+                    "fold": 4
+                },
+                {
+                    "accuracy": 0.9375,
+                    "precision": 0.9318181818181818,
+                    "sensitivity": 1.0,
+                    "specificity": 0.5714285714285714,
+                    "f1_score": 0.9647058823529412,
+                    "roc_auc": 0.9721254355400697,
+                    "log_loss": 0.16928211557897055,
+                    "confusion_matrix": {
+                        "TP": 41,
+                        "FP": 3,
+                        "TN": 4,
+                        "FN": 0
+                    },
+                    "fold": 5
+                }
+            ],
+            "test_metrics": {
+                "accuracy": 0.8524590163934426,
+                "precision": 0.8524590163934426,
+                "sensitivity": 1.0,
+                "specificity": 0.0,
+                "f1_score": 0.9203539823008849,
+                "roc_auc": 0.514957264957265,
+                "log_loss": 0.5055373810908743,
+                "confusion_matrix": {
+                    "TP": 52,
+                    "FP": 9,
+                    "TN": 0,
+                    "FN": 0
+                },
+                "training_time_sec": 0.04229,
+                "inference_time_sec": 0.00201,
+                "n_layers": 3,
+                "architecture": "(32, 16, 8)"
+            },
+            "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_mlp_full.joblib"
+        }
+    },
+    "models_pca_features": {
+        "mlp": {
+            "best_params": {
+                "activation": "relu",
+                "alpha": 0.001,
+                "hidden_layer_sizes": [
+                    16,
+                    8,
+                    4
+                ],
+                "learning_rate_init": 0.01
+            },
+            "cv_summary": {
+                "accuracy_mean": 0.8553571428571429,
+                "accuracy_std": 0.0014580296087995056,
+                "accuracy_formatted": "85.54% +/- 0.15%",
+                "precision_mean": 0.8553571428571429,
+                "precision_std": 0.0014580296087995056,
+                "precision_formatted": "85.54% +/- 0.15%",
+                "sensitivity_mean": 1.0,
+                "sensitivity_std": 0.0,
+                "sensitivity_formatted": "100.00% +/- 0.00%",
+                "specificity_mean": 0.0,
+                "specificity_std": 0.0,
+                "specificity_formatted": "0.00% +/- 0.00%",
+                "f1_score_mean": 0.9220397579948141,
+                "f1_score_std": 0.0008468417433995535,
+                "f1_score_formatted": "92.20% +/- 0.08%",
+                "roc_auc_mean": 0.7710635473701675,
+                "roc_auc_std": 0.05779203409556618,
+                "roc_auc_formatted": "77.11% +/- 5.78%"
+            },
+            "cv_folds": [
+                {
+                    "accuracy": 0.8571428571428571,
+                    "precision": 0.8571428571428571,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9230769230769231,
+                    "roc_auc": 0.717687074829932,
+                    "log_loss": 0.41882779773861667,
+                    "confusion_matrix": {
+                        "TP": 42,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 1
+                },
+                {
+                    "accuracy": 0.8571428571428571,
+                    "precision": 0.8571428571428571,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9230769230769231,
+                    "roc_auc": 0.7857142857142856,
+                    "log_loss": 0.36115531351829944,
+                    "confusion_matrix": {
+                        "TP": 42,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 2
+                },
+                {
+                    "accuracy": 0.8541666666666666,
+                    "precision": 0.8541666666666666,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9213483146067416,
+                    "roc_auc": 0.6968641114982579,
+                    "log_loss": 0.38681366242587245,
+                    "confusion_matrix": {
+                        "TP": 41,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 3
+                },
+                {
+                    "accuracy": 0.8541666666666666,
+                    "precision": 0.8541666666666666,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9213483146067416,
+                    "roc_auc": 0.8571428571428572,
+                    "log_loss": 0.42075456710192666,
+                    "confusion_matrix": {
+                        "TP": 41,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 4
+                },
+                {
+                    "accuracy": 0.8541666666666666,
+                    "precision": 0.8541666666666666,
+                    "sensitivity": 1.0,
+                    "specificity": 0.0,
+                    "f1_score": 0.9213483146067416,
+                    "roc_auc": 0.7979094076655052,
+                    "log_loss": 0.4159199656563655,
+                    "confusion_matrix": {
+                        "TP": 41,
+                        "FP": 7,
+                        "TN": 0,
+                        "FN": 0
+                    },
+                    "fold": 5
+                }
+            ],
+            "test_metrics": {
+                "accuracy": 0.8524590163934426,
+                "precision": 0.8524590163934426,
+                "sensitivity": 1.0,
+                "specificity": 0.0,
+                "f1_score": 0.9203539823008849,
+                "roc_auc": 0.6794871794871795,
+                "log_loss": 0.418859478684608,
+                "confusion_matrix": {
+                    "TP": 52,
+                    "FP": 9,
+                    "TN": 0,
+                    "FN": 0
+                },
+                "training_time_sec": 0.0316,
+                "inference_time_sec": 0.0,
+                "n_layers": 3,
+                "architecture": "(16, 8, 4)"
+            },
+            "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cardiovascular\\classical_mlp_pca.joblib"
+        }
+    }
+}

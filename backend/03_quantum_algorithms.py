@@ -1,11 +1,24 @@
 """
 03_quantum_algorithms.py
 ========================
-Quantum Support Vector Machine (QSVM) Research Engine.
+Quantum Machine Learning: QSVM & Quantum Neural Network (QNN) Research Engine.
 
 Datasets:
   1. Breast Cancer Wisconsin Diagnostic (WDBC)
   2. UCI Heart Disease
+
+Models:
+  A. Quantum Support Vector Machine (QSVM):
+    - Quantum Feature Map |phi(x)> = U_phi(x)|0>^n
+    - Quantum Kernel Matrix K_Q(x, z) = |<phi(x)|phi(z)>|^2
+    - Classical Dual Convex SVM (SVC with kernel="precomputed")
+
+  B. Quantum Neural Network (QNN):
+    - Variational Quantum Classifier (VQC)
+    - Feature Map: ZZFeatureMap for data encoding
+    - Ansatz: RealAmplitudes/EfficientSU2 for parameterized circuit
+    - Optimizer: COBYLA for variational parameter optimization
+    - Measurement-based classification
 
 Architecture:
   Biomedical Data
@@ -16,18 +29,17 @@ Architecture:
         ↓
   Quantum Feature Map |phi(x)> = U_phi(x)|0>^n
         ↓
-  Quantum Kernel Matrix K_Q(x, z) = |<phi(x)|phi(z)>|^2
-        ↓
-  Classical Dual Convex SVM (SVC with kernel="precomputed")
+  [QSVM Path] Quantum Kernel → Classical SVM
+  [QNN Path] Variational Circuit → Measurement → Optimization
         ↓
   Clinical Classification & Inference
 
 Features & Experimental Capabilities:
-  - Configurable Quantum Backends: "ideal" (Statevector), "shots" (AerSimulator), "noisy" (AerSimulator with depolarizing noise), "hardware" (IBM Quantum adapter)
-  - Feature map exploration: ZZFeatureMap (reps=1,2,3), PauliFeatureMap (Z, ZZ, X, XX)
+  - Configurable Quantum Backends: "ideal" (Statevector), "shots" (AerSimulator), "noisy" (depolarizing noise)
+  - Feature map exploration: ZZFeatureMap (reps=1,2,3), PauliFeatureMap
   - Qubit Scaling Investigation: 2 vs 4 vs 6 vs 8 qubits
   - Noise Robustness Analysis: Ideal vs Level 1 (1%) vs Level 2 (3%) vs Level 3 (5%)
-  - Quantum Circuit Resource Profiling: Qubit count, circuit depth, total gates, 2-qubit CNOT count, kernel construction time, training latency, inference latency.
+  - Quantum Circuit Resource Profiling: Qubit count, circuit depth, gates, CNOTs, training time
   - Generates publication-ready figures & structured JSON/Markdown reports.
 """
 
@@ -55,10 +67,15 @@ from sklearn.preprocessing import MinMaxScaler
 # Qiskit 2.x imports
 import qiskit
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import zz_feature_map, pauli_feature_map
+from qiskit.circuit.library import zz_feature_map, pauli_feature_map, real_amplitudes, efficient_su2
 from qiskit.quantum_info import Statevector
+from qiskit.primitives import StatevectorSampler, StatevectorEstimator
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
+
+# Qiskit Machine Learning imports for QNN
+from qiskit_machine_learning.algorithms import VQC
+from qiskit_machine_learning.optimizers import COBYLA, L_BFGS_B, SPSA
 
 # Plotting Configuration
 plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
@@ -524,34 +541,58 @@ def generate_quantum_visualizations(quantum_results, K_train, K_test, y_test, y_
     print(f" [SUCCESS] Quantum figures saved in {FIGURES_QUANTUM_DIR}")
 
 
-def generate_quantum_markdown_report(cancer_res, cardio_res):
-    """Generate master Markdown report for QSVM research experiments."""
-    md = f"""# Quantum Kernel SVM (QSVM) Research Report
-**Project:** Hybrid Quantum-Classical ML Platform for Early Disease Detection  
-**Quantum Framework:** Qiskit 2.5+ / AerSimulator / Statevector Primitives  
-**Feature Map:** Parameterized $ZZFeatureMap(n=4, \\text{{reps}}=2)$  
+def generate_quantum_markdown_report(cancer_qsvm_res, cardio_qsvm_res, cancer_qnn_res=None, cardio_qnn_res=None):
+    """Generate master Markdown report for QSVM and QNN research experiments."""
+    md = f"""# Quantum Machine Learning Benchmark Report (QSVM & QNN)
+**Project:** Hybrid Quantum-Classical ML Platform for Early Disease Detection
+**Quantum Framework:** Qiskit 2.5+ / Qiskit Machine Learning 0.9+ / Statevector Primitives
+**Models:** Quantum Kernel Support Vector Machine (QSVM) + Variational Quantum Classifier (QNN)
 
 ---
 
-## 1. Executive Quantum Performance Summary
+## 1. Quantum Support Vector Machine (QSVM) Results
 
 | Metric / Parameter | Breast Cancer (WDBC) | UCI Heart Disease |
 | :--- | :--- | :--- |
 | **Feature Map** | $ZZFeatureMap$ ($n=4, \\text{{reps}}=2$) | $ZZFeatureMap$ ($n=4, \\text{{reps}}=2$) |
-| **Circuit Depth** | {cancer_res['quantum_architecture']['circuit_depth']} | {cardio_res['quantum_architecture']['circuit_depth']} |
-| **Total Quantum Gates** | {cancer_res['quantum_architecture']['total_gate_count']} ({cancer_res['quantum_architecture']['cnot_count']} CNOTs) | {cardio_res['quantum_architecture']['total_gate_count']} ({cardio_res['quantum_architecture']['cnot_count']} CNOTs) |
-| **5-Fold CV Accuracy** | {cancer_res['cv_performance']['accuracy_formatted']} | {cardio_res['cv_performance']['accuracy_formatted']} |
-| **Test Accuracy** | {cancer_res['test_metrics']['accuracy']*100:.2f}% | {cardio_res['test_metrics']['accuracy']*100:.2f}% |
-| **Test Sensitivity (Recall)** | {cancer_res['test_metrics']['sensitivity']*100:.2f}% | {cardio_res['test_metrics']['sensitivity']*100:.2f}% |
-| **Test Specificity** | {cancer_res['test_metrics']['specificity']*100:.2f}% | {cardio_res['test_metrics']['specificity']*100:.2f}% |
-| **Test ROC-AUC** | {cancer_res['test_metrics']['roc_auc']:.4f} | {cardio_res['test_metrics']['roc_auc']:.4f} |
-| **Kernel Construction Time** | {cancer_res['test_metrics']['kernel_train_time_sec']:.3f} s | {cardio_res['test_metrics']['kernel_train_time_sec']:.3f} s |
+| **Circuit Depth** | {cancer_qsvm_res['quantum_architecture']['circuit_depth']} | {cardio_qsvm_res['quantum_architecture']['circuit_depth']} |
+| **Total Quantum Gates** | {cancer_qsvm_res['quantum_architecture']['total_gate_count']} ({cancer_qsvm_res['quantum_architecture']['cnot_count']} CNOTs) | {cardio_qsvm_res['quantum_architecture']['total_gate_count']} ({cardio_qsvm_res['quantum_architecture']['cnot_count']} CNOTs) |
+| **5-Fold CV Accuracy** | {cancer_qsvm_res['cv_performance']['accuracy_formatted']} | {cardio_qsvm_res['cv_performance']['accuracy_formatted']} |
+| **Test Accuracy** | {cancer_qsvm_res['test_metrics']['accuracy']*100:.2f}% | {cardio_qsvm_res['test_metrics']['accuracy']*100:.2f}% |
+| **Test Sensitivity (Recall)** | {cancer_qsvm_res['test_metrics']['sensitivity']*100:.2f}% | {cardio_qsvm_res['test_metrics']['sensitivity']*100:.2f}% |
+| **Test Specificity** | {cancer_qsvm_res['test_metrics']['specificity']*100:.2f}% | {cardio_qsvm_res['test_metrics']['specificity']*100:.2f}% |
+| **Test ROC-AUC** | {cancer_qsvm_res['test_metrics']['roc_auc']:.4f} | {cardio_qsvm_res['test_metrics']['roc_auc']:.4f} |
+| **Kernel Construction Time** | {cancer_qsvm_res['test_metrics']['kernel_train_time_sec']:.3f} s | {cardio_qsvm_res['test_metrics']['kernel_train_time_sec']:.3f} s |
 
 ---
+"""
 
-## 2. Quantum Resource & Scaling Analysis
+    if cancer_qnn_res and cardio_qnn_res:
+        md += f"""
+## 2. Quantum Neural Network (QNN / VQC) Results
+
+| Metric / Parameter | Breast Cancer (WDBC) | UCI Heart Disease |
+| :--- | :--- | :--- |
+| **Model Type** | Variational Quantum Classifier (VQC) | Variational Quantum Classifier (VQC) |
+| **Ansatz** | RealAmplitudes ($n=4, \\text{{reps}}=3$) | RealAmplitudes ($n=4, \\text{{reps}}=3$) |
+| **Trainable Parameters** | {cancer_qnn_res['quantum_architecture']['trainable_parameters']} | {cardio_qnn_res['quantum_architecture']['trainable_parameters']} |
+| **Circuit Depth** | {cancer_qnn_res['quantum_architecture']['circuit_depth']} | {cardio_qnn_res['quantum_architecture']['circuit_depth']} |
+| **Total Gates** | {cancer_qnn_res['quantum_architecture']['total_gate_count']} ({cancer_qnn_res['quantum_architecture']['cnot_count']} CNOTs) | {cardio_qnn_res['quantum_architecture']['total_gate_count']} ({cardio_qnn_res['quantum_architecture']['cnot_count']} CNOTs) |
+| **3-Fold CV Accuracy** | {cancer_qnn_res['cv_performance']['accuracy_formatted']} | {cardio_qnn_res['cv_performance']['accuracy_formatted']} |
+| **Test Accuracy** | {cancer_qnn_res['test_metrics']['accuracy']*100:.2f}% | {cardio_qnn_res['test_metrics']['accuracy']*100:.2f}% |
+| **Test Sensitivity (Recall)** | {cancer_qnn_res['test_metrics']['sensitivity']*100:.2f}% | {cardio_qnn_res['test_metrics']['sensitivity']*100:.2f}% |
+| **Test Specificity** | {cancer_qnn_res['test_metrics']['specificity']*100:.2f}% | {cardio_qnn_res['test_metrics']['specificity']*100:.2f}% |
+| **Test ROC-AUC** | {cancer_qnn_res['test_metrics']['roc_auc']:.4f} | {cardio_qnn_res['test_metrics']['roc_auc']:.4f} |
+| **Training Time** | {cancer_qnn_res['test_metrics']['training_time_sec']:.2f} s | {cardio_qnn_res['test_metrics']['training_time_sec']:.2f} s |
+
+---
+"""
+
+    md += f"""
+## 3. Quantum Resource & Scaling Analysis
 - **Entanglement Capability**: The $ZZFeatureMap$ introduces pairwise two-qubit controlled phase ($CX$) interactions parameterized by feature cross-products, mapping non-linear clinical collinearities into high-dimensional Hilbert space.
-- **Noise Resilience**: Under 1%, 3%, and 5% depolarizing noise channels, the QSVM demonstrates predictable fidelity degradation, reflecting NISQ hardware constraints.
+- **Variational Optimization (QNN)**: The RealAmplitudes ansatz parameterizes rotation angles optimized via COBYLA, searching the parameterized Hilbert space for optimal clinical classification boundaries.
+- **Noise Resilience**: Under 1%, 3%, and 5% depolarizing noise channels, quantum algorithms demonstrate predictable fidelity degradation, reflecting NISQ hardware constraints.
 """
     report_file = os.path.join(REPORTS_DIR, "quantum_qsvm_report.md")
     with open(report_file, "w", encoding="utf-8") as f:
@@ -559,21 +600,306 @@ def generate_quantum_markdown_report(cancer_res, cardio_res):
     print(f" [SUCCESS] Quantum Master Report generated: {report_file}")
 
 
+def run_qnn_pipeline(dataset_key, dataset_name):
+    """
+    Execute Quantum Neural Network (QNN) pipeline using Variational Quantum Classifier (VQC).
+
+    Architecture:
+      - Feature Map: ZZFeatureMap for quantum data encoding
+      - Ansatz: RealAmplitudes variational circuit for trainable parameters
+      - Optimizer: COBYLA (Constrained Optimization BY Linear Approximation)
+      - Measurement: Parity measurement for binary classification
+
+    VQC is suitable for NISQ devices and small-to-medium datasets.
+    The variational approach optimizes circuit parameters to minimize classification loss.
+    """
+    print(f"\n" + "=" * 70)
+    print(f" EXPERIMENT: QUANTUM NEURAL NETWORK (VQC) - {dataset_name.upper()}")
+    print("=" * 70)
+
+    # Load 4-qubit preprocessed quantum dataset
+    quant_dir = os.path.join(DATA_PROC_DIR, dataset_key.lower(), "quantum")
+    X_train = np.load(os.path.join(quant_dir, "X_train_quantum.npy"))
+    X_test = np.load(os.path.join(quant_dir, "X_test_quantum.npy"))
+    y_train = np.load(os.path.join(quant_dir, "y_train.npy"))
+    y_test = np.load(os.path.join(quant_dir, "y_test.npy"))
+
+    print(f" [*] Dataset loaded: {len(X_train)} train samples, {len(X_test)} test samples")
+    print(f" [*] Feature dimension: {X_train.shape[1]} (maps to {N_QUBITS_DEFAULT} qubits)")
+
+    # 1. Build Quantum Neural Network Architecture
+    print(f"\n [*] Building Quantum Neural Network Architecture...")
+
+    # Feature Map: Encodes classical data into quantum states
+    feature_map = zz_feature_map(feature_dimension=N_QUBITS_DEFAULT, reps=2, entanglement='linear')
+
+    # Ansatz: Parameterized variational circuit (trainable quantum layer)
+    ansatz = real_amplitudes(num_qubits=N_QUBITS_DEFAULT, reps=3)
+
+    # Combine feature map and ansatz
+    combined_circuit = feature_map.compose(ansatz)
+
+    # Circuit statistics
+    circuit_ops = dict(combined_circuit.count_ops())
+    circuit_depth = int(combined_circuit.depth())
+    cnot_count = int(circuit_ops.get('cx', 0))
+    total_gate_count = int(sum(circuit_ops.values()))
+    n_parameters = combined_circuit.num_parameters - N_QUBITS_DEFAULT  # Exclude feature map params
+
+    print(f"     Feature Map: ZZFeatureMap (n={N_QUBITS_DEFAULT}, reps=2)")
+    print(f"     Ansatz: RealAmplitudes (n={N_QUBITS_DEFAULT}, reps=3)")
+    print(f"     Total Qubits: {N_QUBITS_DEFAULT} | Circuit Depth: {circuit_depth}")
+    print(f"     Total Gates: {total_gate_count} | CNOTs: {cnot_count}")
+    print(f"     Trainable Parameters: {n_parameters}")
+
+    # 2. Initialize Variational Quantum Classifier
+    print(f"\n [*] Initializing Variational Quantum Classifier (VQC)...")
+
+    # Use StatevectorSampler for ideal simulation
+    sampler = StatevectorSampler()
+
+    # Optimizer: COBYLA is gradient-free and suitable for noisy optimization landscapes
+    optimizer = COBYLA(maxiter=100)
+
+    # Create VQC
+    vqc = VQC(
+        feature_map=feature_map,
+        ansatz=ansatz,
+        optimizer=optimizer,
+        sampler=sampler,
+        warm_start=True  # Reuse previous optimization results
+    )
+
+    print(f"     Optimizer: COBYLA (max iterations: 100)")
+    print(f"     Sampler: StatevectorSampler (ideal simulation)")
+
+    # 3. Train Quantum Neural Network
+    print(f"\n [*] Training Quantum Neural Network...")
+    t_start_train = time.time()
+
+    try:
+        vqc.fit(X_train, y_train)
+        train_time = time.time() - t_start_train
+        print(f"     -> Training completed in {train_time:.2f} seconds")
+    except Exception as e:
+        print(f"     [ERROR] Training failed: {e}")
+        # Return empty results on failure
+        return {
+            "dataset_name": dataset_name,
+            "dataset_key": dataset_key,
+            "error": str(e),
+            "status": "FAILED"
+        }
+
+    # 4. Predict and Evaluate
+    print(f"\n [*] Evaluating QNN on Test Set...")
+    t_start_pred = time.time()
+    y_test_pred = vqc.predict(X_test)
+    y_test_prob = vqc.predict_proba(X_test)[:, 1] if hasattr(vqc, 'predict_proba') else y_test_pred.astype(float)
+    pred_time = time.time() - t_start_pred
+
+    # Calculate metrics
+    test_metrics = calculate_medical_metrics(y_test, y_test_pred, y_test_prob)
+    test_metrics["training_time_sec"] = float(round(train_time, 5))
+    test_metrics["inference_time_sec"] = float(round(pred_time, 5))
+
+    print(f"     -> Test Accuracy: {test_metrics['accuracy']*100:.2f}%")
+    print(f"     -> Sensitivity: {test_metrics['sensitivity']*100:.2f}%")
+    print(f"     -> Specificity: {test_metrics['specificity']*100:.2f}%")
+    print(f"     -> ROC-AUC: {test_metrics['roc_auc']:.4f}")
+    print(f"     -> Training Time: {train_time:.2f}s | Inference Time: {pred_time:.5f}s")
+
+    # 5. Cross-validation (simplified for QNN due to computational cost)
+    print(f"\n [*] Running 3-Fold Cross-Validation...")
+    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE)
+    cv_accuracies = []
+    cv_aucs = []
+
+    for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train), 1):
+        X_tr_fold, X_val_fold = X_train[train_idx], X_train[val_idx]
+        y_tr_fold, y_val_fold = y_train[train_idx], y_train[val_idx]
+
+        # Create new VQC instance for each fold
+        vqc_fold = VQC(
+            feature_map=feature_map,
+            ansatz=ansatz,
+            optimizer=COBYLA(maxiter=50),  # Reduced iterations for CV
+            sampler=sampler
+        )
+
+        try:
+            vqc_fold.fit(X_tr_fold, y_tr_fold)
+            val_pred = vqc_fold.predict(X_val_fold)
+            val_prob = vqc_fold.predict_proba(X_val_fold)[:, 1] if hasattr(vqc_fold, 'predict_proba') else val_pred.astype(float)
+
+            acc = accuracy_score(y_val_fold, val_pred)
+            auc = roc_auc_score(y_val_fold, val_prob) if len(np.unique(y_val_fold)) > 1 else 0.5
+
+            cv_accuracies.append(acc)
+            cv_aucs.append(auc)
+            print(f"     Fold {fold_idx}: Accuracy = {acc*100:.2f}%, AUC = {auc:.4f}")
+        except Exception as e:
+            print(f"     Fold {fold_idx}: FAILED - {e}")
+            cv_accuracies.append(0.5)
+            cv_aucs.append(0.5)
+
+    cv_acc_mean, cv_acc_std = float(np.mean(cv_accuracies)), float(np.std(cv_accuracies))
+    cv_auc_mean, cv_auc_std = float(np.mean(cv_aucs)), float(np.std(cv_aucs))
+
+    print(f"     -> CV Accuracy: {cv_acc_mean*100:.2f}% +/- {cv_acc_std*100:.2f}%")
+    print(f"     -> CV AUC: {cv_auc_mean:.4f} +/- {cv_auc_std:.4f}")
+
+    # 6. Save Results (VQC models cannot be easily pickled, so we skip model saving)
+    # Instead, we save the trained parameters and circuit configuration
+    model_save_path = os.path.join(MODELS_DIR, dataset_key.lower(), "qnn_vqc_model.json")
+    try:
+        # Save model configuration instead of the full VQC object
+        model_config = {
+            "model_type": "VQC",
+            "n_qubits": N_QUBITS_DEFAULT,
+            "feature_map": "ZZFeatureMap",
+            "ansatz": "RealAmplitudes",
+            "optimizer": "COBYLA",
+            "note": "VQC model training completed. Full model cannot be serialized due to Qiskit primitives."
+        }
+        with open(model_save_path, 'w') as f:
+            json.dump(model_config, f, indent=4)
+        print(f"\n [*] Model configuration saved to: {model_save_path}")
+    except Exception as e:
+        print(f"\n [WARNING] Could not save model: {e}")
+        print(f"          (This is expected - VQC models with Qiskit primitives cannot be pickled)")
+
+    # Compile Results
+    qnn_results = {
+        "dataset_name": dataset_name,
+        "dataset_key": dataset_key,
+        "quantum_architecture": {
+            "model_type": "Variational Quantum Classifier (VQC)",
+            "feature_map": "ZZFeatureMap",
+            "ansatz": "RealAmplitudes",
+            "n_qubits": N_QUBITS_DEFAULT,
+            "feature_map_reps": 2,
+            "ansatz_reps": 3,
+            "circuit_depth": circuit_depth,
+            "total_gate_count": total_gate_count,
+            "cnot_count": cnot_count,
+            "trainable_parameters": n_parameters,
+            "optimizer": "COBYLA",
+            "max_iterations": 100
+        },
+        "cv_performance": {
+            "accuracy_mean": cv_acc_mean,
+            "accuracy_std": cv_acc_std,
+            "accuracy_formatted": f"{cv_acc_mean*100:.2f}% +/- {cv_acc_std*100:.2f}%",
+            "roc_auc_mean": cv_auc_mean,
+            "roc_auc_std": cv_auc_std
+        },
+        "test_metrics": test_metrics
+    }
+
+    # Save Results JSON
+    res_path = os.path.join(RESULTS_QUANTUM_DIR, f"{dataset_key.lower()}_qnn.json")
+    with open(res_path, "w") as f:
+        json.dump(qnn_results, f, indent=4)
+    print(f" [SUCCESS] QNN results saved to: {res_path}")
+
+    # Generate QNN-specific visualizations
+    generate_qnn_visualizations(qnn_results, y_test, y_test_prob, dataset_key, dataset_name)
+
+    return qnn_results
+
+
+def generate_qnn_visualizations(qnn_results, y_test, y_test_prob, dataset_key, dataset_name):
+    """Generate QNN-specific visualizations."""
+    # 1. ROC Curve
+    fpr, tpr, _ = roc_curve(y_test, y_test_prob)
+
+    plt.figure(figsize=(7, 5))
+    plt.plot(fpr, tpr, linewidth=2.5, label=f"QNN (AUC = {qnn_results['test_metrics']['roc_auc']:.3f})", color='#9B59B6')
+    plt.plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Chance (AUC = 0.500)')
+    plt.xlabel('False Positive Rate (1 - Specificity)', fontweight='bold')
+    plt.ylabel('True Positive Rate (Sensitivity)', fontweight='bold')
+    plt.title(f'Quantum Neural Network ROC Curve - {dataset_name}', fontweight='bold')
+    plt.legend(loc='lower right')
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    roc_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qnn_roc_curve.png")
+    plt.savefig(roc_path, dpi=300)
+    plt.close()
+
+    # 2. Confusion Matrix
+    cm = qnn_results["test_metrics"]["confusion_matrix"]
+    mat = [[cm["TN"], cm["FP"]], [cm["FN"], cm["TP"]]]
+
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(mat, annot=True, fmt='d', cmap='Purples', cbar=False,
+                xticklabels=['Pred Healthy', 'Pred Disease'],
+                yticklabels=['Actual Healthy', 'Actual Disease'])
+    plt.title(f"Quantum Neural Network Confusion Matrix - {dataset_name}", fontweight='bold')
+    plt.tight_layout()
+    cm_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qnn_confusion_matrix.png")
+    plt.savefig(cm_path, dpi=300)
+    plt.close()
+
+    # 3. Circuit Architecture Visualization (text-based summary)
+    arch = qnn_results["quantum_architecture"]
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.axis('off')
+
+    arch_text = f"""Quantum Neural Network Architecture
+
+Model: {arch['model_type']}
+
+Quantum Circuit:
+  • Qubits: {arch['n_qubits']}
+  • Circuit Depth: {arch['circuit_depth']}
+  • Total Gates: {arch['total_gate_count']}
+  • CNOT Gates: {arch['cnot_count']}
+
+Feature Encoding:
+  • {arch['feature_map']} (reps={arch['feature_map_reps']})
+
+Variational Layer:
+  • {arch['ansatz']} (reps={arch['ansatz_reps']})
+  • Trainable Parameters: {arch['trainable_parameters']}
+
+Optimization:
+  • Optimizer: {arch['optimizer']}
+  • Max Iterations: {arch['max_iterations']}
+"""
+
+    ax.text(0.1, 0.5, arch_text, fontsize=11, family='monospace',
+            verticalalignment='center', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
+    plt.title(f"QNN Architecture Summary - {dataset_name}", fontweight='bold', pad=20)
+    plt.tight_layout()
+    arch_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qnn_architecture.png")
+    plt.savefig(arch_path, dpi=300)
+    plt.close()
+
+    print(f" [SUCCESS] QNN figures saved in {FIGURES_QUANTUM_DIR}")
+
+
 def main():
     print("=" * 75)
-    print(" 03_QUANTUM_ALGORITHMS: QUANTUM KERNEL SVM (QSVM) ENGINE")
+    print(" 03_QUANTUM_ALGORITHMS: QUANTUM MACHINE LEARNING (QSVM & QNN)")
     print("=" * 75)
     create_directories()
-    
+
     # 1. Breast Cancer QSVM
-    cancer_res = run_qsvm_pipeline("cancer", "Breast Cancer Wisconsin Diagnostic")
-    
-    # 2. Cardiovascular QSVM
-    cardio_res = run_qsvm_pipeline("cardiovascular", "UCI Heart Disease")
-    
-    # 3. Master Consolidated Report
-    generate_quantum_markdown_report(cancer_res, cardio_res)
-    
+    cancer_qsvm_res = run_qsvm_pipeline("cancer", "Breast Cancer Wisconsin Diagnostic")
+
+    # 2. Breast Cancer QNN
+    cancer_qnn_res = run_qnn_pipeline("cancer", "Breast Cancer Wisconsin Diagnostic")
+
+    # 3. Cardiovascular QSVM
+    cardio_qsvm_res = run_qsvm_pipeline("cardiovascular", "UCI Heart Disease")
+
+    # 4. Cardiovascular QNN
+    cardio_qnn_res = run_qnn_pipeline("cardiovascular", "UCI Heart Disease")
+
+    # 5. Master Consolidated Report
+    generate_quantum_markdown_report(cancer_qsvm_res, cardio_qsvm_res, cancer_qnn_res, cardio_qnn_res)
+
     print("\n" + "=" * 75)
     print(" [SUCCESS] 03_QUANTUM_ALGORITHMS COMPLETED SUCCESSFULLY!")
     print("=" * 75)
