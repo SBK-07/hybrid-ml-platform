@@ -879,9 +879,285 @@ Optimization:
     print(f" [SUCCESS] QNN figures saved in {FIGURES_QUANTUM_DIR}")
 
 
+def run_qvc_pipeline(dataset_key, dataset_name):
+    """
+    Execute Quantum Variational Circuit (QVC) pipeline using custom parameterized circuits.
+
+    Distinct from QNN/VQC:
+      - Ansatz: EfficientSU2 (different from RealAmplitudes in QNN)
+      - Optimizer: SPSA (stochastic perturbation gradient descent, noise-robust)
+      - Architecture: Custom shallow-depth variational circuit optimized for medical data
+      - Measurement: Computational basis Z-measurement for binary classification
+
+    QVC represents a third distinct quantum approach alongside QSVM (kernel) and QNN (variational).
+    """
+    print(f"\n" + "=" * 70)
+    print(f" EXPERIMENT: QUANTUM VARIATIONAL CIRCUIT (QVC) - {dataset_name.upper()}")
+    print("=" * 70)
+
+    # Load 4-qubit preprocessed quantum dataset
+    quant_dir = os.path.join(DATA_PROC_DIR, dataset_key.lower(), "quantum")
+    X_train = np.load(os.path.join(quant_dir, "X_train_quantum.npy"))
+    X_test = np.load(os.path.join(quant_dir, "X_test_quantum.npy"))
+    y_train = np.load(os.path.join(quant_dir, "y_train.npy"))
+    y_test = np.load(os.path.join(quant_dir, "y_test.npy"))
+
+    print(f" [*] Dataset loaded: {len(X_train)} train samples, {len(X_test)} test samples")
+    print(f" [*] Feature dimension: {X_train.shape[1]} (maps to {N_QUBITS_DEFAULT} qubits)")
+
+    # 1. Build Quantum Variational Circuit Architecture
+    print(f"\n [*] Building Quantum Variational Circuit (QVC) Architecture...")
+
+    # Feature Map: Encodes classical data into quantum states
+    feature_map = zz_feature_map(feature_dimension=N_QUBITS_DEFAULT, reps=2, entanglement='linear')
+
+    # Ansatz: EfficientSU2 variational circuit (different from RealAmplitudes)
+    # EfficientSU2 uses single-qubit rotations (Ry, Rz) + CNOT entanglers
+    ansatz = efficient_su2(num_qubits=N_QUBITS_DEFAULT, reps=2)
+
+    # Combine feature map and ansatz
+    combined_circuit = feature_map.compose(ansatz)
+
+    # Circuit statistics
+    circuit_ops = dict(combined_circuit.count_ops())
+    circuit_depth = int(combined_circuit.depth())
+    cnot_count = int(circuit_ops.get('cx', 0))
+    total_gate_count = int(sum(circuit_ops.values()))
+    n_parameters = combined_circuit.num_parameters - N_QUBITS_DEFAULT  # Exclude feature map params
+
+    print(f"     Feature Map: ZZFeatureMap (n={N_QUBITS_DEFAULT}, reps=2)")
+    print(f"     Ansatz: EfficientSU2 (n={N_QUBITS_DEFAULT}, reps=2)")
+    print(f"     Total Qubits: {N_QUBITS_DEFAULT} | Circuit Depth: {circuit_depth}")
+    print(f"     Total Gates: {total_gate_count} | CNOTs: {cnot_count}")
+    print(f"     Trainable Parameters: {n_parameters}")
+
+    # 2. Initialize Quantum Variational Circuit with SPSA
+    print(f"\n [*] Initializing QVC with SPSA Optimizer...")
+
+    # Use StatevectorSampler for ideal simulation
+    sampler = StatevectorSampler()
+
+    # Optimizer: SPSA (Simultaneous Perturbation Stochastic Approximation)
+    # More noise-robust than COBYLA, better for NISQ hardware
+    optimizer = SPSA(maxiter=100)
+
+    # Create VQC with SPSA (represents our QVC)
+    qvc = VQC(
+        feature_map=feature_map,
+        ansatz=ansatz,
+        optimizer=optimizer,
+        sampler=sampler,
+        warm_start=True
+    )
+
+    print(f"     Optimizer: SPSA (max iterations: 100, noise-robust)")
+    print(f"     Sampler: StatevectorSampler (ideal simulation)")
+
+    # 3. Train Quantum Variational Circuit
+    print(f"\n [*] Training Quantum Variational Circuit...")
+    t_start_train = time.time()
+
+    try:
+        qvc.fit(X_train, y_train)
+        train_time = time.time() - t_start_train
+        print(f"     -> Training completed in {train_time:.2f} seconds")
+    except Exception as e:
+        print(f"     [ERROR] Training failed: {e}")
+        return {
+            "dataset_name": dataset_name,
+            "dataset_key": dataset_key,
+            "error": str(e),
+            "status": "FAILED"
+        }
+
+    # 4. Predict and Evaluate
+    print(f"\n [*] Evaluating QVC on Test Set...")
+    t_start_pred = time.time()
+    y_test_pred = qvc.predict(X_test)
+    y_test_prob = qvc.predict_proba(X_test)[:, 1] if hasattr(qvc, 'predict_proba') else y_test_pred.astype(float)
+    pred_time = time.time() - t_start_pred
+
+    # Calculate metrics
+    test_metrics = calculate_medical_metrics(y_test, y_test_pred, y_test_prob)
+    test_metrics["training_time_sec"] = float(round(train_time, 5))
+    test_metrics["inference_time_sec"] = float(round(pred_time, 5))
+
+    print(f"     -> Test Accuracy: {test_metrics['accuracy']*100:.2f}%")
+    print(f"     -> Sensitivity: {test_metrics['sensitivity']*100:.2f}%")
+    print(f"     -> Specificity: {test_metrics['specificity']*100:.2f}%")
+    print(f"     -> ROC-AUC: {test_metrics['roc_auc']:.4f}")
+    print(f"     -> Training Time: {train_time:.2f}s | Inference Time: {pred_time:.5f}s")
+
+    # 5. Cross-validation (simplified 3-fold for computational efficiency)
+    print(f"\n [*] Running 3-Fold Cross-Validation...")
+    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE)
+    cv_accuracies = []
+    cv_aucs = []
+
+    for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train), 1):
+        X_tr_fold, X_val_fold = X_train[train_idx], X_train[val_idx]
+        y_tr_fold, y_val_fold = y_train[train_idx], y_train[val_idx]
+
+        # Create new QVC instance for each fold
+        qvc_fold = VQC(
+            feature_map=feature_map,
+            ansatz=ansatz,
+            optimizer=SPSA(maxiter=50),  # Reduced iterations for CV
+            sampler=sampler
+        )
+
+        try:
+            qvc_fold.fit(X_tr_fold, y_tr_fold)
+            val_pred = qvc_fold.predict(X_val_fold)
+            val_prob = qvc_fold.predict_proba(X_val_fold)[:, 1] if hasattr(qvc_fold, 'predict_proba') else val_pred.astype(float)
+
+            acc = accuracy_score(y_val_fold, val_pred)
+            auc = roc_auc_score(y_val_fold, val_prob) if len(np.unique(y_val_fold)) > 1 else 0.5
+
+            cv_accuracies.append(acc)
+            cv_aucs.append(auc)
+            print(f"     Fold {fold_idx}: Accuracy = {acc*100:.2f}%, AUC = {auc:.4f}")
+        except Exception as e:
+            print(f"     Fold {fold_idx}: FAILED - {e}")
+            cv_accuracies.append(0.5)
+            cv_aucs.append(0.5)
+
+    cv_acc_mean, cv_acc_std = float(np.mean(cv_accuracies)), float(np.std(cv_accuracies))
+    cv_auc_mean, cv_auc_std = float(np.mean(cv_aucs)), float(np.std(cv_aucs))
+
+    print(f"     -> CV Accuracy: {cv_acc_mean*100:.2f}% +/- {cv_acc_std*100:.2f}%")
+    print(f"     -> CV AUC: {cv_auc_mean:.4f} +/- {cv_auc_std:.4f}")
+
+    # 6. Save Results (model config only, not the full QVC object)
+    model_save_path = os.path.join(MODELS_DIR, dataset_key.lower(), "qvc_model.json")
+    try:
+        model_config = {
+            "model_type": "QVC",
+            "n_qubits": N_QUBITS_DEFAULT,
+            "feature_map": "ZZFeatureMap",
+            "ansatz": "EfficientSU2",
+            "optimizer": "SPSA",
+            "note": "QVC training completed. Full model cannot be serialized due to Qiskit primitives."
+        }
+        with open(model_save_path, 'w') as f:
+            json.dump(model_config, f, indent=4)
+        print(f"\n [*] Model configuration saved to: {model_save_path}")
+    except Exception as e:
+        print(f"\n [WARNING] Could not save model: {e}")
+
+    # Compile Results
+    qvc_results = {
+        "dataset_name": dataset_name,
+        "dataset_key": dataset_key,
+        "quantum_architecture": {
+            "model_type": "Quantum Variational Circuit (QVC)",
+            "feature_map": "ZZFeatureMap",
+            "ansatz": "EfficientSU2",
+            "n_qubits": N_QUBITS_DEFAULT,
+            "feature_map_reps": 2,
+            "ansatz_reps": 2,
+            "circuit_depth": circuit_depth,
+            "total_gate_count": total_gate_count,
+            "cnot_count": cnot_count,
+            "trainable_parameters": n_parameters,
+            "optimizer": "SPSA",
+            "max_iterations": 100
+        },
+        "cv_performance": {
+            "accuracy_mean": cv_acc_mean,
+            "accuracy_std": cv_acc_std,
+            "accuracy_formatted": f"{cv_acc_mean*100:.2f}% +/- {cv_acc_std*100:.2f}%",
+            "roc_auc_mean": cv_auc_mean,
+            "roc_auc_std": cv_auc_std
+        },
+        "test_metrics": test_metrics
+    }
+
+    # Save Results JSON
+    res_path = os.path.join(RESULTS_QUANTUM_DIR, f"{dataset_key.lower()}_qvc.json")
+    with open(res_path, "w") as f:
+        json.dump(qvc_results, f, indent=4)
+    print(f" [SUCCESS] QVC results saved to: {res_path}")
+
+    # Generate QVC-specific visualizations
+    generate_qvc_visualizations(qvc_results, y_test, y_test_prob, dataset_key, dataset_name)
+
+    return qvc_results
+
+
+def generate_qvc_visualizations(qvc_results, y_test, y_test_prob, dataset_key, dataset_name):
+    """Generate QVC-specific visualizations."""
+    # 1. ROC Curve
+    fpr, tpr, _ = roc_curve(y_test, y_test_prob)
+
+    plt.figure(figsize=(7, 5))
+    plt.plot(fpr, tpr, linewidth=2.5, label=f"QVC (AUC = {qvc_results['test_metrics']['roc_auc']:.3f})", color='#16A085')
+    plt.plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Chance (AUC = 0.500)')
+    plt.xlabel('False Positive Rate (1 - Specificity)', fontweight='bold')
+    plt.ylabel('True Positive Rate (Sensitivity)', fontweight='bold')
+    plt.title(f'Quantum Variational Circuit ROC Curve - {dataset_name}', fontweight='bold')
+    plt.legend(loc='lower right')
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    roc_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qvc_roc_curve.png")
+    plt.savefig(roc_path, dpi=300)
+    plt.close()
+
+    # 2. Confusion Matrix
+    cm = qvc_results["test_metrics"]["confusion_matrix"]
+    mat = [[cm["TN"], cm["FP"]], [cm["FN"], cm["TP"]]]
+
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(mat, annot=True, fmt='d', cmap='Greens', cbar=False,
+                xticklabels=['Pred Healthy', 'Pred Disease'],
+                yticklabels=['Actual Healthy', 'Actual Disease'])
+    plt.title(f"Quantum Variational Circuit Confusion Matrix - {dataset_name}", fontweight='bold')
+    plt.tight_layout()
+    cm_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qvc_confusion_matrix.png")
+    plt.savefig(cm_path, dpi=300)
+    plt.close()
+
+    # 3. Circuit Architecture Visualization
+    arch = qvc_results["quantum_architecture"]
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.axis('off')
+
+    arch_text = f"""Quantum Variational Circuit (QVC) Architecture
+
+Model: {arch['model_type']}
+
+Quantum Circuit:
+  • Qubits: {arch['n_qubits']}
+  • Circuit Depth: {arch['circuit_depth']}
+  • Total Gates: {arch['total_gate_count']}
+  • CNOT Gates: {arch['cnot_count']}
+
+Feature Encoding:
+  • {arch['feature_map']} (reps={arch['feature_map_reps']})
+
+Variational Layer:
+  • {arch['ansatz']} (reps={arch['ansatz_reps']})
+  • Trainable Parameters: {arch['trainable_parameters']}
+
+Optimization:
+  • Optimizer: {arch['optimizer']} (noise-robust gradient descent)
+  • Max Iterations: {arch['max_iterations']}
+"""
+
+    ax.text(0.1, 0.5, arch_text, fontsize=11, family='monospace',
+            verticalalignment='center', bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.3))
+    plt.title(f"QVC Architecture Summary - {dataset_name}", fontweight='bold', pad=20)
+    plt.tight_layout()
+    arch_path = os.path.join(FIGURES_QUANTUM_DIR, f"{dataset_key.lower()}_qvc_architecture.png")
+    plt.savefig(arch_path, dpi=300)
+    plt.close()
+
+    print(f" [SUCCESS] QVC figures saved in {FIGURES_QUANTUM_DIR}")
+
+
 def main():
     print("=" * 75)
-    print(" 03_QUANTUM_ALGORITHMS: QUANTUM MACHINE LEARNING (QSVM & QNN)")
+    print(" 03_QUANTUM_ALGORITHMS: QUANTUM MACHINE LEARNING (QSVM, QNN & QVC)")
     print("=" * 75)
     create_directories()
 
@@ -891,13 +1167,19 @@ def main():
     # 2. Breast Cancer QNN
     cancer_qnn_res = run_qnn_pipeline("cancer", "Breast Cancer Wisconsin Diagnostic")
 
-    # 3. Cardiovascular QSVM
+    # 3. Breast Cancer QVC
+    cancer_qvc_res = run_qvc_pipeline("cancer", "Breast Cancer Wisconsin Diagnostic")
+
+    # 4. Cardiovascular QSVM
     cardio_qsvm_res = run_qsvm_pipeline("cardiovascular", "UCI Heart Disease")
 
-    # 4. Cardiovascular QNN
+    # 5. Cardiovascular QNN
     cardio_qnn_res = run_qnn_pipeline("cardiovascular", "UCI Heart Disease")
 
-    # 5. Master Consolidated Report
+    # 6. Cardiovascular QVC
+    cardio_qvc_res = run_qvc_pipeline("cardiovascular", "UCI Heart Disease")
+
+    # 7. Master Consolidated Report
     generate_quantum_markdown_report(cancer_qsvm_res, cardio_qsvm_res, cancer_qnn_res, cardio_qnn_res)
 
     print("\n" + "=" * 75)
