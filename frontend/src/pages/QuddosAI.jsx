@@ -1,20 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, FileText, Image, BarChart, Microscope, ChevronRight } from 'lucide-react';
+import { Send, Trash2, FileText, Image, BarChart, Microscope, Bot, Sparkles } from 'lucide-react';
 
 export default function QuddosAI() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `### 🤖 Welcome to Quddos AI
+      content: `### Welcome to Quddos AI Assistant
 
 I am your **context-aware quantum-classical ML research assistant** embedded in the Q-Med Platform.
 
-**How to use me effectively**:
+**How to use effectively**:
 1. Navigate to any experiment page (Individual, Cumulative, or Live Inference).
 2. Click the **three-dot (⋮) menu** on plots, metrics, or results and select **"Add to Quddos AI"**.
 3. Return here and ask me to interpret ROC curves, explain quantum circuit depths, compare classical vs quantum performance, or analyze patient risk predictions.
-
-**I operate with strict scientific grounding**: I analyze your *actual* experiment results and will never fabricate metrics or claim unjustified quantum advantage.
 
 *What would you like to explore today?*`,
       timestamp: new Date().toLocaleTimeString()
@@ -25,16 +23,13 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
   const [loading, setLoading] = useState(false);
   const [showArtifacts, setShowArtifacts] = useState(true);
   const messagesEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  // Load artifacts from localStorage on mount
   useEffect(() => {
     const storedArtifacts = localStorage.getItem('quddos_artifacts');
     if (storedArtifacts) {
@@ -61,7 +56,6 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
     setLoading(true);
 
     try {
-      // Build conversation history (last 6 messages for context)
       const history = messages.slice(-6).map(msg => ({
         role: msg.role,
         content: msg.content
@@ -95,7 +89,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
       console.error('Chat error:', err);
       const errorMessage = {
         role: 'assistant',
-        content: '⚠️ I encountered a connection error. Please check your backend server and try again.',
+        content: 'Connection error. Please verify backend server on http://127.0.0.1:8000 and try again.',
         timestamp: new Date().toLocaleTimeString()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -118,11 +112,11 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
   };
 
   const handleClearChat = () => {
-    if (window.confirm('Clear entire conversation history? This cannot be undone.')) {
+    if (window.confirm('Clear entire conversation history?')) {
       setMessages([
         {
           role: 'assistant',
-          content: '🔄 **Chat cleared.** Ready for a fresh research session!',
+          content: 'Chat cleared. Ready for a fresh research session.',
           timestamp: new Date().toLocaleTimeString()
         }
       ]);
@@ -130,7 +124,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
   };
 
   const handleClearArtifacts = () => {
-    if (window.confirm('Remove all attached artifacts from context? You can re-add them from experiment pages.')) {
+    if (window.confirm('Remove all attached artifacts from context?')) {
       setArtifacts([]);
       localStorage.removeItem('quddos_artifacts');
     }
@@ -138,100 +132,77 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
 
   const getArtifactIcon = (category) => {
     switch (category) {
-      case 'plot': return <Image size={16} />;
-      case 'metrics': return <BarChart size={16} />;
-      case 'model': return <Microscope size={16} />;
-      default: return <FileText size={16} />;
+      case 'plot': return <Image size={15} />;
+      case 'metrics': return <BarChart size={15} />;
+      case 'model': return <Microscope size={15} />;
+      default: return <FileText size={15} />;
     }
   };
 
   return (
-    <div className="section" style={{ display: 'flex', gap: '20px', height: 'calc(100vh - 300px)', minHeight: '600px' }}>
-      {/* Left Panel: Artifact Context Drawer */}
-      <div style={{
-        width: showArtifacts ? '320px' : '0',
-        minWidth: showArtifacts ? '320px' : '0',
-        background: '#f8fafc',
-        borderRadius: '12px',
-        border: '2px solid #e2e8f0',
-        overflow: 'hidden',
-        transition: 'all 0.3s',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+    <div className="hub-section active">
+      <div className="section-header">
+        <div>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Bot size={24} style={{ color: 'var(--classical-color)' }} />
+            Quddos AI Assistant
+          </h1>
+          <p className="subtitle">
+            Ground-truth diagnostic & research AI. Attach telemetry artifacts, plots, and patient profiles to perform context-aware research synthesis.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: showArtifacts ? '300px 1fr' : '1fr', gap: '20px', minHeight: '600px', height: 'calc(100vh - 220px)' }}>
+        {/* Left Panel: Context Drawer */}
         {showArtifacts && (
-          <>
-            <div style={{
-              padding: '15px',
-              borderBottom: '2px solid #e2e8f0',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{ fontWeight: 700, fontSize: '1rem' }}>📎 Active Context</div>
-              <div style={{ fontSize: '0.85rem', background: 'rgba(255,255,255,0.25)', padding: '3px 8px', borderRadius: '10px' }}>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: '16px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={16} style={{ color: 'var(--classical-color)' }} /> Active Context
+              </span>
+              <span className="val-badge ready" style={{ fontSize: '0.7rem' }}>
                 {artifacts.length} item{artifacts.length !== 1 ? 's' : ''}
-              </div>
+              </span>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
               {artifacts.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 20px', color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                  <FileText size={40} style={{ margin: '0 auto 15px', opacity: 0.5 }} />
-                  <p>No artifacts attached yet.</p>
-                  <p style={{ marginTop: '10px', fontSize: '0.85rem' }}>
-                    Navigate to experiment pages and use the <strong>⋮ menu</strong> to add plots, metrics, or results.
+                <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  <FileText size={36} style={{ margin: '0 auto 10px', opacity: 0.3 }} />
+                  <p>No telemetry artifacts attached yet.</p>
+                  <p style={{ marginTop: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    Use the <strong>⋮ menu</strong> on experiment cards to attach context.
                   </p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {artifacts.map((artifact, idx) => (
                     <div key={idx} style={{
-                      background: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
+                      background: '#F8FAFC',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '6px',
                       padding: '10px',
-                      fontSize: '0.85rem',
-                      position: 'relative',
-                      transition: 'all 0.2s'
+                      fontSize: '0.82rem'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
-                        <div style={{ color: '#667eea', marginTop: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--classical-color)' }}>
                           {getArtifactIcon(artifact.category)}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, color: '#2d3748', fontSize: '0.9rem', lineHeight: '1.3' }}>
-                            {artifact.title || `Artifact ${idx + 1}`}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: '#718096', marginTop: '3px' }}>
-                            {artifact.category || 'General'} · {artifact.metadata?.model_type || 'N/A'}
-                          </div>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{artifact.title || `Artifact ${idx + 1}`}</span>
                         </div>
                         <button
                           onClick={() => handleRemoveArtifact(idx)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#cbd5e0',
-                            padding: '4px',
-                            borderRadius: '4px',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => { e.target.style.color = '#ef4444'; e.target.style.background = '#fee2e2'; }}
-                          onMouseLeave={(e) => { e.target.style.color = '#cbd5e0'; e.target.style.background = 'none'; }}
-                          title="Remove from context"
+                          style={{ background: 'none', border: 'none', color: 'var(--status-danger)', cursor: 'pointer', padding: '2px' }}
+                          title="Remove artifact"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                       {artifact.image_url && (
                         <img
                           src={artifact.image_url}
                           alt={artifact.title}
-                          style={{ width: '100%', borderRadius: '6px', marginTop: '8px', border: '1px solid #e2e8f0' }}
+                          style={{ width: '100%', borderRadius: '4px', marginTop: '6px' }}
                         />
                       )}
                     </div>
@@ -240,206 +211,132 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
               )}
             </div>
 
-            <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0' }}>
-              <button
-                onClick={handleClearArtifacts}
-                disabled={artifacts.length === 0}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: artifacts.length === 0 ? '#f1f5f9' : '#fee2e2',
-                  color: artifacts.length === 0 ? '#cbd5e0' : '#991b1b',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: artifacts.length === 0 ? 'not-allowed' : 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Trash2 size={14} style={{ marginRight: '6px', display: 'inline', verticalAlign: 'middle' }} />
-                Clear All Artifacts
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Right Panel: Chat Interface */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', borderRadius: '12px', border: '2px solid #e2e8f0', overflow: 'hidden' }}>
-        {/* Header */}
-        <div style={{
-          padding: '15px 20px',
-          borderBottom: '2px solid #e2e8f0',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>🤖 Quddos AI</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', opacity: 0.9 }}>Context-Aware Multimodal Research Assistant</p>
+            <button
+              onClick={handleClearArtifacts}
+              disabled={artifacts.length === 0}
+              className="btn btn-sm btn-outline-danger full-width-btn"
+              style={{ marginTop: '12px' }}
+            >
+              <Trash2 size={14} /> Clear Context
+            </button>
           </div>
-          <button
-            onClick={handleClearChat}
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: 'white',
-              padding: '8px 14px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Trash2 size={16} />
-            Clear Chat
-          </button>
-        </div>
+        )}
 
-        {/* Messages Container */}
-        <div
-          ref={chatContainerRef}
-          style={{
+        {/* Right Panel: Chat Interface */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+          {/* Header */}
+          <div style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-color)',
+            background: '#FFFFFF',
+            display: 'flex',
+            justify: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Bot size={20} style={{ color: 'var(--classical-color)' }} />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600 }}>Quddos AI Intelligence</h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Scientific Multimodal Grounding</span>
+              </div>
+            </div>
+            <button onClick={handleClearChat} className="btn btn-sm btn-outline-danger">
+              <Trash2 size={14} /> Clear Chat
+            </button>
+          </div>
+
+          {/* Messages Window */}
+          <div style={{
             flex: 1,
             overflowY: 'auto',
             padding: '20px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '15px',
-            background: '#fafafa'
-          }}
-        >
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: 'flex',
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
-              }}
-            >
-              <div style={{
-                maxWidth: '75%',
-                padding: '12px 16px',
-                borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: msg.role === 'user'
-                  ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                  : 'white',
-                color: msg.role === 'user' ? 'white' : '#2d3748',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                border: msg.role === 'assistant' ? '1px solid #e2e8f0' : 'none'
-              }}>
-                <div
-                  style={{ lineHeight: '1.6', fontSize: '0.95rem' }}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.role === 'assistant'
-                      ? msg.content
-                          .replace(/### (.+)/g, '<h3 style="margin: 10px 0 8px 0; color: #667eea; font-size: 1.1rem;">$1</h3>')
-                          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                          .replace(/`(.+?)`/g, '<code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em;">$1</code>')
-                          .replace(/\n- /g, '<br/>• ')
-                          .replace(/\n\n/g, '<br/><br/>')
-                      : msg.content
-                  }}
-                />
+            gap: '16px',
+            background: '#F7F8FA'
+          }}>
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
+                }}
+              >
                 <div style={{
-                  fontSize: '0.75rem',
-                  opacity: 0.7,
-                  marginTop: '8px',
-                  textAlign: msg.role === 'user' ? 'right' : 'left'
+                  maxWidth: '80%',
+                  padding: '12px 16px',
+                  borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                  background: msg.role === 'user'
+                    ? 'var(--classical-color)'
+                    : '#FFFFFF',
+                  color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
+                  border: msg.role === 'assistant' ? '1px solid var(--border-color)' : 'none',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.5',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                 }}>
-                  {msg.timestamp}
-                  {msg.metadata?.provider && (
-                    <span style={{ marginLeft: '8px', fontSize: '0.7rem', opacity: 0.8 }}>
-                      · {msg.metadata.provider}
-                    </span>
-                  )}
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: msg.role === 'assistant'
+                        ? msg.content
+                            .replace(/### (.+)/g, '<h4 style="margin: 8px 0 6px 0; color: var(--text-primary); font-size: 0.95rem; font-weight: 600;">$1</h4>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                            .replace(/`(.+?)`/g, '<code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px; color: var(--classical-color); font-size: 0.85em;">$1</code>')
+                            .replace(/\n- /g, '<br/>• ')
+                            .replace(/\n\n/g, '<br/><br/>')
+                        : msg.content
+                    }}
+                  />
+                  <div style={{ fontSize: '0.72rem', color: msg.role === 'user' ? 'rgba(255,255,255,0.8)' : 'var(--text-secondary)', marginTop: '6px', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
+                    {msg.timestamp}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {loading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: '18px 18px 18px 4px',
-                background: 'white',
-                border: '1px solid #e2e8f0',
-                color: '#667eea',
-                fontSize: '0.9rem',
-                fontStyle: 'italic'
-              }}>
-                Quddos AI is analyzing your artifacts and generating response...
+            {loading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div className="card" style={{ padding: '12px 16px', color: 'var(--classical-color)', fontSize: '0.85rem', fontStyle: 'italic', background: '#FFFFFF' }}>
+                  Quddos AI is evaluating context artifacts & generating grounded answer...
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Box */}
-        <div style={{
-          padding: '15px 20px',
-          borderTop: '2px solid #e2e8f0',
-          background: 'white',
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'flex-end'
-        }}>
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me about ROC curves, quantum circuits, patient risk predictions, or comparative model performance..."
-            disabled={loading}
-            style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: '10px',
-              border: '2px solid #e2e8f0',
-              fontSize: '0.95rem',
-              fontFamily: 'inherit',
-              resize: 'none',
-              minHeight: '60px',
-              maxHeight: '120px',
-              outline: 'none',
-              transition: 'border 0.2s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#667eea'}
-            onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={loading || !inputText.trim()}
-            style={{
-              padding: '12px 20px',
-              background: loading || !inputText.trim()
-                ? '#e2e8f0'
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: loading || !inputText.trim() ? '#cbd5e0' : 'white',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: loading || !inputText.trim() ? 'not-allowed' : 'pointer',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s',
-              minHeight: '60px'
-            }}
-          >
-            <Send size={18} />
-            Send
-          </button>
+          {/* Input Box */}
+          <div style={{ padding: '14px', borderTop: '1px solid var(--border-color)', background: '#FFFFFF', display: 'flex', gap: '10px' }}>
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask Quddos AI about ROC curves, quantum kernel mechanics, patient risk levels, or circuit depth..."
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                background: '#FFFFFF',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                color: 'var(--text-primary)',
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                resize: 'none',
+                height: '50px',
+                outline: 'none'
+              }}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={loading || !inputText.trim()}
+              className="btn btn-primary"
+              style={{ padding: '0 18px', height: '50px' }}
+            >
+              <Send size={18} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

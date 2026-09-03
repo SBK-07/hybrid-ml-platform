@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope } from 'lucide-react';
 import { predictPatient } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
 
@@ -78,55 +78,61 @@ export default function LivePatientInference() {
   const predictions = predictionResult?.predictions;
 
   return (
-    <div className="section">
-      <h2 className="section-title">🩺 Live Patient Risk Inference</h2>
-
-      <div className="explainer">
-        <div className="explainer-title">Patient Diagnostic Simulator</div>
-        <p>
-          Select from <strong>5 clinically curated patient profile categories</strong> from the dropdown to automatically load representative biomarkers.
-          Inputs and outputs are partitioned into <strong>Basic</strong> and <strong>Advanced</strong> tiers for student and researcher workflows.
-        </p>
+    <div className="hub-section active">
+      <div className="section-header">
+        <div>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Activity size={24} style={{ color: 'var(--classical-color)' }} />
+            Live Patient Risk Inference
+          </h1>
+          <p className="subtitle">
+            Real-time clinical patient diagnostic simulator. Features automated 4-qubit PCA projection, zero-data-leakage scaling, and 3-way consensus evaluation.
+          </p>
+        </div>
       </div>
 
-      {/* Preset Dropdown & Dataset Selector */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', margin: '20px 0' }}>
-        <div className="model-card" style={{ margin: 0 }}>
-          <label style={{ fontWeight: 600, color: '#4a5568', display: 'block', marginBottom: '8px' }}>
-            👤 Select Patient Profile Category (5 Archetypes):
-          </label>
-          <select
-            value={selectedPresetId}
-            onChange={handlePresetChange}
-            className="dataset-select"
-            style={{ width: '100%', padding: '12px' }}
-          >
-            {presets.map(p => (
-              <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
-            ))}
-          </select>
+      {/* Preset & Dataset Selection Bar */}
+      <div className="grid-2" style={{ gap: '16px', marginBottom: '20px' }}>
+        <div className="card active-control-card" style={{ margin: 0, padding: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <UserCheck size={16} style={{ color: 'var(--classical-color)' }} /> Select Clinical Patient Profile Category:
+            </label>
+            <select
+              value={selectedPresetId}
+              onChange={handlePresetChange}
+              className="form-select-inline"
+              style={{ width: '100%', padding: '8px 12px' }}
+            >
+              {presets.map(p => (
+                <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="model-card" style={{ margin: 0 }}>
-          <label style={{ fontWeight: 600, color: '#4a5568', display: 'block', marginBottom: '8px' }}>
-            🏥 Disease Domain:
-          </label>
-          <select
-            value={activeDataset}
-            onChange={handleDatasetChange}
-            className="dataset-select"
-            style={{ width: '100%', padding: '12px' }}
-          >
-            <option value="cancer">Breast Cancer (WDBC - 30 Features)</option>
-            <option value="cardiovascular">Cardiovascular Heart Disease (13 Features)</option>
-          </select>
+        <div className="card active-control-card" style={{ margin: 0, padding: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Activity size={16} style={{ color: 'var(--classical-color)' }} /> Disease Domain:
+            </label>
+            <select
+              value={activeDataset}
+              onChange={handleDatasetChange}
+              className="form-select-inline"
+              style={{ width: '100%', padding: '8px 12px' }}
+            >
+              <option value="cancer">Breast Cancer Wisconsin Diagnostic (WDBC)</option>
+              <option value="cardiovascular">UCI Heart Disease (Cardiovascular)</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Selected Preset Information Box */}
       {selectedPreset && (
-        <div className="model-card" style={{ background: '#f8fafc', borderLeft: '5px solid #667eea', marginBottom: '25px', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
+        <div className="card" style={{ marginBottom: '24px', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
             <CardActionMenu
               title={`Patient Profile: ${selectedPreset.name}`}
               category="patient_profile"
@@ -144,51 +150,48 @@ export default function LivePatientInference() {
               }}
             />
           </div>
-          <h4 style={{ color: '#2d3748', marginBottom: '5px' }}>📋 Category Profile: {selectedPreset.name}</h4>
-          <p style={{ color: '#4a5568', fontSize: '0.95rem' }}>{selectedPreset.description}</p>
 
-          {/* Basic Preset Info (Student Level) */}
-          <div style={{ marginTop: '12px', padding: '10px 15px', background: '#e0f2fe', borderRadius: '6px' }}>
-            <strong style={{ color: '#0369a1' }}>📚 Student View (Basic Clinical Summary):</strong>
-            <p style={{ color: '#0c4a6e', fontSize: '0.9rem', marginTop: '4px' }}>
+          <h4 style={{ color: 'var(--text-primary)', marginBottom: '6px', fontSize: '1rem', fontWeight: 600 }}>
+            Profile Archetype: {selectedPreset.name}
+          </h4>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.5' }}>
+            {selectedPreset.description}
+          </p>
+
+          {/* Student View Summary */}
+          <div style={{ marginTop: '14px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> Student View (Basic Clinical Summary):
+            </strong>
+            <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', marginTop: '4px' }}>
               <strong>Clinical Presentation:</strong> {selectedPreset.basic_info?.clinical_notes}
             </p>
-            <p style={{ color: '#0c4a6e', fontSize: '0.9rem', marginTop: '4px' }}>
-              <strong>Standard Clinical Protocol:</strong> {selectedPreset.basic_info?.typical_action}
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
+              <strong>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
             </p>
           </div>
 
-          {/* Advanced Preset Info (Researcher Level) */}
-          <div style={{ marginTop: '10px' }}>
+          {/* Advanced Preset Info */}
+          <div style={{ marginTop: '12px' }}>
             <button
               onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#92400e',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 0',
-                fontSize: '0.9rem'
-              }}
+              className="btn btn-sm btn-outline"
+              type="button"
             >
-              🔬 {showAdvancedInputs ? 'Hide' : 'Show'} Advanced Biomarker Specifications (Researcher Level)
-              {showAdvancedInputs ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <Sliders size={14} /> {showAdvancedInputs ? 'Hide' : 'Show'} Advanced Biomarker Telemetry
+              {showAdvancedInputs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
             {showAdvancedInputs && (
-              <div style={{ marginTop: '8px', padding: '10px 15px', background: '#fef3c7', borderRadius: '6px' }}>
-                <p style={{ color: '#78350f', fontSize: '0.85rem' }}>
-                  <strong>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
+              <div style={{ marginTop: '10px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <p style={{ color: 'var(--text-primary)' }}>
+                  <strong style={{ color: 'var(--classical-color)' }}>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
                 </p>
-                <p style={{ color: '#78350f', fontSize: '0.85rem', marginTop: '4px' }}>
-                  <strong>Hemodynamics:</strong> {selectedPreset.advanced_info?.hemodynamics}
+                <p style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
+                  <strong style={{ color: 'var(--quantum-color)' }}>Hemodynamics:</strong> {selectedPreset.advanced_info?.hemodynamics}
                 </p>
-                <p style={{ color: '#78350f', fontSize: '0.85rem', marginTop: '4px' }}>
-                  <strong>Theoretical Risk Score:</strong> {selectedPreset.advanced_info?.risk_score_expected}
+                <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  <strong style={{ color: 'var(--hybrid-color)' }}>Theoretical Risk Range:</strong> {selectedPreset.advanced_info?.risk_score_expected}
                 </p>
               </div>
             )}
@@ -196,15 +199,16 @@ export default function LivePatientInference() {
         </div>
       )}
 
-      {/* Inference Input & Output Grid */}
-      <div className="inference-grid">
+      {/* Main Form & Predictions Grid */}
+      <div className="grid-2" style={{ gap: '24px', alignItems: 'start' }}>
         {/* Left Side: Parameters Form */}
-        <div className="model-card" style={{ margin: 0 }}>
-          <h3 style={{ fontSize: '1.2em', marginBottom: '15px' }}>
-            Patient Parameters ({Object.keys(features).length} Features)
+        <div className="card">
+          <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Cpu size={18} style={{ color: 'var(--classical-color)' }} /> Patient Parameters ({Object.keys(features).length} Features)
           </h3>
+
           <form onSubmit={handleRunInference}>
-            <div className="form-grid">
+            <div className="form-grid" style={{ maxHeight: '420px', overflowY: 'auto', paddingRight: '6px', marginBottom: '16px' }}>
               {Object.keys(features).map((feat) => (
                 <div className="form-group" key={feat}>
                   <label>{feat}</label>
@@ -217,23 +221,24 @@ export default function LivePatientInference() {
                 </div>
               ))}
             </div>
-            <button type="submit" className="btn-predict" disabled={loading}>
-              {loading ? '⚛️ Computing Quantum Kernel Overlaps...' : '⚡ Run Diagnostic Risk Inference'}
+            <button type="submit" className="btn btn-primary full-width-btn" disabled={loading}>
+              <Play size={16} />
+              {loading ? 'Computing Quantum Statevector Overlaps...' : 'Run Diagnostic Risk Inference'}
             </button>
           </form>
         </div>
 
         {/* Right Side: Prediction Output Cards */}
-        <div className="model-card" style={{ margin: 0 }}>
-          <h3 style={{ fontSize: '1.2em', marginBottom: '15px' }}>
-            Diagnostic Consensus & Risk Tier
+        <div className="card">
+          <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={18} style={{ color: 'var(--classical-color)' }} /> Tri-Model Diagnostic Cards
           </h3>
 
           {predictionResult ? (
-            <div className="pred-results-container" style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '0', right: '0', zIndex: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '-44px', right: '0', zIndex: 10 }}>
                 <CardActionMenu
-                  title={`Tri-Model Patient Risk Prediction - ${selectedPreset?.name}`}
+                  title={`Patient Risk Prediction - ${selectedPreset?.name}`}
                   category="prediction"
                   data={{
                     patient_profile: selectedPreset?.name,
@@ -249,93 +254,91 @@ export default function LivePatientInference() {
                   }}
                 />
               </div>
-              {/* Basic Results (Student Level) */}
-              <div style={{ padding: '12px', background: '#e0f2fe', borderRadius: '8px', marginBottom: '10px' }}>
-                <strong style={{ color: '#0369a1' }}>📚 Basic Diagnostic Summary:</strong>
-                <p style={{ color: '#0c4a6e', fontSize: '0.9rem', marginTop: '5px' }}>
-                  The models have analyzed the patient's features and generated a unified risk estimate.
-                </p>
-              </div>
 
-              {/* Classical Card */}
-              <div className="pred-card">
-                <div className="pred-card-header">
-                  <div className="pred-title">1. Classical RBF SVM</div>
-                  <span className={`risk-badge`} style={{ background: predictions?.classical_rbf_svm?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
+              {/* Classical Card - Blue Color Token */}
+              <div className="pred-card" style={{ textAlign: 'left', borderLeft: '4px solid var(--classical-color)' }}>
+                <div className="pred-title">1. Classical RBF Support Vector Machine</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
+                  <span className={`pred-badge ${predictions?.classical_rbf_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
                     {predictions?.classical_rbf_svm?.label}
                   </span>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--classical-color)' }}>
+                    {(predictions?.classical_rbf_svm?.probability * 100).toFixed(1)}%
+                  </div>
                 </div>
-                <div>Risk Probability: <strong>{(predictions?.classical_rbf_svm?.probability * 100).toFixed(1)}%</strong></div>
-                <div style={{ fontSize: '0.85rem', color: '#718096' }}>Confidence: {predictions?.classical_rbf_svm?.confidence_pct}%</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  Confidence: {predictions?.classical_rbf_svm?.confidence_pct}%
+                </div>
               </div>
 
-              {/* Quantum Card */}
-              <div className="pred-card">
-                <div className="pred-card-header">
-                  <div className="pred-title">2. Quantum Kernel QSVM</div>
-                  <span className={`risk-badge`} style={{ background: predictions?.quantum_kernel_svm?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
+              {/* Quantum Card - Teal Color Token */}
+              <div className="pred-card" style={{ textAlign: 'left', borderLeft: '4px solid var(--quantum-color)' }}>
+                <div className="pred-title">2. Quantum Kernel QSVM (ZZFeatureMap)</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
+                  <span className={`pred-badge ${predictions?.quantum_kernel_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
                     {predictions?.quantum_kernel_svm?.label}
                   </span>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--quantum-color)' }}>
+                    {(predictions?.quantum_kernel_svm?.probability * 100).toFixed(1)}%
+                  </div>
                 </div>
-                <div>Risk Probability: <strong>{(predictions?.quantum_kernel_svm?.probability * 100).toFixed(1)}%</strong></div>
-                <div style={{ fontSize: '0.85rem', color: '#718096' }}>
-                  4 Qubits | {predictions?.quantum_kernel_svm?.feature_map || 'ZZFeatureMap'}
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  4 Qubits | {predictions?.quantum_kernel_svm?.feature_map || 'ZZFeatureMap (reps=2)'}
                 </div>
               </div>
 
-              {/* Hybrid Card */}
-              <div className="pred-card highlight">
-                <div className="pred-card-header">
-                  <div className="pred-title">3. Hybrid Consensus Ensemble</div>
-                  <span className={`risk-badge`} style={{ background: predictions?.hybrid_consensus_ensemble?.risk_color || '#E74C3C' }}>
+              {/* Hybrid Consensus Ensemble Card - Amber Color Token */}
+              <div className="pred-card highlight" style={{ textAlign: 'left', borderLeft: '4px solid var(--hybrid-color)' }}>
+                <div className="pred-title" style={{ color: 'var(--hybrid-color)', fontWeight: 600 }}>3. Hybrid Consensus Ensemble (Centerpiece)</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
+                  <span className="badge-paradigm badge-hybrid">
                     {predictions?.hybrid_consensus_ensemble?.label}
                   </span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--hybrid-color)' }}>
+                    {(predictions?.hybrid_consensus_ensemble?.probability * 100).toFixed(1)}%
+                  </div>
                 </div>
-                <div>Consensus Risk Score: <strong style={{ fontSize: '1.2em' }}>{(predictions?.hybrid_consensus_ensemble?.probability * 100).toFixed(1)}%</strong></div>
-                <div style={{ marginTop: '8px', fontSize: '0.9rem', fontWeight: 600, color: predictions?.hybrid_consensus_ensemble?.risk_color || '#E74C3C' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--hybrid-color)' }}>
                   {predictions?.hybrid_consensus_ensemble?.risk_tier}
                 </div>
               </div>
 
-              {/* Advanced Results (Researcher Level) - Collapsible */}
-              <div style={{ marginTop: '10px' }}>
+              {/* Advanced Quantum State Coordinates */}
+              <div>
                 <button
                   onClick={() => setShowAdvancedResults(!showAdvancedResults)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#92400e',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 0',
-                    fontSize: '0.9rem'
-                  }}
+                  className="btn btn-sm btn-outline"
+                  type="button"
                 >
-                  🔬 {showAdvancedResults ? 'Hide' : 'Show'} Advanced Quantum State Coordinates (Researcher Level)
-                  {showAdvancedResults ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {showAdvancedResults ? 'Hide' : 'Show'} Quantum Hilbert State Telemetry
+                  {showAdvancedResults ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
 
                 {showAdvancedResults && (
-                  <div style={{ marginTop: '8px', padding: '12px', background: '#fef3c7', borderRadius: '6px', fontSize: '0.85rem' }}>
-                    <div><strong>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
-                    <div style={{ marginTop: '5px' }}><strong>Bloch Sphere Rotation Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
+                  <div style={{ marginTop: '10px', padding: '12px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                    <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
+                    <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
                   </div>
                 )}
               </div>
 
               {/* Guidance Note */}
-              <div className="explainer" style={{ background: '#f0fdf4', borderLeftColor: '#22c55e', margin: '10px 0 0 0', padding: '12px' }}>
-                <div className="explainer-title" style={{ color: '#15803d', fontSize: '0.95rem' }}>💡 Clinical Guidance</div>
-                <p style={{ fontSize: '0.85rem' }}>{predictionResult?.clinical_guidance?.recommendation}</p>
+              <div className="banner reality-banner" style={{ marginTop: '6px' }}>
+                <Stethoscope size={20} style={{ color: '#92400E', flexShrink: 0 }} />
+                <div>
+                  <strong style={{ color: '#92400E', fontSize: '0.85rem' }}>Clinician Guidance:</strong>
+                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: '#92400E' }}>
+                    {predictionResult?.clinical_guidance?.recommendation}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#a0aec0' }}>
-              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🩺</div>
-              <p>Click <strong>"Run Diagnostic Risk Inference"</strong> to execute real-time quantum-classical model inference.</p>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-secondary)' }}>
+              <Activity size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
+              <p style={{ fontSize: '0.875rem' }}>
+                Select a patient profile archetype or adjust sliders, then click <strong>"Run Diagnostic Risk Inference"</strong> to execute real-time quantum statevector simulation.
+              </p>
             </div>
           )}
         </div>

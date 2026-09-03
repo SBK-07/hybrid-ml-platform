@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { BarChart3, ChevronDown, ChevronUp, Database, CheckCircle2, Cpu, ShieldCheck, Zap, Atom } from 'lucide-react';
 import CardActionMenu from '../components/CardActionMenu';
 
 export default function CumulativeExperiment() {
@@ -33,38 +33,49 @@ export default function CumulativeExperiment() {
   };
 
   return (
-    <div className="section">
-      <h2 className="section-title">📊 Cumulative Experiment & Comprehensive Benchmark</h2>
-
-      <div className="explainer">
-        <div className="explainer-title">What is Cumulative Experiment Mode?</div>
-        <p>
-          Compare <strong>all 5 classical and quantum models</strong> simultaneously across key clinical metrics.
-          Each model card is partitioned into <strong>Basic Information</strong> (easy-to-understand metrics and explanations for students and non-technical visitors)
-          and <strong>Advanced Information</strong> (deep mathematical formulations, circuit parameters, and hyperparameter grids for researchers).
-        </p>
+    <div className="hub-section active">
+      <div className="section-header">
+        <div>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BarChart3 size={24} style={{ color: 'var(--classical-color)' }} />
+            Cumulative Experiment & Comprehensive Benchmark
+          </h1>
+          <p className="subtitle">
+            Side-by-side comparative analysis of all 5 classical and quantum models across diagnostic accuracy, sensitivity, specificity, ROC-AUC, and latency.
+          </p>
+        </div>
       </div>
 
-      {/* Dataset Selector */}
-      <div className="dataset-bar" style={{ borderRadius: '10px', margin: '20px 0' }}>
-        <label>Selected Dataset:</label>
-        <select
-          value={selectedDataset}
-          onChange={(e) => setSelectedDataset(e.target.value)}
-          className="dataset-select"
-        >
-          <option value="cancer">Breast Cancer Wisconsin Diagnostic (WDBC)</option>
-          <option value="cardiovascular">UCI Heart Disease</option>
-        </select>
+      {/* Dataset Selector Banner */}
+      <div className="card active-control-card" style={{ marginBottom: '24px' }}>
+        <div className="control-row">
+          <div className="control-info">
+            <Database size={18} style={{ color: 'var(--classical-color)' }} />
+            <span className="label">Benchmark Dataset:</span>
+            <select
+              value={selectedDataset}
+              onChange={(e) => setSelectedDataset(e.target.value)}
+              className="form-select-inline"
+            >
+              <option value="cancer">Breast Cancer Wisconsin Diagnostic (WDBC - 30 features)</option>
+              <option value="cardiovascular">UCI Heart Disease (Cardiovascular - 13 features)</option>
+            </select>
+          </div>
+          <div className="val-badge ready">
+            {loading ? 'Evaluating Models...' : '5 Models Synchronized'}
+          </div>
+        </div>
       </div>
 
-      {/* Comparison Visualizations */}
+      {/* Comparison Visualizations Grid */}
       {results?.comparison_figures && (
-        <div style={{ margin: '30px 0' }}>
-          <h3 style={{ color: '#667eea', marginBottom: '15px' }}>📈 Benchmark Visualizations</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
-            <div className="model-card" style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BarChart3 size={18} style={{ color: 'var(--classical-color)' }} /> Benchmark Visualizations & Performance Overlays
+          </h3>
+          <div className="grid-2" style={{ gap: '24px' }}>
+            <div className="card" style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
                 <CardActionMenu
                   title="All Models Radar Chart Comparison"
                   category="plot"
@@ -73,15 +84,18 @@ export default function CumulativeExperiment() {
                   imageUrl={results.comparison_figures.radar_chart}
                 />
               </div>
-              <h4 style={{ color: '#2d3748', marginBottom: '10px' }}>Radar Chart Comparison</h4>
-              <img
-                src={results.comparison_figures.radar_chart}
-                alt="Radar Chart"
-                style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-              />
+              <h4 style={{ color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.95rem', fontWeight: 600 }}>Multi-Metric Radar Chart Overview</h4>
+              <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <img
+                  src={results.comparison_figures.radar_chart}
+                  alt="Radar Chart"
+                  style={{ width: '100%', borderRadius: '6px' }}
+                />
+              </div>
             </div>
-            <div className="model-card" style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+
+            <div className="card" style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
                 <CardActionMenu
                   title="Metric Comparison Bar Chart"
                   category="plot"
@@ -90,26 +104,31 @@ export default function CumulativeExperiment() {
                   imageUrl={results.comparison_figures.metric_comparison}
                 />
               </div>
-              <h4 style={{ color: '#2d3748', marginBottom: '10px' }}>Metric Comparison Bar Chart</h4>
-              <img
-                src={results.comparison_figures.metric_comparison}
-                alt="Metric Comparison"
-                style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-              />
+              <h4 style={{ color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.95rem', fontWeight: 600 }}>Comparative Accuracy & Sensitivity Breakdown</h4>
+              <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <img
+                  src={results.comparison_figures.metric_comparison}
+                  alt="Metric Comparison"
+                  style={{ width: '100%', borderRadius: '6px' }}
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Model Cards Grid */}
-      <h3 style={{ color: '#667eea', margin: '30px 0 15px 0' }}>🤖 All 5 Models Benchmark</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Model Cards */}
+      <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Cpu size={20} style={{ color: 'var(--classical-color)' }} /> 5-Model Performance Matrix
+      </h3>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {results?.models?.map(model => (
-          <div key={model.id} className="model-card" style={{
-            borderLeft: `6px solid ${model.type === 'classical' ? '#667eea' : '#9b59b6'}`,
+          <div key={model.id} className="card" style={{
+            borderLeft: `4px solid ${model.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)'}`,
             position: 'relative'
           }}>
-            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
+            <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
               <CardActionMenu
                 title={`${model.name} - Cumulative Benchmark`}
                 category="metrics"
@@ -131,83 +150,75 @@ export default function CumulativeExperiment() {
                 }}
               />
             </div>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+
+            {/* Header Bar */}
+            <div className="card-header-bar" style={{ marginBottom: '12px' }}>
               <div>
-                <h3 style={{ margin: 0, color: '#2d3748' }}>
-                  {model.type === 'classical' ? '💻' : '⚛️'} {model.name}
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {model.type === 'classical' ? <Zap size={16} style={{ color: 'var(--classical-color)' }} /> : <Atom size={16} style={{ color: 'var(--quantum-color)' }} />}
+                  {model.name}
                 </h3>
-                <span className={`tag ${model.type === 'classical' ? 'tag-classical' : 'tag-quantum'}`} style={{ marginTop: '5px' }}>
+                <span className={`badge-paradigm ${model.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ marginTop: '6px' }}>
                   {model.tag}
                 </span>
               </div>
-              <div style={{ fontSize: '0.9rem', color: '#718096' }}>
-                Training Time: <strong>{model.training_time}</strong>
-                {model.qubits !== 'N/A' && <> | Qubits: <strong>{model.qubits}</strong></>}
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginRight: '36px' }}>
+                Latency: <strong style={{ color: 'var(--text-primary)' }}>{model.training_time}</strong>
+                {model.qubits !== 'N/A' && <> | Qubits: <strong style={{ color: 'var(--quantum-color)' }}>{model.qubits}</strong></>}
               </div>
             </div>
 
             {/* Basic Section (Student Level) */}
-            <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px' }}>
-              <div style={{ fontWeight: 600, color: '#667eea', marginBottom: '8px' }}>
-                📚 Basic Information (Student & General Understanding)
+            <div style={{ marginTop: '14px', padding: '14px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px', fontSize: '0.85rem' }}>
+                Basic Information (Student & General Understanding)
               </div>
-              <p style={{ color: '#4a5568', lineHeight: '1.6' }}>{model.basic_summary}</p>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5', fontSize: '0.85rem' }}>{model.basic_summary}</p>
 
               {/* Metric Grid */}
-              <div className="metric-grid" style={{ marginTop: '15px' }}>
-                <div className="metric-box">
-                  <div className="metric-label">Accuracy</div>
-                  <div className="metric-value">{model.accuracy}%</div>
+              <div className="grid-2" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '12px' }}>
+                <div className="metric-mini-box">
+                  <div className="mini-val" style={{ color: model.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)' }}>{model.accuracy}%</div>
+                  <div className="mini-lbl">Accuracy</div>
                 </div>
-                <div className="metric-box">
-                  <div className="metric-label">Sensitivity</div>
-                  <div className="metric-value">{model.sensitivity}%</div>
+                <div className="metric-mini-box">
+                  <div className="mini-val">{model.sensitivity}%</div>
+                  <div className="mini-lbl">Sensitivity</div>
                 </div>
-                <div className="metric-box">
-                  <div className="metric-label">Specificity</div>
-                  <div className="metric-value">{model.specificity}%</div>
+                <div className="metric-mini-box">
+                  <div className="mini-val">{model.specificity}%</div>
+                  <div className="mini-lbl">Specificity</div>
                 </div>
-                <div className="metric-box">
-                  <div className="metric-label">ROC-AUC</div>
-                  <div className="metric-value">{model.roc_auc}</div>
+                <div className="metric-mini-box">
+                  <div className="mini-val">{model.roc_auc}</div>
+                  <div className="mini-lbl">ROC-AUC Score</div>
                 </div>
               </div>
             </div>
 
-            {/* Advanced Section (Researcher Level) - Collapsible */}
-            <div style={{ marginTop: '15px' }}>
+            {/* Advanced Section (Researcher Level) */}
+            <div style={{ marginTop: '12px' }}>
               <button
                 onClick={() => toggleAdvanced(model.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#92400e',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 0',
-                  fontSize: '0.95rem'
-                }}
+                className="btn btn-sm btn-outline"
+                type="button"
               >
-                🔬 {showAdvanced[model.id] ? 'Hide' : 'Show'} Advanced Information (Researcher Level)
-                {showAdvanced[model.id] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                {showAdvanced[model.id] ? 'Hide' : 'Show'} Advanced Telemetry
+                {showAdvanced[model.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </button>
 
               {showAdvanced[model.id] && (
                 <div style={{
                   marginTop: '10px',
-                  padding: '15px',
-                  background: '#fef3c7',
+                  padding: '14px',
+                  background: '#F8FAFC',
                   borderRadius: '8px',
-                  borderLeft: '4px solid #f59e0b'
+                  border: '1px solid var(--border-color)'
                 }}>
-                  <p style={{ color: '#78350f', lineHeight: '1.6' }}>{model.advanced_summary}</p>
+                  <p style={{ color: 'var(--text-primary)', lineHeight: '1.5', fontSize: '0.85rem' }}>{model.advanced_summary}</p>
                   {model.circuit_depth !== 'N/A' && (
-                    <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#92400e' }}>
-                      <strong>Circuit Depth:</strong> {model.circuit_depth} | <strong>Entanglement:</strong> Linear CX gates
+                    <div style={{ marginTop: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: 'var(--quantum-color)' }}>Circuit Depth:</strong> {model.circuit_depth} | <strong style={{ color: 'var(--quantum-color)' }}>Entanglement:</strong> Linear CX gate mapping
                     </div>
                   )}
                 </div>
@@ -218,10 +229,19 @@ export default function CumulativeExperiment() {
       </div>
 
       {/* Synthesis Box */}
-      <div className="conclusion-box" style={{ marginTop: '30px' }}>
-        <h3>🎯 Quantum vs Classical Synthesis</h3>
-        <p style={{ marginTop: '10px', fontSize: '1rem' }}>{results?.basic_inference?.summary}</p>
-        <p style={{ marginTop: '8px', fontSize: '0.95rem', opacity: 0.9 }}>{results?.basic_inference?.takeaway}</p>
+      <div className="card reality-banner" style={{ marginTop: '32px', display: 'flex', gap: '16px' }}>
+        <ShieldCheck size={24} style={{ color: '#92400E', flexShrink: 0 }} />
+        <div>
+          <h3 style={{ color: '#92400E', fontSize: '1rem', margin: '0 0 6px 0', fontWeight: 600 }}>
+            Quantum vs Classical Diagnostic Verdict
+          </h3>
+          <p style={{ color: '#92400E', fontSize: '0.875rem', lineHeight: '1.5' }}>
+            {results?.basic_inference?.summary}
+          </p>
+          <p style={{ color: '#78350F', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.5' }}>
+            {results?.basic_inference?.takeaway}
+          </p>
+        </div>
       </div>
     </div>
   );

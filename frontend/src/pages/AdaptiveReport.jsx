@@ -83,53 +83,53 @@ export default function AdaptiveReport() {
   };
 
   return (
-    <div className="section">
-      <h2 className="section-title">📑 Adaptive Report Maker</h2>
-
-      <div className="explainer">
-        <div className="explainer-title">Interactive Live Report Synthesis</div>
-        <p>
-          Customized clinical and research report builder. Items can be dynamically added, edited, reordered, annotated with live typing rights, and downloaded as a publication-ready Markdown research report.
-        </p>
+    <div className="hub-section active">
+      <div className="section-header">
+        <div>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FileText size={24} style={{ color: 'var(--classical-color)' }} />
+            Adaptive Report Builder
+          </h1>
+          <p className="subtitle">
+            Customizable publication-ready Markdown report synthesizer. Dynamically annotate live findings, attach saved figure cards, and export full reports.
+          </p>
+        </div>
       </div>
 
       {/* Action Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0', flexWrap: 'wrap', gap: '15px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 24px 0', flexWrap: 'wrap', gap: '16px' }}>
         <input
           type="text"
           value={reportTitle}
           onChange={(e) => setReportTitle(e.target.value)}
+          className="form-group"
           style={{
-            fontSize: '1.4rem',
-            fontWeight: 'bold',
-            padding: '10px 15px',
-            border: '2px solid #667eea',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            padding: '10px 14px',
+            background: '#FFFFFF',
+            border: '1px solid var(--border-color)',
             borderRadius: '8px',
+            color: 'var(--text-primary)',
             flex: 1,
-            minWidth: '300px'
+            minWidth: '320px',
+            outline: 'none'
           }}
         />
 
         <button
           onClick={handleDownloadReport}
-          className="btn-predict"
-          style={{
-            margin: 0,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            width: 'auto',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-          }}
+          className="btn btn-primary"
+          style={{ padding: '10px 20px' }}
         >
-          <Download size={18} /> Download Markdown Report
+          <Download size={16} /> Export Markdown Report
         </button>
       </div>
 
       {/* Author Notes Editor */}
-      <div className="model-card">
-        <label style={{ fontWeight: 600, color: '#4a5568', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <Edit3 size={16} /> Clinical Summary & Author Notes (Live Editable):
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <label style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontSize: '0.875rem' }}>
+          <Edit3 size={16} style={{ color: 'var(--classical-color)' }} /> Author & Clinical Notes (Live Editable):
         </label>
         <textarea
           value={authorNotes}
@@ -137,83 +137,82 @@ export default function AdaptiveReport() {
           rows={3}
           style={{
             width: '100%',
-            padding: '12px',
-            border: '1px solid #cbd5e0',
+            padding: '10px 12px',
+            background: '#FFFFFF',
+            border: '1px solid var(--border-color)',
             borderRadius: '6px',
-            fontSize: '0.95rem',
-            fontFamily: 'inherit'
+            fontSize: '0.875rem',
+            color: 'var(--text-primary)',
+            fontFamily: 'inherit',
+            outline: 'none'
           }}
         />
       </div>
 
       {/* Report Items List */}
-      <h3 style={{ color: '#667eea', margin: '30px 0 15px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <FileText size={22} /> Live Report Sections ({reportItems.length} Blocks)
+      <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem' }}>
+        <FileText size={18} style={{ color: 'var(--classical-color)' }} /> Live Report Sections ({reportItems.length} Blocks)
       </h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {reportItems.map((item, idx) => (
-          <div key={item.id} className="model-card" style={{ position: 'relative', borderLeft: '5px solid #667eea' }}>
+          <div key={item.id} className="card" style={{ position: 'relative' }}>
             {/* Delete button */}
             <button
               onClick={() => handleRemoveItem(item.id)}
+              className="btn btn-sm btn-outline-danger"
               style={{
                 position: 'absolute',
-                top: '15px',
-                right: '15px',
-                background: '#fee2e2',
-                border: 'none',
-                color: '#dc2626',
-                borderRadius: '6px',
-                padding: '6px 10px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '0.85rem'
+                top: '24px',
+                right: '24px'
               }}
-              title="Remove from report"
+              title="Remove block"
             >
               <Trash2 size={14} /> Remove
             </button>
 
-            <h4 style={{ color: '#2d3748', fontSize: '1.2rem', marginBottom: '10px' }}>
+            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '10px', fontWeight: 600 }}>
               {idx + 1}. {item.title}
             </h4>
 
             {item.type === 'text' && (
-              <p style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '0.95rem' }}>{item.content}</p>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '0.875rem' }}>{item.content}</p>
             )}
 
             {item.type === 'figure' && (
-              <div style={{ margin: '15px 0', textAlign: 'center' }}>
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{ maxWidth: '100%', maxHeight: '350px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                />
-                <div style={{ fontStyle: 'italic', fontSize: '0.85rem', color: '#718096', marginTop: '6px' }}>
+              <div style={{ margin: '14px 0', textAlign: 'center' }}>
+                <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'inline-block', maxWidth: '100%' }}>
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    style={{ maxWidth: '100%', maxHeight: '350px', borderRadius: '6px' }}
+                  />
+                </div>
+                <div style={{ fontStyle: 'italic', fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
                   {item.caption}
                 </div>
               </div>
             )}
 
             {/* Note taking field */}
-            <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#667eea', display: 'block', marginBottom: '5px' }}>
-                ✏️ Add Notes / Annotations for this Section:
+            <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+                Section Annotations:
               </label>
               <input
                 type="text"
-                placeholder="Type your notes or analysis here..."
+                placeholder="Type your notes or clinical observations here..."
                 value={item.notes || ''}
                 onChange={(e) => handleNoteChange(item.id, e.target.value)}
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  border: '1px solid #cbd5e0',
+                  background: '#FFFFFF',
+                  border: '1px solid var(--border-color)',
                   borderRadius: '6px',
-                  fontSize: '0.9rem'
+                  color: 'var(--text-primary)',
+                  fontSize: '0.85rem',
+                  outline: 'none'
                 }}
               />
             </div>
@@ -222,39 +221,51 @@ export default function AdaptiveReport() {
       </div>
 
       {/* Add Custom Text Block Form */}
-      <div className="model-card" style={{ marginTop: '30px', background: '#f8fafc', border: '2px dashed #cbd5e0' }}>
-        <h4 style={{ color: '#2d3748', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '15px' }}>
-          <Plus size={18} /> Add Custom Section to Report
+      <div className="card" style={{ marginTop: '28px', border: '1px dashed var(--border-color)' }}>
+        <h4 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '0.95rem', fontWeight: 600 }}>
+          <Plus size={16} style={{ color: 'var(--classical-color)' }} /> Append Custom Section
         </h4>
         <form onSubmit={handleAddItem}>
-          <div className="form-group" style={{ marginBottom: '15px' }}>
-            <label>Section Title:</label>
+          <div className="form-group" style={{ marginBottom: '14px' }}>
+            <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Section Title:</label>
             <input
               type="text"
-              placeholder="e.g., Clinical Recommendation / Methodology Critique"
+              placeholder="e.g., Clinical Recommendation / Quantum Advantage Verdict"
               value={newItemTitle}
               onChange={(e) => setNewItemTitle(e.target.value)}
               required
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                color: 'var(--text-primary)',
+                outline: 'none'
+              }}
             />
           </div>
-          <div className="form-group" style={{ marginBottom: '15px' }}>
-            <label>Content / Analysis:</label>
+          <div className="form-group" style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Content / Observations:</label>
             <textarea
               rows={3}
-              placeholder="Enter findings, mathematical proof, or clinical inferences..."
+              placeholder="Enter details, findings, or annotations..."
               value={newItemText}
               onChange={(e) => setNewItemText(e.target.value)}
               style={{
                 width: '100%',
-                padding: '10px',
-                border: '1px solid #cbd5e0',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                border: '1px solid var(--border-color)',
                 borderRadius: '6px',
-                fontFamily: 'inherit'
+                color: 'var(--text-primary)',
+                fontFamily: 'inherit',
+                outline: 'none'
               }}
             />
           </div>
-          <button type="submit" className="btn-predict" style={{ width: 'auto', padding: '10px 20px' }}>
-            ➕ Append Section to Report
+          <button type="submit" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Plus size={16} /> Append Section to Report
           </button>
         </form>
       </div>

@@ -3,9 +3,7 @@ import { MoreVertical, Bot, FileText, Check } from 'lucide-react';
 
 /**
  * Reusable three-dot (⋮) action menu component for all result cards, plots, and metrics.
- * Provides two critical platform actions:
- *   1. "Add to Quddos AI" -> Saves artifact with data + visuals to Quddos AI context.
- *   2. "Add to Report" -> Saves artifact to Adaptive Report builder (Page 4).
+ * Updated with clinical light theme tokens.
  */
 export default function CardActionMenu({
   title,
@@ -44,7 +42,6 @@ export default function CardActionMenu({
         timestamp: new Date().toISOString()
       };
 
-      // Avoid exact duplicates by title
       const filtered = existing.filter(item => item.title !== title);
       filtered.push(newArtifact);
 
@@ -94,16 +91,16 @@ export default function CardActionMenu({
           background: 'none',
           border: 'none',
           cursor: 'pointer',
-          color: '#718096',
+          color: 'var(--text-secondary)',
           padding: '4px',
           borderRadius: '4px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'all 0.2s'
+          transition: 'all 0.15s'
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = '#edf2f7'; e.currentTarget.style.color = '#2d3748'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#718096'; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
         title="More options (Add to Quddos AI / Add to Report)"
       >
         <MoreVertical size={18} />
@@ -115,10 +112,10 @@ export default function CardActionMenu({
           right: 0,
           top: '100%',
           marginTop: '4px',
-          background: 'white',
-          border: '1px solid #e2e8f0',
+          background: '#FFFFFF',
+          border: '1px solid var(--border-color)',
           borderRadius: '8px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
           zIndex: 1000,
           minWidth: '180px',
           overflow: 'hidden'
@@ -136,14 +133,14 @@ export default function CardActionMenu({
               alignItems: 'center',
               gap: '8px',
               fontSize: '0.85rem',
-              fontWeight: 600,
-              color: addedToQuddos ? '#10b981' : '#4a5568',
-              transition: 'background 0.2s'
+              fontWeight: 500,
+              color: addedToQuddos ? 'var(--status-success)' : 'var(--text-primary)',
+              transition: 'background 0.15s'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#f7fafc'}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
           >
-            {addedToQuddos ? <Check size={16} color="#10b981" /> : <Bot size={16} color="#667eea" />}
+            {addedToQuddos ? <Check size={16} color="var(--status-success)" /> : <Bot size={16} color="var(--classical-color)" />}
             {addedToQuddos ? 'Added to Quddos!' : 'Add to Quddos AI'}
           </button>
 
@@ -160,15 +157,15 @@ export default function CardActionMenu({
               alignItems: 'center',
               gap: '8px',
               fontSize: '0.85rem',
-              fontWeight: 600,
-              color: addedToReport ? '#10b981' : '#4a5568',
-              borderTop: '1px solid #edf2f7',
-              transition: 'background 0.2s'
+              fontWeight: 500,
+              color: addedToReport ? 'var(--status-success)' : 'var(--text-primary)',
+              borderTop: '1px solid var(--border-color)',
+              transition: 'background 0.15s'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#f7fafc'}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
           >
-            {addedToReport ? <Check size={16} color="#10b981" /> : <FileText size={16} color="#f59e0b" />}
+            {addedToReport ? <Check size={16} color="var(--status-success)" /> : <FileText size={16} color="var(--hybrid-color)" />}
             {addedToReport ? 'Added to Report!' : 'Add to Report'}
           </button>
         </div>
