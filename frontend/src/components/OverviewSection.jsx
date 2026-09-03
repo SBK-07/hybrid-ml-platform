@@ -55,18 +55,6 @@ export default function OverviewSection({ activeDataset }) {
         </div>
       </div>
 
-      <div className="card active-control-card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Atom4Orbits size={28} color="var(--classical-color)" />
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600 }}>SIH 2026 Problem Statement 139 Implementation</h3>
-            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              Bridging classical feature preprocessing, SMOTE class balancing, zero-data-leakage PCA feature compression down to 4 qubits, PennyLane quantum circuit statevector simulation, and real-time patient risk inference.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* 7-Stage Narrative Clinical Pipeline - Vertical Roadmap */}
       <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Layers size={18} style={{ color: 'var(--classical-color)' }} /> 7-Stage Narrative Clinical Pipeline
