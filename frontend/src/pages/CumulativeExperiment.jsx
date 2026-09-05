@@ -217,7 +217,7 @@ export default function CumulativeExperiment() {
           {/* Fusion Strategy Grid */}
           <div className="grid-3" style={{ gap: '14px', marginTop: '14px' }}>
             {/* Early Fusion */}
-            <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>1. Early (Feature-Level) Fusion</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--classical-color)', margin: '6px 0' }}>
                 {(Number(fusionResults?.fusion_strategies?.early_fusion?.accuracy || 0.956) * 100).toFixed(1)}% Acc
@@ -231,7 +231,7 @@ export default function CumulativeExperiment() {
             </div>
 
             {/* Intermediate Fusion */}
-            <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--quantum-color)' }}>2. Intermediate (Latent) Fusion</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--quantum-color)', margin: '6px 0' }}>
                 {(Number(fusionResults?.fusion_strategies?.intermediate_fusion?.accuracy || 0.971) * 100).toFixed(1)}% Acc
@@ -252,17 +252,17 @@ export default function CumulativeExperiment() {
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--hybrid-color)', margin: '6px 0' }}>
                 {(Number(fusionResults?.fusion_strategies?.late_adaptive_consensus?.accuracy || 0.985) * 100).toFixed(1)}% Acc
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#92400E' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--banner-warn-text)' }}>
                 ROC-AUC: {fusionResults?.fusion_strategies?.late_adaptive_consensus?.roc_auc || 0.999} · Latency: {fusionResults?.fusion_strategies?.late_adaptive_consensus?.latency_ms || 18}ms
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#78350F', marginTop: '6px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--banner-warn-text-dark)', marginTop: '6px' }}>
                 Dynamic confidence weighting with automated missing-modality compensation.
               </div>
             </div>
           </div>
 
           {/* Missing Modality Fallback Callout */}
-          <div className="banner" style={{ marginTop: '14px', background: '#F8FAFC', border: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+          <div className="banner" style={{ marginTop: '14px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
             <Activity size={16} style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
             <div>
               <strong>Missing-Modality Robustness:</strong> In real-world emergency triage when imaging or biosignals are absent, the adaptive consensus engine preserves <strong>{(Number(fusionResults?.fallback_performance_retention || 0.994) * 100).toFixed(1)}%</strong> of baseline accuracy without pipeline crash.
@@ -289,7 +289,7 @@ export default function CumulativeExperiment() {
                 />
               </div>
               <h4 style={{ color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.95rem', fontWeight: 600 }}>Multi-Metric Radar Chart Overview</h4>
-              <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <img
                   src={results.comparison_figures.radar_chart}
                   alt="Radar Chart"
@@ -309,7 +309,7 @@ export default function CumulativeExperiment() {
                 />
               </div>
               <h4 style={{ color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.95rem', fontWeight: 600 }}>Comparative Accuracy & Sensitivity Breakdown</h4>
-              <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <img
                   src={results.comparison_figures.metric_comparison}
                   alt="Metric Comparison"
@@ -373,7 +373,7 @@ export default function CumulativeExperiment() {
             </div>
 
             {/* Basic Section (Student Level) */}
-            <div style={{ marginTop: '14px', padding: '14px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px', fontSize: '0.85rem' }}>
                 Basic Information (Student & General Understanding)
               </div>
@@ -415,7 +415,7 @@ export default function CumulativeExperiment() {
                 <div style={{
                   marginTop: '10px',
                   padding: '14px',
-                  background: '#F8FAFC',
+                  background: 'var(--bg-inset)',
                   borderRadius: '8px',
                   border: '1px solid var(--border-color)'
                 }}>
@@ -434,15 +434,15 @@ export default function CumulativeExperiment() {
 
       {/* Synthesis Box */}
       <div className="card reality-banner" style={{ marginTop: '32px', display: 'flex', gap: '16px' }}>
-        <ShieldCheck size={24} style={{ color: '#92400E', flexShrink: 0 }} />
+        <ShieldCheck size={24} style={{ color: 'var(--banner-warn-text)', flexShrink: 0 }} />
         <div>
-          <h3 style={{ color: '#92400E', fontSize: '1rem', margin: '0 0 6px 0', fontWeight: 600 }}>
+          <h3 style={{ color: 'var(--banner-warn-text)', fontSize: '1rem', margin: '0 0 6px 0', fontWeight: 600 }}>
             Quantum vs Classical Diagnostic Verdict & Scientific Integrity
           </h3>
-          <p style={{ color: '#92400E', fontSize: '0.875rem', lineHeight: '1.5' }}>
+          <p style={{ color: 'var(--banner-warn-text)', fontSize: '0.875rem', lineHeight: '1.5' }}>
             {results?.basic_inference?.summary}
           </p>
-          <p style={{ color: '#78350F', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.5' }}>
+          <p style={{ color: 'var(--banner-warn-text-dark)', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.5' }}>
             {results?.basic_inference?.takeaway}
           </p>
         </div>

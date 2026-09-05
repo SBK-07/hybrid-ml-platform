@@ -163,7 +163,7 @@ export default function LivePatientInference() {
           </p>
 
           {/* Student View Summary */}
-          <div style={{ marginTop: '14px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+          <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
             <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> Student View (Basic Clinical Summary):
             </strong>
@@ -187,7 +187,7 @@ export default function LivePatientInference() {
             </button>
 
             {showAdvancedInputs && (
-              <div style={{ marginTop: '10px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+              <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
                 <p style={{ color: 'var(--text-primary)' }}>
                   <strong style={{ color: 'var(--classical-color)' }}>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
                 </p>
@@ -310,7 +310,7 @@ export default function LivePatientInference() {
 
               {/* Uncertainty Quantification & Discordance Gauge */}
               {uncertainty && (
-                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <AlertCircle size={15} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
@@ -322,11 +322,11 @@ export default function LivePatientInference() {
                   </div>
 
                   <div className="grid-2" style={{ gap: '8px' }}>
-                    <div className="metric-mini-box" style={{ background: '#FFFFFF', padding: '8px' }}>
+                    <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
                       <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.epistemic_uncertainty}</div>
                       <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Epistemic Ambiguity</div>
                     </div>
-                    <div className="metric-mini-box" style={{ background: '#FFFFFF', padding: '8px' }}>
+                    <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
                       <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.aleatoric_uncertainty}</div>
                       <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Aleatoric Data Noise</div>
                     </div>
@@ -353,11 +353,11 @@ export default function LivePatientInference() {
                   </button>
 
                   {showExplainability && (
-                    <div style={{ marginTop: '10px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
+                    <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Top Biomarker Risk Contributors:</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {explainability.top_attributions?.map((attr, idx) => (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFFFFF', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card-solid)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                             <span style={{ fontWeight: 500 }}>{attr.feature_name}</span>
                             <span style={{ color: attr.normalized_impact > 0 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 600 }}>
                               {attr.direction.includes('Increases') ? '+ Risk' : '- Baseline'} ({attr.importance_score})
@@ -385,7 +385,7 @@ export default function LivePatientInference() {
                 </button>
 
                 {showAdvancedResults && (
-                  <div style={{ marginTop: '10px', padding: '12px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                  <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
                     <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
                     <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
                     {blochCoords && (
@@ -400,10 +400,10 @@ export default function LivePatientInference() {
 
               {/* Guidance Note */}
               <div className="banner reality-banner" style={{ marginTop: '6px' }}>
-                <Stethoscope size={20} style={{ color: '#92400E', flexShrink: 0 }} />
+                <Stethoscope size={20} style={{ color: 'var(--banner-warn-text)', flexShrink: 0 }} />
                 <div>
-                  <strong style={{ color: '#92400E', fontSize: '0.85rem' }}>Clinician Guidance:</strong>
-                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: '#92400E' }}>
+                  <strong style={{ color: 'var(--banner-warn-text)', fontSize: '0.85rem' }}>Clinician Guidance:</strong>
+                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: 'var(--banner-warn-text)' }}>
                     {predictionResult?.clinical_guidance?.recommendation}
                   </p>
                 </div>

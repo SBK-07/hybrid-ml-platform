@@ -107,7 +107,7 @@ export default function AdaptiveReport() {
             fontSize: '1.1rem',
             fontWeight: '600',
             padding: '10px 14px',
-            background: '#FFFFFF',
+            background: 'var(--bg-card-solid)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             color: 'var(--text-primary)',
@@ -138,7 +138,7 @@ export default function AdaptiveReport() {
           style={{
             width: '100%',
             padding: '10px 12px',
-            background: '#FFFFFF',
+            background: 'var(--bg-card-solid)',
             border: '1px solid var(--border-color)',
             borderRadius: '6px',
             fontSize: '0.875rem',
@@ -181,7 +181,7 @@ export default function AdaptiveReport() {
 
             {item.type === 'figure' && (
               <div style={{ margin: '14px 0', textAlign: 'center' }}>
-                <div style={{ background: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'inline-block', maxWidth: '100%' }}>
+                <div style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'inline-block', maxWidth: '100%' }}>
                   <img
                     src={item.image}
                     alt={item.title}
@@ -207,7 +207,7 @@ export default function AdaptiveReport() {
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  background: '#FFFFFF',
+                  background: 'var(--bg-card-solid)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '6px',
                   color: 'var(--text-primary)',
@@ -237,7 +237,7 @@ export default function AdaptiveReport() {
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                background: '#FFFFFF',
+                background: 'var(--bg-card-solid)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '6px',
                 color: 'var(--text-primary)',
@@ -255,7 +255,7 @@ export default function AdaptiveReport() {
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                background: '#FFFFFF',
+                background: 'var(--bg-card-solid)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '6px',
                 color: 'var(--text-primary)',

@@ -179,7 +179,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {artifacts.map((artifact, idx) => (
                     <div key={idx} style={{
-                      background: '#F8FAFC',
+                      background: 'var(--bg-inset)',
                       border: '1px solid var(--border-color)',
                       borderRadius: '6px',
                       padding: '10px',
@@ -228,7 +228,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
           <div style={{
             padding: '16px 20px',
             borderBottom: '1px solid var(--border-color)',
-            background: '#FFFFFF',
+            background: 'var(--bg-card-solid)',
             display: 'flex',
             justify: 'space-between',
             alignItems: 'center'
@@ -298,7 +298,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
 
             {loading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <div className="card" style={{ padding: '12px 16px', color: 'var(--classical-color)', fontSize: '0.85rem', fontStyle: 'italic', background: '#FFFFFF' }}>
+                <div className="card" style={{ padding: '12px 16px', color: 'var(--classical-color)', fontSize: '0.85rem', fontStyle: 'italic', background: 'var(--bg-card-solid)' }}>
                   Quddos AI is evaluating context artifacts & generating grounded answer...
                 </div>
               </div>
@@ -307,7 +307,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
           </div>
 
           {/* Input Box */}
-          <div style={{ padding: '14px', borderTop: '1px solid var(--border-color)', background: '#FFFFFF', display: 'flex', gap: '10px' }}>
+          <div style={{ padding: '14px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-card-solid)', display: 'flex', gap: '10px' }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -317,7 +317,7 @@ I am your **context-aware quantum-classical ML research assistant** embedded in 
               style={{
                 flex: 1,
                 padding: '10px 14px',
-                background: '#FFFFFF',
+                background: 'var(--bg-card-solid)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '6px',
                 color: 'var(--text-primary)',
