@@ -170,9 +170,10 @@ export default function DatasetOverview() {
               {datasetsList.map(ds => {
                 const dKey = ds.id || ds.key;
                 const fCount = ds.features_count || ds.features || 0;
+                const cleanName = ds.name.replace(/^Custom:\s*/i, '');
                 return (
                   <option key={dKey} value={dKey}>
-                    {!ds.built_in ? `[Custom] ${ds.name}` : `${ds.name} (${fCount} features)`}
+                    {!ds.built_in ? `[Custom] ${cleanName}` : `${cleanName} (${fCount} features)`}
                   </option>
                 );
               })}

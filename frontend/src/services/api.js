@@ -226,13 +226,12 @@ export const getQuantumFeasibility = async (datasetKey) => {
   }
 };
 
-export const runMultimodalFusion = async (datasetKey, baseAccuracy = 0.974, baseAuc = 0.996) => {
+export const runMultimodalFusion = async (datasetKey, baseAccuracy = null, baseAuc = null) => {
   try {
-    const res = await axios.post(`${API_BASE}/multimodal/fuse`, {
-      dataset_key: datasetKey,
-      base_accuracy: baseAccuracy,
-      base_auc: baseAuc
-    });
+    const payload = { dataset_key: datasetKey };
+    if (baseAccuracy !== null) payload.base_accuracy = baseAccuracy;
+    if (baseAuc !== null) payload.base_auc = baseAuc;
+    const res = await axios.post(`${API_BASE}/multimodal/fuse`, payload);
     return res.data;
   } catch (err) {
     console.warn(`FastAPI backend offline. Returning fallback multimodal fusion for ${datasetKey}.`, err);

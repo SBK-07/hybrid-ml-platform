@@ -3,7 +3,7 @@ import React from 'react';
 export default function WorkflowSection() {
   return (
     <div id="workflow" className="section">
-      <h2 className="section-title">🔄 How It Works - Simple Explanation</h2>
+      <h2 className="section-title">How It Works - Simple Explanation</h2>
 
       <div className="explainer">
         <div className="explainer-title">The Process (Step-by-Step)</div>
@@ -41,7 +41,7 @@ export default function WorkflowSection() {
       </div>
 
       <div className="explainer" style={{ background: 'var(--banner-warn-bg)', borderLeftColor: 'var(--banner-warn-border)' }}>
-        <div className="explainer-title" style={{ color: 'var(--banner-warn-text)' }}>⚠️ Why Sensitivity Matters Most in Medicine</div>
+        <div className="explainer-title" style={{ color: 'var(--banner-warn-text)' }}>Why Sensitivity Matters Most in Medicine</div>
         <p>
           In clinical diagnostic systems, <strong>missing an active disease (False Negative)</strong> has life-threatening consequences compared to a false alarm. High <strong>Sensitivity</strong> ensures deadly diagnostic misses are minimized.
         </p>

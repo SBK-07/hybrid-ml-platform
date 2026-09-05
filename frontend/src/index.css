@@ -1,3 +1,4 @@
+
 /* ═══════════════════════════════════════════════════════════════════
    Q-Med AI Studio — Premium Design System
    Dual Theme (Light + Dark) with Glassmorphism & Micro-Animations
@@ -1229,3 +1230,73 @@ h3, h4 {
         padding: 20px;
     }
 }
+
+/* ── INLINE NARRATED EXECUTION & RESULTS ANIMATIONS ── */
+@keyframes atomSoftPulse {
+    0%, 100% { opacity: 1.0; }
+    50% { opacity: 0.4; }
+}
+
+.atom-soft-pulse {
+    animation: atomSoftPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes narrationFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.narration-fade-in {
+    animation: narrationFadeIn 350ms ease-out forwards;
+}
+
+@keyframes resultsFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.results-fade-in {
+    animation: resultsFadeIn 400ms ease-out forwards;
+}
+
+@keyframes stageGroupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes stageGroupFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+.stage-group-enter {
+    animation: stageGroupFadeIn 300ms ease-out forwards;
+}
+
+.stage-group-exit {
+    animation: stageGroupFadeOut 250ms ease-in forwards;
+}
+
+
