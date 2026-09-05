@@ -1,20 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  ChevronDown, ChevronUp, Plus, Zap, Database, Play, BookOpen, 
-  FlaskConical, CheckCircle2, Settings, BarChart2, Cpu, FileCode, 
-  HelpCircle, GraduationCap, Image, Loader2, Circle, Clock, Check 
+import {
+  ChevronDown, ChevronUp, Plus, Zap, Database, Play, BookOpen,
+  FlaskConical, CheckCircle2, Settings, BarChart2, Cpu, HelpCircle,
+  GraduationCap, Image, ShieldAlert, Loader2, Circle, Clock, Trash2
 } from 'lucide-react';
 import CardActionMenu from '../components/CardActionMenu';
+import PipelineExecutionModal from '../components/PipelineExecutionModal';
+import { getQuantumFeasibility, getDatasets, deleteDataset } from '../services/api';
 
 export default function IndividualExperiment() {
   const [selectedModel, setSelectedModel] = useState('svm');
   const [selectedDataset, setSelectedDataset] = useState('cancer');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showFeasibility, setShowFeasibility] = useState(false);
   const [results, setResults] = useState(null);
+  const [feasibilityData, setFeasibilityData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState(null);
-  
+  const [showExecutionModal, setShowExecutionModal] = useState(false);
+
   // Custom Dropdown Open States
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isDatasetOpen, setIsDatasetOpen] = useState(false);
@@ -43,6 +48,58 @@ export default function IndividualExperiment() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const [datasetsList, setDatasetsList] = useState([
+    { id: 'cancer', key: 'cancer', name: 'Breast Cancer (WDBC)', features_count: 30, description: 'Nuclear morphology metrics', modality: 'Multimodal (Tabular + Imaging)', built_in: true },
+    { id: 'cardiovascular', key: 'cardiovascular', name: 'UCI Heart Disease', features_count: 13, description: 'Clinical cardiac indicators', modality: 'Multimodal (Tabular + Biosignal)', built_in: true },
+    { id: 'diabetes', key: 'diabetes', name: 'Pima Indians Diabetes', features_count: 8, description: 'Metabolic & diagnostic profile', modality: 'Tabular', built_in: true },
+    { id: 'parkinsons', key: 'parkinsons', name: 'Parkinson\'s Biomedical Voice', features_count: 22, description: 'Phonation acoustic measures', modality: 'Biosignal', built_in: true }
+  ]);
+
+  useEffect(() => {
+    fetchDatasets();
+  }, []);
+
+  const fetchDatasets = async () => {
+    try {
+      const res = await getDatasets();
+      if (res && res.datasets && res.datasets.length > 0) {
+        setDatasetsList(res.datasets);
+      }
+    } catch (err) {
+      console.error('Failed to fetch datasets:', err);
+    }
+  };
+
+  const handleDeleteDataset = async (e, dataset) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const dKey = dataset.id || dataset.key;
+    if (!window.confirm(`Are you sure you want to permanently delete custom dataset "${dataset.name}"?`)) {
+      return;
+    }
+    try {
+      const res = await deleteDataset(dKey);
+      if (res && res.datasets) {
+        setDatasetsList(res.datasets);
+      } else {
+        await fetchDatasets();
+      }
+      if (selectedDataset === dKey) {
+        setSelectedDataset('cancer');
+      }
+      setUploadMessage({
+        type: 'success',
+        text: `✓ Successfully removed custom dataset "${dataset.name}".`
+      });
+    } catch (err) {
+      console.error('Error deleting dataset:', err);
+      setUploadMessage({
+        type: 'error',
+        text: `Failed to remove dataset: ${err.response?.data?.detail || err.message}`
+      });
+    }
+  };
+
   const models = [
     { id: 'svm', name: 'SVM (RBF Kernel)', type: 'classical' },
     { id: 'mlp', name: 'Neural Network (MLP)', type: 'classical' },
@@ -51,15 +108,8 @@ export default function IndividualExperiment() {
     { id: 'qvc', name: 'Variational Circuit (QVC)', type: 'quantum' }
   ];
 
-  const datasets = [
-    { id: 'cancer', name: 'Breast Cancer (WDBC)', features: 30, desc: 'Nuclear morphology metrics' },
-    { id: 'cardiovascular', name: 'UCI Heart Disease', features: 13, desc: 'Clinical cardiac indicators' },
-    { id: 'diabetes', name: 'Pima Indians Diabetes', features: 8, desc: 'Metabolic & diagnostic profile' },
-    { id: 'parkinsons', name: 'Parkinson\'s Biomedical Voice', features: 22, desc: 'Phonation acoustic measures' }
-  ];
-
   const currentModelObj = models.find(m => m.id === selectedModel);
-  const currentDatasetObj = datasets.find(d => d.id === selectedDataset);
+  const currentDatasetObj = datasetsList.find(d => (d.id || d.key) === selectedDataset);
 
   const getStages = (modelType) => {
     const isQuantum = ['qsvm', 'qnn', 'qvc'].includes(modelType);
@@ -89,8 +139,10 @@ export default function IndividualExperiment() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.csv')) {
-      setUploadMessage({ type: 'error', text: 'Please upload a valid CSV file.' });
+    const validExts = ['.csv', '.zip', '.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff'];
+    const hasValidExt = validExts.some(ext => file.name.toLowerCase().endsWith(ext));
+    if (!hasValidExt) {
+      setUploadMessage({ type: 'error', text: 'Please upload a CSV, Multimodal ZIP archive, or medical image.' });
       return;
     }
 
@@ -114,18 +166,25 @@ export default function IndividualExperiment() {
           text: `✓ ${data.message}`,
           metadata: data.metadata
         });
-        setSelectedDataset('custom');
+        if (data.datasets) {
+          setDatasetsList(data.datasets);
+        } else {
+          await fetchDatasets();
+        }
+        if (data.dataset_key) {
+          setSelectedDataset(data.dataset_key);
+        }
       } else {
         setUploadMessage({
           type: 'error',
-          text: data.detail || 'Upload failed. Please check your CSV file.'
+          text: data.detail || 'Upload failed. Please check your dataset format.'
         });
       }
     } catch (err) {
       console.error('Upload error:', err);
       setUploadMessage({
         type: 'error',
-        text: 'Failed to upload dataset. Please ensure the file is a valid clinical CSV.'
+        text: 'Failed to upload dataset. Please ensure the file is a valid clinical CSV, ZIP, or image.'
       });
     } finally {
       setUploading(false);
@@ -172,6 +231,17 @@ export default function IndividualExperiment() {
 
         if (data) {
           setResults(data);
+          // Fetch quantum feasibility if applicable
+          if (selectedModel !== 'svm' && selectedModel !== 'mlp') {
+            try {
+              const feas = await getQuantumFeasibility(selectedDataset);
+              setFeasibilityData(feas);
+            } catch (e) {
+              setFeasibilityData(null);
+            }
+          } else {
+            setFeasibilityData(null);
+          }
         }
       } else {
         await new Promise(r => setTimeout(r, 450));
@@ -184,6 +254,40 @@ export default function IndividualExperiment() {
     setCurrentStageIndex(stages.length);
     setIsExecutionComplete(true);
     setLoading(false);
+  };
+
+  const isQuantum = selectedModel !== 'svm' && selectedModel !== 'mlp';
+
+  // Dropdown style helpers
+  const dropdownTriggerStyle = (isOpen) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    background: 'var(--bg-input)',
+    border: isOpen ? '1px solid var(--classical-color)' : '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-sm)',
+    height: '44px',
+    padding: '0 12px',
+    gap: '8px',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    boxShadow: isOpen ? '0 0 0 3px var(--classical-glow)' : '0 1px 2px rgba(0,0,0,0.02)',
+    userSelect: 'none',
+    transition: 'all 0.2s ease'
+  });
+
+  const dropdownMenuStyle = {
+    position: 'absolute',
+    top: 'calc(100% + 4px)',
+    left: 0,
+    right: 0,
+    background: 'var(--bg-card-solid)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-md)',
+    boxShadow: 'var(--shadow-dropdown)',
+    zIndex: 100,
+    padding: '6px 0',
+    overflow: 'hidden',
+    animation: 'stageFadeIn 0.15s ease-out'
   };
 
   return (
@@ -202,41 +306,21 @@ export default function IndividualExperiment() {
       </div>
 
       {/* PART 1 — CONTROL ROW LAYOUT */}
-      <div className="card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
+      <div className="card slide-in-up" style={{ marginBottom: '24px', padding: '16px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          
+
           {/* 1. Model Selector Custom Dropdown */}
           <div ref={modelDropdownRef} style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <div
-              onClick={() => !loading && setIsModelOpen(!isModelOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: '#FFFFFF',
-                border: isModelOpen ? '1px solid var(--classical-color)' : '1px solid var(--border-color)',
-                borderRadius: '6px',
-                height: '44px',
-                padding: '0 12px',
-                gap: '8px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                boxSizing: 'border-box',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-                userSelect: 'none',
-                transition: 'border-color 0.15s ease'
-              }}
-            >
+            <div onClick={() => !loading && setIsModelOpen(!isModelOpen)} style={dropdownTriggerStyle(isModelOpen)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1 }}>
                 <Zap size={18} style={{ color: currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)', flexShrink: 0 }} />
                 <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Model</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Model</span>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentModelObj?.name}
                   </span>
                 </div>
               </div>
-
-              {/* Tag BEFORE Arrow */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 <span className={`badge-paradigm ${currentModelObj?.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
                   {currentModelObj?.type === 'classical' ? 'Classical' : 'Quantum'}
@@ -247,38 +331,20 @@ export default function IndividualExperiment() {
 
             {/* Model Dropdown Menu */}
             {isModelOpen && (
-              <div style={{
-                position: 'absolute',
-                top: 'calc(100% + 4px)',
-                left: 0,
-                right: 0,
-                background: '#FFFFFF',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                zIndex: 100,
-                padding: '6px 0',
-                overflow: 'hidden'
-              }}>
+              <div style={dropdownMenuStyle}>
                 {models.map((model) => {
                   const isSelected = model.id === selectedModel;
                   return (
                     <div
                       key={model.id}
-                      onClick={() => {
-                        setSelectedModel(model.id);
-                        setIsModelOpen(false);
-                      }}
+                      onClick={() => { setSelectedModel(model.id); setIsModelOpen(false); }}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 14px',
-                        cursor: 'pointer',
-                        background: isSelected ? '#F0F6FF' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '10px 14px', cursor: 'pointer',
+                        background: isSelected ? 'var(--classical-bg)' : 'transparent',
                         transition: 'background 0.15s ease'
                       }}
-                      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = '#F8FAFC'; }}
+                      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-inset)'; }}
                       onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
                       <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isSelected ? 'var(--classical-color)' : 'var(--text-primary)' }}>
@@ -296,38 +362,16 @@ export default function IndividualExperiment() {
 
           {/* 2. Dataset Selector Custom Dropdown */}
           <div ref={datasetDropdownRef} style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <div
-              onClick={() => !loading && !uploading && setIsDatasetOpen(!isDatasetOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: '#FFFFFF',
-                border: isDatasetOpen ? '1px solid var(--classical-color)' : '1px solid var(--border-color)',
-                borderRadius: '6px',
-                height: '44px',
-                padding: '0 12px',
-                gap: '8px',
-                cursor: (loading || uploading) ? 'not-allowed' : 'pointer',
-                boxSizing: 'border-box',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-                userSelect: 'none',
-                transition: 'border-color 0.15s ease'
-              }}
-            >
+            <div onClick={() => !loading && !uploading && setIsDatasetOpen(!isDatasetOpen)} style={dropdownTriggerStyle(isDatasetOpen)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1 }}>
                 <Database size={18} style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
                 <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Dataset</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Dataset</span>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {selectedDataset === 'custom' && uploadMessage?.metadata
-                      ? `Uploaded: ${uploadMessage.metadata.filename || 'Custom Dataset'}`
-                      : currentDatasetObj?.name}
+                    {currentDatasetObj?.name || 'Select Dataset'}
                   </span>
                 </div>
               </div>
-
-              {/* Tag / Meta BEFORE Arrow */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 <ChevronDown size={16} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isDatasetOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </div>
@@ -335,93 +379,64 @@ export default function IndividualExperiment() {
 
             {/* Dataset Dropdown Menu */}
             {isDatasetOpen && (
-              <div style={{
-                position: 'absolute',
-                top: 'calc(100% + 4px)',
-                left: 0,
-                right: 0,
-                background: '#FFFFFF',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                zIndex: 100,
-                padding: '6px 0',
-                overflow: 'hidden'
-              }}>
-                {datasets.map((dataset) => {
-                  const isSelected = dataset.id === selectedDataset;
+              <div style={dropdownMenuStyle}>
+                {datasetsList.map((dataset) => {
+                  const dId = dataset.id || dataset.key;
+                  const isSelected = dId === selectedDataset;
+                  const isCustom = !dataset.built_in;
                   return (
                     <div
-                      key={dataset.id}
-                      onClick={() => {
-                        setSelectedDataset(dataset.id);
-                        setIsDatasetOpen(false);
-                      }}
+                      key={dId}
+                      onClick={() => { setSelectedDataset(dId); setIsDatasetOpen(false); }}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 14px',
-                        cursor: 'pointer',
-                        background: isSelected ? '#F0F6FF' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '10px 14px', cursor: 'pointer', position: 'relative',
+                        background: isSelected ? 'var(--classical-bg)' : isCustom ? 'var(--status-success-bg)' : 'transparent',
                         transition: 'background 0.15s ease'
                       }}
-                      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = '#F8FAFC'; }}
-                      onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                      onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = isCustom ? 'var(--status-success-bg)' : 'transparent'; }}
                     >
-                      <div>
-                        <div style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 500, color: isSelected ? 'var(--classical-color)' : 'var(--text-primary)' }}>
+                      <div style={{ paddingRight: isCustom ? '36px' : '0' }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 500, color: isSelected ? 'var(--classical-color)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {dataset.name}
+                          {isCustom && (
+                            <span style={{ fontSize: '0.65rem', padding: '1px 6px', background: 'var(--status-success-bg)', color: 'var(--status-success)', borderRadius: '4px', fontWeight: 600 }}>Custom</span>
+                          )}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                          {dataset.desc}
+                          {dataset.features_count || 0} features · {dataset.description || dataset.modality || 'Tabular'}
                         </div>
                       </div>
-
+                      {isCustom && (
+                        <button
+                          type="button"
+                          title="Remove this custom uploaded dataset"
+                          onClick={(e) => handleDeleteDataset(e, dataset)}
+                          style={{
+                            position: 'absolute', right: '12px', background: 'transparent',
+                            border: 'none', color: 'var(--status-danger)', cursor: 'pointer',
+                            padding: '6px 8px', borderRadius: '4px', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--status-danger-bg)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
-
-                {/* Uploaded Custom Dataset option */}
-                {uploadMessage?.metadata && (
-                  <div
-                    onClick={() => {
-                      setSelectedDataset('custom');
-                      setIsDatasetOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '10px 14px',
-                      cursor: 'pointer',
-                      borderTop: '1px solid var(--border-color)',
-                      background: selectedDataset === 'custom' ? 'rgba(22, 163, 74, 0.08)' : 'transparent',
-                      transition: 'background 0.15s ease'
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--status-success)' }}>
-                        Uploaded: {uploadMessage.metadata.filename || 'Custom Dataset'}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                        {uploadMessage.metadata.total_features} features · {uploadMessage.metadata.total_samples} samples
-                      </div>
-                    </div>
-                    <span className="badge-paradigm" style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(22, 163, 74, 0.1)', color: 'var(--status-success)', border: '1px solid rgba(22, 163, 74, 0.25)' }}>
-                      Selected
-                    </span>
-                  </div>
-                )}
               </div>
             )}
           </div>
 
-          {/* Hidden File Input for CSV Upload */}
+          {/* Hidden File Input */}
           <input
             type="file"
             ref={fileInputRef}
-            accept=".csv"
+            accept=".csv,.zip,.png,.jpg,.jpeg"
             onChange={handleUploadDataset}
             style={{ display: 'none' }}
           />
@@ -431,58 +446,31 @@ export default function IndividualExperiment() {
             onClick={handleRunExperiment}
             disabled={loading || uploading}
             className="btn btn-primary"
-            style={{
-              height: '44px',
-              padding: '0 22px',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
+            style={{ height: '44px', padding: '0 22px', fontSize: '0.875rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} fill="currentColor" />}
             {loading ? 'Executing Pipeline...' : 'Run Experiment'}
           </button>
 
-          {/* 4. Upload Custom CSV Button (POSITIONED AFTER RUN EXPERIMENT) */}
+          {/* 4. Upload Custom CSV Button */}
           <button
             type="button"
             onClick={() => fileInputRef.current && fileInputRef.current.click()}
             disabled={loading || uploading}
             className="btn btn-outline"
-            style={{
-              height: '44px',
-              padding: '0 18px',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
+            style={{ height: '44px', padding: '0 18px', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             {uploading ? <Loader2 size={16} className="spinner" /> : <Plus size={16} />}
             {uploading ? 'Preprocessing...' : 'Upload Custom CSV'}
           </button>
-
         </div>
 
         {/* Custom Upload Banner Message */}
         {uploadMessage && (
           <div className="banner" style={{
-            marginTop: '12px',
-            padding: '8px 14px',
-            fontSize: '0.82rem',
-            background: uploadMessage.type === 'success' ? 'rgba(22, 163, 74, 0.08)' : 'rgba(220, 38, 38, 0.08)',
-            border: `1px solid ${uploadMessage.type === 'success' ? 'rgba(22, 163, 74, 0.3)' : 'rgba(220, 38, 38, 0.3)'}`,
+            marginTop: '12px', padding: '8px 14px', fontSize: '0.82rem',
+            background: uploadMessage.type === 'success' ? 'var(--status-success-bg)' : 'var(--status-danger-bg)',
+            border: `1px solid ${uploadMessage.type === 'success' ? 'rgba(22, 163, 74, 0.2)' : 'rgba(220, 38, 38, 0.2)'}`,
             color: uploadMessage.type === 'success' ? 'var(--status-success)' : 'var(--status-danger)'
           }}>
             {uploadMessage.text}
@@ -492,7 +480,7 @@ export default function IndividualExperiment() {
 
       {/* PART 2 — LIVE EXECUTION VISUALIZATION CHECKLIST */}
       {showExecutionPanel && (
-        <div className="card" style={{ marginBottom: '24px', padding: '24px' }}>
+        <div className="card slide-in-up" style={{ marginBottom: '24px', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <FlaskConical size={20} style={{ color: 'var(--classical-color)' }} />
@@ -512,17 +500,17 @@ export default function IndividualExperiment() {
                   <Loader2 size={12} className="spinner" /> Stage {Math.min(currentStageIndex + 1, activeStages.length)} of {activeStages.length}
                 </span>
               ) : (
-                <span className="badge-paradigm" style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'rgba(22, 163, 74, 0.1)', color: 'var(--status-success)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="badge-paradigm" style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'var(--status-success-bg)', color: 'var(--status-success)', border: '1px solid rgba(22, 163, 74, 0.2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle2 size={12} /> Execution Complete
                 </span>
               )}
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {activeStages.map((stage, idx) => {
               const isPending = idx > currentStageIndex;
-              const isActive = idx === currentStageIndex;
+              const isActive = idx === currentStageIndex && !isExecutionComplete;
               const isDone = idx < currentStageIndex || isExecutionComplete;
 
               return (
@@ -530,30 +518,19 @@ export default function IndividualExperiment() {
                   key={stage.id}
                   className="stage-row"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    background: isActive ? '#F0F6FF' : isDone ? '#F8FAFC' : '#FFFFFF',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                    background: isActive ? 'var(--classical-bg)' : isDone ? 'var(--bg-inset)' : 'transparent',
                     border: isActive ? '1px solid var(--classical-color)' : '1px solid var(--border-color)',
                     transition: 'all 0.2s ease',
-                    opacity: isPending ? 0.6 : 1
+                    opacity: isPending ? 0.5 : 1,
+                    boxShadow: isActive ? '0 0 0 3px var(--classical-glow)' : 'none'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {/* Stage State Icons */}
-                    {isPending && (
-                      <Circle size={18} style={{ color: '#CBD5E1', flexShrink: 0 }} />
-                    )}
-                    {isActive && (
-                      <Loader2 size={18} className="spinner" style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
-                    )}
-                    {isDone && (
-                      <CheckCircle2 size={18} style={{ color: 'var(--status-success)', flexShrink: 0 }} />
-                    )}
-
-                    {/* Stage Label */}
+                    {isPending && <Circle size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />}
+                    {isActive && <Loader2 size={18} className="spinner" style={{ color: 'var(--classical-color)', flexShrink: 0 }} />}
+                    {isDone && <CheckCircle2 size={18} style={{ color: 'var(--status-success)', flexShrink: 0 }} />}
                     <span style={{
                       fontSize: '0.875rem',
                       fontWeight: isActive ? 600 : isDone ? 500 : 400,
@@ -563,23 +540,18 @@ export default function IndividualExperiment() {
                     </span>
                   </div>
 
-                  {/* Stage Timing & Status Indicator */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {isActive && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--classical-color)', fontWeight: 500 }}>
-                        In Progress...
-                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--classical-color)', fontWeight: 500 }}>In Progress...</span>
                     )}
                     {isDone && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', background: '#FFFFFF', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-card-solid)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                         <Clock size={12} style={{ color: 'var(--status-success)' }} />
                         {stageTimings[stage.id] || 'Done'}
                       </span>
                     )}
                     {isPending && (
-                      <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
-                        Pending
-                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Pending</span>
                     )}
                   </div>
                 </div>
@@ -589,11 +561,26 @@ export default function IndividualExperiment() {
         </div>
       )}
 
+      {/* Real Live Server Pipeline Execution Modal */}
+      <PipelineExecutionModal
+        isOpen={showExecutionModal}
+        onClose={() => setShowExecutionModal(false)}
+        datasetKey={selectedDataset}
+        modelType={selectedModel}
+        onComplete={(liveResults) => {
+          if (liveResults) {
+            setResults(liveResults);
+          } else {
+            handleRunExperiment();
+          }
+        }}
+      />
+
       {/* PART 3 — RESULTS DISPLAY */}
       {results && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Basic Information (Student Level) */}
-          <div className="card" style={{ position: 'relative' }}>
+          <div className="card slide-in-up" style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
               <CardActionMenu
                 title={`${results.basic_info?.model_name} - Basic Metrics`}
@@ -625,7 +612,7 @@ export default function IndividualExperiment() {
                 {results.basic_info?.concept_explanation}
               </p>
 
-              <div style={{ marginTop: '18px', padding: '16px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <div style={{ marginTop: '18px', padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <strong style={{ color: 'var(--text-primary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <HelpCircle size={16} style={{ color: 'var(--classical-color)' }} /> Why use this model?
                 </strong>
@@ -635,7 +622,7 @@ export default function IndividualExperiment() {
               </div>
 
               {/* Key Metrics Grid */}
-              <div className="grid-2" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginTop: '20px' }}>
+              <div className="stagger-children" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginTop: '20px' }}>
                 <div className="metric-mini-box">
                   <div className="mini-val">{results.basic_info?.key_metrics?.accuracy}</div>
                   <div className="mini-lbl">Accuracy</div>
@@ -656,13 +643,13 @@ export default function IndividualExperiment() {
 
               {/* Student Takeaway Banner */}
               <div className="banner reality-banner" style={{ marginTop: '20px' }}>
-                <GraduationCap size={20} style={{ flexShrink: 0, color: '#92400E' }} />
+                <GraduationCap size={20} style={{ flexShrink: 0, color: 'var(--banner-warn-text)' }} />
                 <div>
-                  <strong style={{ color: '#92400E', fontSize: '0.875rem' }}>Student Diagnostic Takeaway:</strong>
-                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: '#92400E' }}>
+                  <strong style={{ color: 'var(--banner-warn-text)', fontSize: '0.875rem' }}>Student Diagnostic Takeaway:</strong>
+                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: 'var(--banner-warn-text)' }}>
                     <strong>Graph Signal:</strong> {results.basic_info?.student_takeaway?.what_graph_indicates}
                   </p>
-                  <p style={{ marginTop: '2px', fontSize: '0.85rem', color: '#78350F' }}>
+                  <p style={{ marginTop: '2px', fontSize: '0.85rem', color: 'var(--banner-warn-text-dark)' }}>
                     <strong>Clinical Significance:</strong> {results.basic_info?.student_takeaway?.clinical_meaning}
                   </p>
                 </div>
@@ -676,7 +663,7 @@ export default function IndividualExperiment() {
                   </h4>
                   <div className="grid-2" style={{ gap: '16px' }}>
                     {results.advanced_info.figure_artifacts.roc_curve && (
-                      <div style={{ position: 'relative', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ position: 'relative', background: 'var(--bg-card-solid)', padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
                         <div style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}>
                           <CardActionMenu
                             title={`${results.basic_info?.model_name} - ROC Curve`}
@@ -686,11 +673,11 @@ export default function IndividualExperiment() {
                             imageUrl={results.advanced_info.figure_artifacts.roc_curve}
                           />
                         </div>
-                        <img src={results.advanced_info.figure_artifacts.roc_curve} alt="ROC Curve" style={{ width: '100%', borderRadius: '6px' }} />
+                        <img src={results.advanced_info.figure_artifacts.roc_curve} alt="ROC Curve" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
                       </div>
                     )}
                     {results.advanced_info.figure_artifacts.confusion_matrix && (
-                      <div style={{ position: 'relative', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ position: 'relative', background: 'var(--bg-card-solid)', padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
                         <div style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}>
                           <CardActionMenu
                             title={`${results.basic_info?.model_name} - Confusion Matrix`}
@@ -704,7 +691,7 @@ export default function IndividualExperiment() {
                             imageUrl={results.advanced_info.figure_artifacts.confusion_matrix}
                           />
                         </div>
-                        <img src={results.advanced_info.figure_artifacts.confusion_matrix} alt="Confusion Matrix" style={{ width: '100%', borderRadius: '6px' }} />
+                        <img src={results.advanced_info.figure_artifacts.confusion_matrix} alt="Confusion Matrix" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
                       </div>
                     )}
                   </div>
@@ -712,6 +699,70 @@ export default function IndividualExperiment() {
               )}
             </div>
           </div>
+
+          {/* Expandable Quantum Feasibility & Noise Telemetry Section */}
+          {isQuantum && feasibilityData && (
+            <div className="card" style={{ borderLeft: '4px solid var(--quantum-color)' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                onClick={() => setShowFeasibility(!showFeasibility)}
+              >
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--quantum-color)', margin: 0, fontSize: '1.05rem' }}>
+                  <Cpu size={18} /> Quantum Hardware Feasibility & Depolarizing Noise Telemetry
+                </h3>
+                <button className="btn btn-sm btn-outline" type="button">
+                  {showFeasibility ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  {showFeasibility ? 'Hide Feasibility' : 'View Feasibility Telemetry'}
+                </button>
+              </div>
+
+              {showFeasibility && (
+                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="stagger-children" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.qubits_required} Qubits</div>
+                      <div className="mini-lbl">Hilbert Dim: 2⁴ = {feasibilityData.hilbert_space_dimension}</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.circuit_depth}</div>
+                      <div className="mini-lbl">Circuit Depth ({feasibilityData.cnot_count} CNOTs)</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--status-success)' }}>{feasibilityData.barren_plateau_risk}</div>
+                      <div className="mini-lbl">Barren Plateau Risk</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--classical-color)' }}>{feasibilityData.nisq_readiness_level}</div>
+                      <div className="mini-lbl">NISQ Hardware Tier</div>
+                    </div>
+                  </div>
+
+                  {/* Depolarizing Noise Degradation Table */}
+                  <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      Depolarizing Noise Degradation Profile: ℰ(ρ) = (1-p)ρ + (p/2ⁿ)I
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                      {feasibilityData.noise_curve?.map((pt, i) => (
+                        <div key={i} style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', textAlign: 'center', transition: 'all 0.2s ease' }}>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>p = {pt.noise_rate_percentage}% Noise</div>
+                          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--quantum-color)', margin: '4px 0' }}>{(pt.accuracy * 100).toFixed(1)}% Acc</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Fidelity: {pt.fidelity_score}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="banner" style={{ background: 'var(--classical-bg)', border: '1px solid var(--classical-glow)', color: 'var(--classical-color)', fontSize: '0.85rem' }}>
+                    <ShieldAlert size={18} style={{ flexShrink: 0 }} />
+                    <div>
+                      <strong>Scientific Integrity Verdict:</strong> {feasibilityData.scientific_verdict}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Advanced Information (Researcher Level) */}
           <div className="card">
@@ -731,17 +782,17 @@ export default function IndividualExperiment() {
             {showAdvanced && (
               <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Architecture Details */}
-                <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                   <h4 style={{ color: 'var(--text-primary)', marginBottom: '10px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Settings size={16} /> Architectural Hyperparameters
                   </h4>
-                  <pre style={{ background: '#FFFFFF', padding: '14px', borderRadius: '6px', fontSize: '0.82rem', color: 'var(--text-primary)', border: '1px solid var(--border-color)', overflow: 'auto' }}>
+                  <pre style={{ background: 'var(--bg-card-solid)', padding: '14px', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-primary)', border: '1px solid var(--border-color)', overflow: 'auto' }}>
                     {JSON.stringify(results.advanced_info?.architectural_details, null, 2)}
                   </pre>
                 </div>
 
                 {/* Cross-Validation Details */}
-                <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                   <h4 style={{ color: 'var(--text-primary)', marginBottom: '10px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <BarChart2 size={16} /> Cross-Validation Methodology
                   </h4>
@@ -754,11 +805,11 @@ export default function IndividualExperiment() {
 
                 {/* Quantum Hardware Profile */}
                 {results.model_type !== 'svm' && results.model_type !== 'mlp' && (
-                  <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                     <h4 style={{ color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Cpu size={16} style={{ color: 'var(--quantum-color)' }} /> Quantum Hardware Profile (NISQ Circuit Telemetry)
                     </h4>
-                    <div className="grid-3" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                       <div className="metric-mini-box">
                         <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{results.advanced_info?.quantum_hardware_profile?.qubit_count}</div>
                         <div className="mini-lbl">Qubit Count</div>
@@ -777,10 +828,10 @@ export default function IndividualExperiment() {
 
                 {/* Raw JSON Details */}
                 <details style={{ marginTop: '8px' }}>
-                  <summary style={{ cursor: 'pointer', padding: '10px 14px', background: '#F8FAFC', borderRadius: '6px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  <summary style={{ cursor: 'pointer', padding: '10px 14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                     View Raw Execution Payload JSON
                   </summary>
-                  <pre style={{ marginTop: '10px', background: '#FFFFFF', color: 'var(--text-secondary)', padding: '16px', borderRadius: '6px', fontSize: '0.78rem', border: '1px solid var(--border-color)', overflow: 'auto', maxHeight: '350px' }}>
+                  <pre style={{ marginTop: '10px', background: 'var(--bg-card-solid)', color: 'var(--text-secondary)', padding: '16px', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', border: '1px solid var(--border-color)', overflow: 'auto', maxHeight: '350px' }}>
                     {JSON.stringify(results.advanced_info?.raw_json_results, null, 2)}
                   </pre>
                 </details>

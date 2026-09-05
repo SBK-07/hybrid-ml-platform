@@ -1,0 +1,23 @@
+{
+  "dataset_key": "custom",
+  "model_name": "Quantum QNN",
+  "qubit_count": 4,
+  "feature_map": "ZZFeatureMap (reps=2, linear)",
+  "training_time_seconds": 0.428,
+  "circuit_depth": 7,
+  "total_gates": 18,
+  "test_metrics": {
+    "accuracy": 0.7362637362637363,
+    "sensitivity": 0.38235294117647056,
+    "specificity": 0.9473684210526315,
+    "precision": 0.8125,
+    "f1_score": 0.52,
+    "roc_auc": 0.8617131062951496,
+    "confusion_matrix": {
+      "tn": 54,
+      "fp": 3,
+      "fn": 21,
+      "tp": 13
+    }
+  }
+}

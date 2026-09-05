@@ -1,8 +1,10 @@
 import React from 'react';
-import { Layers, Cpu, LayoutGrid } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Layers, Cpu, LayoutGrid, Database, ArrowRight } from 'lucide-react';
 import Atom4Orbits from './Atom4Orbits';
 
 export default function OverviewSection({ activeDataset }) {
+  const navigate = useNavigate();
   const stages = [
     {
       number: 1,
@@ -11,8 +13,8 @@ export default function OverviewSection({ activeDataset }) {
     },
     {
       number: 2,
-      title: 'Biomedical Ingestion',
-      desc: "Multi-dataset loading (WDBC Cancer, Heart Disease, Diabetes, Parkinson's, Custom CSVs)."
+      title: 'Biomedical Ingestion & Radiomics',
+      desc: "Multi-dataset loading (WDBC Cancer, Heart Disease, MRI Archives, NIfTI, Custom CSVs)."
     },
     {
       number: 3,
@@ -55,14 +57,39 @@ export default function OverviewSection({ activeDataset }) {
         </div>
       </div>
 
+      {/* Hero Banner */}
+      <div className="card active-control-card slide-in-up" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, var(--classical-bg), var(--quantum-bg))', borderColor: 'var(--classical-glow)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
+            <Atom4Orbits size={32} color="var(--classical-color)" />
+            <div>
+              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600 }}>SIH 2026 Problem Statement 139 Implementation</h3>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                Bridging classical feature preprocessing, SMOTE class balancing, zero-data-leakage PCA feature compression down to 4 qubits, PennyLane quantum circuit statevector simulation, and real-time patient risk inference.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate('/dataset-overview')}
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, padding: '10px 20px', whiteSpace: 'nowrap' }}
+          >
+            <Database size={16} />
+            <span>Explore Deep Dataset EDA & Radiomics</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+
       {/* 7-Stage Narrative Clinical Pipeline - Vertical Roadmap */}
       <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Layers size={18} style={{ color: 'var(--classical-color)' }} /> 7-Stage Narrative Clinical Pipeline
       </h3>
 
       <div className="card" style={{ marginBottom: '28px', padding: '28px 32px' }}>
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {/* Continuous Vertical Line running from stage 1 to stage 7 */}
+        <div className="stagger-children" style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+          {/* Continuous Vertical Line */}
           <div
             style={{
               position: 'absolute',
@@ -70,8 +97,9 @@ export default function OverviewSection({ activeDataset }) {
               bottom: '14px',
               left: '13px',
               width: '2px',
-              backgroundColor: 'var(--classical-color)',
-              zIndex: 1
+              background: 'linear-gradient(180deg, var(--classical-color), var(--quantum-color))',
+              zIndex: 1,
+              borderRadius: '1px'
             }}
           />
 
@@ -83,7 +111,8 @@ export default function OverviewSection({ activeDataset }) {
                 zIndex: 2,
                 display: 'flex',
                 alignItems: 'flex-start',
-                gap: '16px'
+                gap: '16px',
+                cursor: 'default'
               }}
             >
               {/* Numbered Circular Dot */}
@@ -92,20 +121,26 @@ export default function OverviewSection({ activeDataset }) {
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  backgroundColor: 'var(--classical-color)',
+                  background: stage.number <= 4
+                    ? 'linear-gradient(135deg, var(--classical-color), #2563EB)'
+                    : 'linear-gradient(135deg, var(--quantum-color), #0D9488)',
                   color: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   fontWeight: 700,
-                  flexShrink: 0
+                  flexShrink: 0,
+                  boxShadow: stage.number <= 4
+                    ? '0 2px 8px var(--classical-glow)'
+                    : '0 2px 8px var(--quantum-glow)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
                 }}
               >
                 {stage.number}
               </div>
 
-              {/* Title & Description Stacked */}
+              {/* Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
                   {stage.title}
@@ -124,7 +159,7 @@ export default function OverviewSection({ activeDataset }) {
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Cpu size={18} style={{ color: 'var(--classical-color)' }} /> Benchmarked Model Suite
         </h3>
-        <div className="grid-2" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        <div className="stagger-children" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
           <div className="metric-mini-box">
             <div className="mini-val" style={{ color: 'var(--classical-color)' }}>SVM</div>
             <div className="mini-lbl">Classical RBF Kernel</div>

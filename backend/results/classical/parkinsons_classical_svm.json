@@ -1,0 +1,30 @@
+{
+  "dataset_key": "parkinsons",
+  "model_name": "Classical SVM (RBF)",
+  "training_time_seconds": 0.0136,
+  "cross_validation_5fold": {
+    "mean_accuracy": 0.8337,
+    "std_accuracy": 0.0707,
+    "fold_scores": [
+      0.7812,
+      0.7742,
+      0.7742,
+      0.9355,
+      0.9032
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.8461538461538461,
+    "sensitivity": 0.9259259259259259,
+    "specificity": 0.6666666666666666,
+    "precision": 0.8620689655172413,
+    "f1_score": 0.8928571428571429,
+    "roc_auc": 0.8981481481481481,
+    "confusion_matrix": {
+      "tn": 8,
+      "fp": 4,
+      "fn": 2,
+      "tp": 25
+    }
+  }
+}

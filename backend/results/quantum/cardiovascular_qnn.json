@@ -1,0 +1,23 @@
+{
+  "dataset_key": "cardiovascular",
+  "model_name": "Quantum QNN",
+  "qubit_count": 4,
+  "feature_map": "ZZFeatureMap (reps=2, linear)",
+  "training_time_seconds": 0.3765,
+  "circuit_depth": 7,
+  "total_gates": 18,
+  "test_metrics": {
+    "accuracy": 0.8360655737704918,
+    "sensitivity": 0.9807692307692307,
+    "specificity": 0.0,
+    "precision": 0.85,
+    "f1_score": 0.9107142857142857,
+    "roc_auc": 0.7008547008547009,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 9,
+      "fn": 1,
+      "tp": 51
+    }
+  }
+}

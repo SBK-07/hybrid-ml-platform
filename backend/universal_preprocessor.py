@@ -26,12 +26,37 @@ import os
 import io
 import json
 import time
+import math
 import numpy as np
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
+
+
+def make_json_safe(obj):
+    """
+    Recursively sanitize dictionaries, lists, and values to guarantee JSON compliance.
+    Replaces NaN, Infinity, -Infinity with None. Converts numpy types to Python native types.
+    """
+    if isinstance(obj, dict):
+        return {str(k): make_json_safe(v) for k, v in obj.items() if 'unnamed' not in str(k).lower()}
+    elif isinstance(obj, (list, tuple, set)):
+        return [make_json_safe(item) for item in obj]
+    elif isinstance(obj, (np.floating, float)):
+        if np.isnan(obj) or math.isnan(obj) or np.isinf(obj) or math.isinf(obj):
+            return None
+        return float(obj)
+    elif isinstance(obj, (np.integer, int)):
+        return int(obj)
+    elif isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return make_json_safe(obj.tolist())
+    elif pd.isna(obj):
+        return None
+    return obj
 
 
 def detect_target_column(df: pd.DataFrame) -> str:
@@ -79,15 +104,27 @@ def clean_and_preprocess_dataframe(df: pd.DataFrame, n_qubits: int = 4, random_s
     start_time = time.time()
     df_clean = df.copy()
 
+    # Normalize column names
+    df_clean.columns = [str(c).strip() for c in df_clean.columns]
+
+    # Drop columns that are completely NaN or empty
+    df_clean = df_clean.dropna(how='all', axis=1)
+
+    # Drop any 'Unnamed' columns created by trailing commas in Kaggle CSVs
+    unnamed_cols = [c for c in df_clean.columns if 'unnamed' in str(c).lower()]
+    if unnamed_cols:
+        df_clean = df_clean.drop(columns=unnamed_cols)
+
     # 1. Identify Target Column
     target_col = detect_target_column(df_clean)
     y_raw = df_clean[target_col]
     X_raw = df_clean.drop(columns=[target_col])
 
     # 2. Drop obvious ID columns
-    id_cols = [c for c in X_raw.columns if any(k in c.lower() for k in ['id', 'patient', 'unnamed', 'index', 'subject'])]
+    id_cols = [c for c in X_raw.columns if any(k in c.lower() for k in ['id', 'patient', 'unnamed', 'index', 'subject']) and c != target_col]
     if id_cols:
         X_raw = X_raw.drop(columns=id_cols)
+        df_clean = df_clean.drop(columns=[c for c in id_cols if c in df_clean.columns])
 
     # 3. Clean and convert target to binary (0 / 1)
     if y_raw.dtype == 'object' or isinstance(y_raw.iloc[0], str):
@@ -125,9 +162,13 @@ def clean_and_preprocess_dataframe(df: pd.DataFrame, n_qubits: int = 4, random_s
     X_matrix = X_raw.astype(float).values
     feature_names = list(X_raw.columns)
 
-    # 6. Stratified Train/Test Split (80/20) - strictly leak-free
+    # 6. Stratified Train/Test Split (80/20) - strictly leak-free with safe stratification
+    class_counts = np.bincount(y_binary) if len(y_binary) > 0 else []
+    can_stratify = (len(np.unique(y_binary)) >= 2 and len(class_counts) >= 2 and min(class_counts) >= 2)
+    strat = y_binary if can_stratify else None
+
     X_train, X_test, y_train, y_test = train_test_split(
-        X_matrix, y_binary, test_size=0.20, random_state=random_state, stratify=y_binary
+        X_matrix, y_binary, test_size=0.20, random_state=random_state, stratify=strat
     )
 
     # 7. Classical Normalization (StandardScaler fitted strictly on X_train)
@@ -171,6 +212,10 @@ def clean_and_preprocess_dataframe(df: pd.DataFrame, n_qubits: int = 4, random_s
         "status": "READY_FOR_BENCHMARK"
     }
 
+    # Clean sample records to be 100% JSON compliant
+    sample_df = df_clean.head(10).copy()
+    sample_records = make_json_safe(sample_df.to_dict(orient='records'))
+
     return {
         "X_train_scaled": X_train_scaled,
         "X_test_scaled": X_test_scaled,
@@ -181,6 +226,6 @@ def clean_and_preprocess_dataframe(df: pd.DataFrame, n_qubits: int = 4, random_s
         "scaler": scaler,
         "pca": pca,
         "angle_scaler": angle_scaler,
-        "metadata": metadata,
-        "df_processed_sample": df_clean.head(10).to_dict(orient='records')
+        "metadata": make_json_safe(metadata),
+        "df_processed_sample": sample_records
     }
