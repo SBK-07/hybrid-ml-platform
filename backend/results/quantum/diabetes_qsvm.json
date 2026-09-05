@@ -1,0 +1,23 @@
+{
+  "dataset_key": "diabetes",
+  "model_name": "Quantum QSVM",
+  "qubit_count": 4,
+  "feature_map": "ZZFeatureMap (reps=2, linear)",
+  "training_time_seconds": 0.3324,
+  "circuit_depth": 19,
+  "total_gates": 30,
+  "test_metrics": {
+    "accuracy": 0.8166666666666667,
+    "sensitivity": 1.0,
+    "specificity": 0.0,
+    "precision": 0.8166666666666667,
+    "f1_score": 0.8990825688073395,
+    "roc_auc": 0.5454545454545454,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 11,
+      "fn": 0,
+      "tp": 49
+    }
+  }
+}

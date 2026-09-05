@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope } from 'lucide-react';
+import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope, Sparkles, Layers, AlertCircle, Compass, HelpCircle } from 'lucide-react';
 import { predictPatient } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
 
@@ -12,6 +12,7 @@ export default function LivePatientInference() {
   const [loading, setLoading] = useState(false);
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
+  const [showExplainability, setShowExplainability] = useState(false);
 
   useEffect(() => {
     fetchPresets();
@@ -76,6 +77,9 @@ export default function LivePatientInference() {
 
   const selectedPreset = presets.find(p => p.id === selectedPresetId);
   const predictions = predictionResult?.predictions;
+  const uncertainty = predictionResult?.uncertainty;
+  const explainability = predictionResult?.explainability;
+  const blochCoords = predictionResult?.bloch_coordinates;
 
   return (
     <div className="hub-section active">
@@ -83,10 +87,10 @@ export default function LivePatientInference() {
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Activity size={24} style={{ color: 'var(--classical-color)' }} />
-            Live Patient Risk Inference
+            Live Patient Risk Inference & Decision Support
           </h1>
           <p className="subtitle">
-            Real-time clinical patient diagnostic simulator. Features automated 4-qubit PCA projection, zero-data-leakage scaling, and 3-way consensus evaluation.
+            Real-time clinical diagnostic simulator. Features automated 4-qubit PCA projection, zero-data-leakage scaling, tri-model consensus, uncertainty quantification, and clinical explainability.
           </p>
         </div>
       </div>
@@ -245,7 +249,8 @@ export default function LivePatientInference() {
                     dataset: activeDataset,
                     predictions: predictions,
                     consensus_risk: predictions?.hybrid_consensus_ensemble?.probability,
-                    risk_tier: predictions?.hybrid_consensus_ensemble?.risk_tier
+                    risk_tier: predictions?.hybrid_consensus_ensemble?.risk_tier,
+                    uncertainty: uncertainty
                   }}
                   metadata={{
                     page: 'live_inference',
@@ -303,6 +308,71 @@ export default function LivePatientInference() {
                 </div>
               </div>
 
+              {/* Uncertainty Quantification & Discordance Gauge */}
+              {uncertainty && (
+                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <AlertCircle size={15} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
+                      Uncertainty & Model Consensus
+                    </span>
+                    <span className="val-badge ready" style={{ fontSize: '0.72rem' }}>
+                      Consensus: {(uncertainty.consensus_confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div className="grid-2" style={{ gap: '8px' }}>
+                    <div className="metric-mini-box" style={{ background: '#FFFFFF', padding: '8px' }}>
+                      <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.epistemic_uncertainty}</div>
+                      <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Epistemic Ambiguity</div>
+                    </div>
+                    <div className="metric-mini-box" style={{ background: '#FFFFFF', padding: '8px' }}>
+                      <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.aleatoric_uncertainty}</div>
+                      <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Aleatoric Data Noise</div>
+                    </div>
+                  </div>
+
+                  {uncertainty.is_classical_quantum_discordant && (
+                    <div className="banner" style={{ marginTop: '8px', padding: '8px 10px', background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.3)', color: 'var(--status-danger)', fontSize: '0.78rem' }}>
+                      <strong>Discordance Alert:</strong> Classical and Quantum models predict opposing classes. Secondary histopathology review recommended.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Feature Attributions & Explainability */}
+              {explainability && (
+                <div>
+                  <button
+                    onClick={() => setShowExplainability(!showExplainability)}
+                    className="btn btn-sm btn-outline full-width-btn"
+                    type="button"
+                  >
+                    <Compass size={14} /> {showExplainability ? 'Hide' : 'Show'} Biomarker Feature Attributions (SHAP-style)
+                    {showExplainability ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+
+                  {showExplainability && (
+                    <div style={{ marginTop: '10px', padding: '14px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Top Biomarker Risk Contributors:</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {explainability.top_attributions?.map((attr, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFFFFF', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontWeight: 500 }}>{attr.feature_name}</span>
+                            <span style={{ color: attr.normalized_impact > 0 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 600 }}>
+                              {attr.direction.includes('Increases') ? '+ Risk' : '- Baseline'} ({attr.importance_score})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.4' }}>
+                        <strong>Clinical Rationale:</strong> {explainability.clinical_rationale}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Advanced Quantum State Coordinates */}
               <div>
                 <button
@@ -318,6 +388,12 @@ export default function LivePatientInference() {
                   <div style={{ marginTop: '10px', padding: '12px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
                     <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
                     <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
+                    {blochCoords && (
+                      <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <strong>Bloch 3D Coordinates (x, y, z):</strong>
+                        {blochCoords.map(c => ` Q${c.qubit_index}: (${c.x}, ${c.y}, ${c.z})`).join(' | ')}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

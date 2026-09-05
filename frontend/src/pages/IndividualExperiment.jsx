@@ -1,16 +1,74 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Plus, Zap, Database, Play, BookOpen, FlaskConical, CheckCircle2, Settings, BarChart2, Cpu, FileCode, HelpCircle, GraduationCap, Image } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Plus, Zap, Database, Play, BookOpen, FlaskConical, CheckCircle2, Settings, BarChart2, Cpu, FileCode, HelpCircle, GraduationCap, Image, ShieldAlert, Activity, Sparkles, Layers, Terminal, Trash2 } from 'lucide-react';
 import CardActionMenu from '../components/CardActionMenu';
+import PipelineExecutionModal from '../components/PipelineExecutionModal';
+import { getQuantumFeasibility, getDatasets, deleteDataset } from '../services/api';
 
 export default function IndividualExperiment() {
   const [selectedModel, setSelectedModel] = useState('svm');
   const [selectedDataset, setSelectedDataset] = useState('cancer');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showFeasibility, setShowFeasibility] = useState(false);
+  const [showExplainability, setShowExplainability] = useState(false);
   const [results, setResults] = useState(null);
+  const [feasibilityData, setFeasibilityData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState(null);
+  const [showExecutionModal, setShowExecutionModal] = useState(false);
   const fileInputRef = React.useRef(null);
+
+  const [datasetsList, setDatasetsList] = useState([
+    { id: 'cancer', key: 'cancer', name: 'Breast Cancer (WDBC)', features_count: 30, description: 'Nuclear morphology metrics', modality: 'Multimodal (Tabular + Imaging)', built_in: true },
+    { id: 'cardiovascular', key: 'cardiovascular', name: 'UCI Heart Disease', features_count: 13, description: 'Clinical cardiac indicators', modality: 'Multimodal (Tabular + Biosignal)', built_in: true },
+    { id: 'diabetes', key: 'diabetes', name: 'Pima Indians Diabetes', features_count: 8, description: 'Metabolic & diagnostic profile', modality: 'Tabular', built_in: true },
+    { id: 'parkinsons', key: 'parkinsons', name: 'Parkinson\'s Biomedical Voice', features_count: 22, description: 'Phonation acoustic measures', modality: 'Biosignal', built_in: true }
+  ]);
+
+  useEffect(() => {
+    fetchDatasets();
+  }, []);
+
+  const fetchDatasets = async () => {
+    try {
+      const res = await getDatasets();
+      if (res && res.datasets && res.datasets.length > 0) {
+        setDatasetsList(res.datasets);
+      }
+    } catch (err) {
+      console.error('Failed to fetch datasets:', err);
+    }
+  };
+
+  const handleDeleteDataset = async (e, dataset) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const dKey = dataset.id || dataset.key;
+    if (!window.confirm(`Are you sure you want to permanently delete custom dataset "${dataset.name}"?`)) {
+      return;
+    }
+    try {
+      const res = await deleteDataset(dKey);
+      if (res && res.datasets) {
+        setDatasetsList(res.datasets);
+      } else {
+        await fetchDatasets();
+      }
+      if (selectedDataset === dKey) {
+        setSelectedDataset('cancer');
+      }
+      setUploadMessage({
+        type: 'success',
+        text: `✓ Successfully removed custom dataset "${dataset.name}".`
+      });
+    } catch (err) {
+      console.error('Error deleting dataset:', err);
+      setUploadMessage({
+        type: 'error',
+        text: `Failed to remove dataset: ${err.response?.data?.detail || err.message}`
+      });
+    }
+  };
 
   const models = [
     { id: 'svm', name: 'Classical SVM (RBF Kernel)', type: 'classical' },
@@ -20,19 +78,14 @@ export default function IndividualExperiment() {
     { id: 'qvc', name: 'Quantum Variational Circuit (QVC)', type: 'quantum' }
   ];
 
-  const datasets = [
-    { id: 'cancer', name: 'Breast Cancer (WDBC)', features: 30, desc: 'Nuclear morphology metrics' },
-    { id: 'cardiovascular', name: 'UCI Heart Disease', features: 13, desc: 'Clinical cardiac indicators' },
-    { id: 'diabetes', name: 'Pima Indians Diabetes', features: 8, desc: 'Metabolic & diagnostic profile' },
-    { id: 'parkinsons', name: 'Parkinson\'s Biomedical Voice', features: 22, desc: 'Phonation acoustic measures' }
-  ];
-
   const handleUploadDataset = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.csv')) {
-      setUploadMessage({ type: 'error', text: 'Please upload a valid CSV file.' });
+    const validExts = ['.csv', '.zip', '.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff'];
+    const hasValidExt = validExts.some(ext => file.name.toLowerCase().endsWith(ext));
+    if (!hasValidExt) {
+      setUploadMessage({ type: 'error', text: 'Please upload a CSV, Multimodal ZIP archive, or medical image.' });
       return;
     }
 
@@ -56,18 +109,25 @@ export default function IndividualExperiment() {
           text: `✓ ${data.message}`,
           metadata: data.metadata
         });
-        setSelectedDataset('custom');
+        if (data.datasets) {
+          setDatasetsList(data.datasets);
+        } else {
+          await fetchDatasets();
+        }
+        if (data.dataset_key) {
+          setSelectedDataset(data.dataset_key);
+        }
       } else {
         setUploadMessage({
           type: 'error',
-          text: data.detail || 'Upload failed. Please check your CSV file.'
+          text: data.detail || 'Upload failed. Please check your dataset format.'
         });
       }
     } catch (err) {
       console.error('Upload error:', err);
       setUploadMessage({
         type: 'error',
-        text: 'Failed to upload dataset. Please ensure the file is a valid clinical CSV.'
+        text: 'Failed to upload dataset. Please ensure the file is a valid clinical CSV, ZIP, or image.'
       });
     } finally {
       setUploading(false);
@@ -90,12 +150,22 @@ export default function IndividualExperiment() {
       });
       const data = await response.json();
       setResults(data);
+
+      // Fetch quantum feasibility if applicable
+      if (selectedModel !== 'svm' && selectedModel !== 'mlp') {
+        const feas = await getQuantumFeasibility(selectedDataset);
+        setFeasibilityData(feas);
+      } else {
+        setFeasibilityData(null);
+      }
     } catch (err) {
       console.error('Error running experiment:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  const isQuantum = selectedModel !== 'svm' && selectedModel !== 'mlp';
 
   return (
     <div className="hub-section active">
@@ -174,73 +244,88 @@ export default function IndividualExperiment() {
             </h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {datasets.map(dataset => {
-              const isSelected = selectedDataset === dataset.id;
+            {datasetsList.map(dataset => {
+              const dId = dataset.id || dataset.key;
+              const isSelected = selectedDataset === dId;
+              const isCustom = !dataset.built_in;
+              const featCount = dataset.features_count || dataset.features || 0;
+              const sampleCount = dataset.samples || dataset.total_samples || 0;
+
               return (
-                <label key={dataset.id} style={{
+                <label key={dId} style={{
                   display: 'flex',
                   alignItems: 'center',
                   padding: '12px 14px',
-                  border: isSelected ? '1px solid var(--classical-color)' : '1px solid var(--border-color)',
+                  border: isSelected ? '1px solid var(--classical-color)' : (isCustom ? '1px solid rgba(22, 163, 74, 0.4)' : '1px solid var(--border-color)'),
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  background: isSelected ? '#F0F6FF' : '#FFFFFF',
-                  transition: 'all 0.15s ease'
+                  background: isSelected ? '#F0F6FF' : (isCustom ? '#F0FDF4' : '#FFFFFF'),
+                  transition: 'all 0.15s ease',
+                  position: 'relative'
                 }}>
                   <input
                     type="radio"
                     name="dataset"
-                    value={dataset.id}
+                    value={dId}
                     checked={isSelected}
                     onChange={(e) => setSelectedDataset(e.target.value)}
                     style={{ marginRight: '12px', accentColor: 'var(--classical-color)' }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>{dataset.name}</div>
+                  <div style={{ flex: 1, paddingRight: isCustom ? '36px' : '0px' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{dataset.name}</span>
+                      {isCustom && (
+                        <span style={{
+                          fontSize: '0.68rem',
+                          padding: '1px 6px',
+                          background: '#DCFCE7',
+                          color: '#15803D',
+                          borderRadius: '4px',
+                          fontWeight: 600
+                        }}>
+                          Custom Upload
+                        </span>
+                      )}
+                    </div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                      {dataset.features} attributes · {dataset.desc}
+                      {featCount} attributes {sampleCount > 0 ? `· ${sampleCount} samples` : ''} · <strong style={{ color: isCustom ? '#15803D' : 'var(--classical-color)' }}>{dataset.modality || 'Tabular'}</strong>
                     </div>
                   </div>
+
+                  {isCustom && (
+                    <button
+                      type="button"
+                      title="Remove this custom uploaded dataset"
+                      onClick={(e) => handleDeleteDataset(e, dataset)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#EF4444',
+                        cursor: 'pointer',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#FEE2E2'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </label>
               );
             })}
-
-            {/* Custom Uploaded Dataset option */}
-            {uploadMessage?.metadata && (
-              <label style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px 14px',
-                border: selectedDataset === 'custom' ? '1px solid var(--status-success)' : '1px solid rgba(22, 163, 74, 0.3)',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                background: selectedDataset === 'custom' ? 'rgba(22, 163, 74, 0.08)' : '#FFFFFF',
-                transition: 'all 0.15s ease'
-              }}>
-                <input
-                  type="radio"
-                  name="dataset"
-                  value="custom"
-                  checked={selectedDataset === 'custom'}
-                  onChange={(e) => setSelectedDataset(e.target.value)}
-                  style={{ marginRight: '12px', accentColor: 'var(--status-success)' }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: 'var(--status-success)', fontSize: '0.875rem' }}>
-                    Uploaded: {uploadMessage.metadata.filename || 'Custom Dataset'}
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                    {uploadMessage.metadata.total_features} features · {uploadMessage.metadata.total_samples} samples
-                  </div>
-                </div>
-              </label>
-            )}
 
             {/* File upload trigger */}
             <input
               type="file"
               ref={fileInputRef}
-              accept=".csv"
+              accept=".csv,.zip,.png,.jpg,.jpeg"
               onChange={handleUploadDataset}
               style={{ display: 'none' }}
             />
@@ -249,10 +334,10 @@ export default function IndividualExperiment() {
               onClick={() => fileInputRef.current && fileInputRef.current.click()}
               className="btn btn-outline full-width-btn"
               disabled={uploading}
-              style={{ marginTop: '6px' }}
+              style={{ marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             >
               <Plus size={16} />
-              {uploading ? 'Preprocessing CSV Pipeline...' : 'Upload Custom Biomedical CSV'}
+              {uploading ? 'Ingesting & Preprocessing Multimodal Data...' : 'Upload Custom Dataset (CSV / ZIP / Images)'}
             </button>
 
             {uploadMessage && (
@@ -270,18 +355,53 @@ export default function IndividualExperiment() {
         </div>
       </div>
 
-      {/* Run Button */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+      {/* Action Buttons: Instant vs Step-by-Step Animated Pipeline */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
         <button
           onClick={handleRunExperiment}
           disabled={loading}
           className="btn btn-primary"
-          style={{ padding: '12px 32px', fontSize: '0.95rem' }}
+          style={{ padding: '12px 28px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}
         >
           <Play size={18} />
-          {loading ? 'Executing Model Pipeline...' : 'Run Experiment'}
+          {loading ? 'Evaluating Model...' : 'Run Experiment (Instant Benchmark)'}
+        </button>
+
+        <button
+          onClick={() => {
+            setShowExecutionModal(true);
+          }}
+          className="btn btn-outline"
+          style={{
+            padding: '12px 24px',
+            fontSize: '0.95rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            borderColor: 'var(--classical-color)',
+            color: 'var(--classical-color)',
+            background: 'rgba(37, 99, 235, 0.04)'
+          }}
+        >
+          <Sparkles size={18} style={{ color: 'var(--classical-color)' }} />
+          <span>⚡ Run Live Pipeline Execution (Real-Time Server Run)</span>
         </button>
       </div>
+
+      {/* Real Live Server Pipeline Execution Modal */}
+      <PipelineExecutionModal
+        isOpen={showExecutionModal}
+        onClose={() => setShowExecutionModal(false)}
+        datasetKey={selectedDataset}
+        modelType={selectedModel}
+        onComplete={(liveResults) => {
+          if (liveResults) {
+            setResults(liveResults);
+          } else {
+            handleRunExperiment();
+          }
+        }}
+      />
 
       {/* Results Section */}
       {results && (
@@ -406,6 +526,70 @@ export default function IndividualExperiment() {
               )}
             </div>
           </div>
+
+          {/* Expandable Quantum Feasibility & Noise Telemetry Section */}
+          {isQuantum && feasibilityData && (
+            <div className="card" style={{ borderLeft: '4px solid var(--quantum-color)' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                onClick={() => setShowFeasibility(!showFeasibility)}
+              >
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--quantum-color)', margin: 0, fontSize: '1.05rem' }}>
+                  <Cpu size={18} /> Quantum Hardware Feasibility & Depolarizing Noise Telemetry
+                </h3>
+                <button className="btn btn-sm btn-outline" type="button">
+                  {showFeasibility ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  {showFeasibility ? 'Hide Feasibility' : 'View Feasibility Telemetry'}
+                </button>
+              </div>
+
+              {showFeasibility && (
+                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.qubits_required} Qubits</div>
+                      <div className="mini-lbl">Hilbert Dim: 2⁴ = {feasibilityData.hilbert_space_dimension}</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.circuit_depth}</div>
+                      <div className="mini-lbl">Circuit Depth ({feasibilityData.cnot_count} CNOTs)</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--status-success)' }}>{feasibilityData.barren_plateau_risk}</div>
+                      <div className="mini-lbl">Barren Plateau Risk</div>
+                    </div>
+                    <div className="metric-mini-box">
+                      <div className="mini-val" style={{ color: 'var(--classical-color)' }}>{feasibilityData.nisq_readiness_level}</div>
+                      <div className="mini-lbl">NISQ Hardware Tier</div>
+                    </div>
+                  </div>
+
+                  {/* Depolarizing Noise Degradation Table */}
+                  <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      Depolarizing Noise Degradation Profile: ℰ(ρ) = (1-p)ρ + (p/2ⁿ)I
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                      {feasibilityData.noise_curve?.map((pt, i) => (
+                        <div key={i} style={{ background: '#FFFFFF', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>p = {pt.noise_rate_percentage}% Noise</div>
+                          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--quantum-color)', margin: '4px 0' }}>{(pt.accuracy * 100).toFixed(1)}% Acc</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Fidelity: {pt.fidelity_score}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="banner" style={{ background: 'rgba(37, 99, 235, 0.06)', border: '1px solid rgba(37, 99, 235, 0.2)', color: 'var(--classical-color)', fontSize: '0.85rem' }}>
+                    <ShieldAlert size={18} style={{ flexShrink: 0 }} />
+                    <div>
+                      <strong>Scientific Integrity Verdict:</strong> {feasibilityData.scientific_verdict}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Advanced Information (Researcher Level) */}
           <div className="card">

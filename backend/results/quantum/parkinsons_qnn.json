@@ -1,0 +1,23 @@
+{
+  "dataset_key": "parkinsons",
+  "model_name": "Quantum QNN",
+  "qubit_count": 4,
+  "feature_map": "ZZFeatureMap (reps=2, linear)",
+  "training_time_seconds": 0.3333,
+  "circuit_depth": 7,
+  "total_gates": 18,
+  "test_metrics": {
+    "accuracy": 0.5897435897435898,
+    "sensitivity": 0.8518518518518519,
+    "specificity": 0.0,
+    "precision": 0.6571428571428571,
+    "f1_score": 0.7419354838709677,
+    "roc_auc": 0.4814814814814815,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 12,
+      "fn": 4,
+      "tp": 23
+    }
+  }
+}

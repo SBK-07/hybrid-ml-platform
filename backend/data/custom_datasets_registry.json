@@ -1,0 +1,34 @@
+{
+    "custom_cancer_custom_dataset": {
+        "key": "custom_cancer_custom_dataset",
+        "name": "Custom: cancer_custom_dataset.zip",
+        "domain": "Custom Clinical Upload",
+        "samples": 569,
+        "features_count": 30,
+        "quantum_qubits": 4,
+        "disease_positive_label": "Disease Positive (Class 1)",
+        "disease_negative_label": "Healthy / Control (Class 0)",
+        "description": "30 features, 569 samples from uploaded 'cancer_custom_dataset.zip'.",
+        "modality": "Custom (imaging + tabular)",
+        "built_in": false,
+        "can_delete": true,
+        "uploaded_at": "2026-09-04T17:53:48.040237",
+        "filename": "cancer_custom_dataset.zip"
+    },
+    "custom_mri_scans": {
+        "key": "custom_mri_scans",
+        "name": "Custom: mri_scans.zip",
+        "domain": "Custom Clinical Upload",
+        "samples": 300,
+        "features_count": 24,
+        "quantum_qubits": 4,
+        "disease_positive_label": "Disease Positive (Class 1)",
+        "disease_negative_label": "Healthy / Control (Class 0)",
+        "description": "24 features, 300 samples from uploaded 'mri_scans.zip'.",
+        "modality": "Custom (imaging)",
+        "built_in": false,
+        "can_delete": true,
+        "uploaded_at": "2026-09-04T19:22:33.159691",
+        "filename": "mri_scans.zip"
+    }
+}

@@ -1,0 +1,57 @@
+{
+    "target_column": "diagnosis",
+    "total_samples": 300,
+    "total_features": 24,
+    "train_samples": 240,
+    "test_samples": 60,
+    "feature_names": [
+        "mri_intensity_mean",
+        "mri_intensity_std",
+        "mri_intensity_variance",
+        "mri_intensity_skewness",
+        "mri_intensity_kurtosis",
+        "mri_intensity_entropy",
+        "mri_intensity_energy",
+        "mri_intensity_rms",
+        "mri_intensity_p10",
+        "mri_intensity_p90",
+        "mri_dynamic_range",
+        "mri_edge_density",
+        "mri_laplacian_sharpness",
+        "mri_foreground_ratio",
+        "mri_spatial_contrast",
+        "mri_spatial_homogeneity",
+        "mri_spatial_dissimilarity",
+        "mri_spatial_correlation",
+        "mri_glcm_energy",
+        "mri_hemispheric_symmetry",
+        "mri_high_freq_fourier_ratio",
+        "mri_compactness",
+        "mri_contrast_to_noise",
+        "mri_tissue_heterogeneity"
+    ],
+    "quantum_qubits": 4,
+    "pca_explained_variance_ratio": [
+        0.5675,
+        0.1901,
+        0.1033,
+        0.0444
+    ],
+    "pca_cumulative_variance": 0.9053,
+    "class_distribution": {
+        "class_0_healthy": 74,
+        "class_1_diseased": 226,
+        "imbalance_ratio": 3.054
+    },
+    "preprocessing_time_sec": 0.0373,
+    "status": "READY_FOR_BENCHMARK",
+    "filename": "mri_scans.zip",
+    "dataset_name": "Custom Dataset (mri_scans.zip)",
+    "dataset_key": "custom_mri_scans",
+    "modalities_detected": [
+        "imaging"
+    ],
+    "ingestion_format": "multimodal_archive",
+    "disease_positive_label": "Disease Positive (Class 1)",
+    "disease_negative_label": "Healthy / Control (Class 0)"
+}

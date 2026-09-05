@@ -1,277 +1,30 @@
 {
-    "dataset_name": "Breast Cancer Wisconsin Diagnostic",
-    "dataset_key": "cancer",
-    "full_feature_dimension": 30,
-    "pca_feature_dimension": 4,
-    "models_full_features": {
-        "mlp": {
-            "best_params": {
-                "activation": "relu",
-                "alpha": 0.0001,
-                "hidden_layer_sizes": [
-                    128,
-                    64
-                ],
-                "learning_rate_init": 0.01
-            },
-            "cv_summary": {
-                "accuracy_mean": 0.9692307692307691,
-                "accuracy_std": 0.010766987880365621,
-                "accuracy_formatted": "96.92% +/- 1.08%",
-                "precision_mean": 0.9648322510822511,
-                "precision_std": 0.02117354750973574,
-                "precision_formatted": "96.48% +/- 2.12%",
-                "sensitivity_mean": 0.9529411764705882,
-                "sensitivity_std": 0.02352941176470589,
-                "sensitivity_formatted": "95.29% +/- 2.35%",
-                "specificity_mean": 0.9789473684210526,
-                "specificity_std": 0.013128622409733122,
-                "specificity_formatted": "97.89% +/- 1.31%",
-                "f1_score_mean": 0.958547185023499,
-                "f1_score_std": 0.014763476577545287,
-                "f1_score_formatted": "95.85% +/- 1.48%",
-                "roc_auc_mean": 0.9941176470588236,
-                "roc_auc_std": 0.0040708117488784485,
-                "roc_auc_formatted": "99.41% +/- 0.41%"
-            },
-            "cv_folds": [
-                {
-                    "accuracy": 0.9560439560439561,
-                    "precision": 0.96875,
-                    "sensitivity": 0.9117647058823529,
-                    "specificity": 0.9824561403508771,
-                    "f1_score": 0.9393939393939394,
-                    "roc_auc": 0.9948400412796697,
-                    "log_loss": 0.10149468500624187,
-                    "confusion_matrix": {
-                        "TP": 31,
-                        "FP": 1,
-                        "TN": 56,
-                        "FN": 3
-                    },
-                    "fold": 1
-                },
-                {
-                    "accuracy": 0.967032967032967,
-                    "precision": 0.9428571428571428,
-                    "sensitivity": 0.9705882352941176,
-                    "specificity": 0.9649122807017544,
-                    "f1_score": 0.9565217391304348,
-                    "roc_auc": 0.9989680082559339,
-                    "log_loss": 0.0808035473538622,
-                    "confusion_matrix": {
-                        "TP": 33,
-                        "FP": 2,
-                        "TN": 55,
-                        "FN": 1
-                    },
-                    "fold": 2
-                },
-                {
-                    "accuracy": 0.967032967032967,
-                    "precision": 0.9696969696969697,
-                    "sensitivity": 0.9411764705882353,
-                    "specificity": 0.9824561403508771,
-                    "f1_score": 0.9552238805970149,
-                    "roc_auc": 0.9948400412796697,
-                    "log_loss": 0.08681554983570286,
-                    "confusion_matrix": {
-                        "TP": 32,
-                        "FP": 1,
-                        "TN": 56,
-                        "FN": 2
-                    },
-                    "fold": 3
-                },
-                {
-                    "accuracy": 0.989010989010989,
-                    "precision": 1.0,
-                    "sensitivity": 0.9705882352941176,
-                    "specificity": 1.0,
-                    "f1_score": 0.9850746268656716,
-                    "roc_auc": 0.9865841073271413,
-                    "log_loss": 0.17044776372035897,
-                    "confusion_matrix": {
-                        "TP": 33,
-                        "FP": 0,
-                        "TN": 57,
-                        "FN": 1
-                    },
-                    "fold": 4
-                },
-                {
-                    "accuracy": 0.967032967032967,
-                    "precision": 0.9428571428571428,
-                    "sensitivity": 0.9705882352941176,
-                    "specificity": 0.9649122807017544,
-                    "f1_score": 0.9565217391304348,
-                    "roc_auc": 0.9953560371517027,
-                    "log_loss": 0.07481434541623645,
-                    "confusion_matrix": {
-                        "TP": 33,
-                        "FP": 2,
-                        "TN": 55,
-                        "FN": 1
-                    },
-                    "fold": 5
-                }
-            ],
-            "test_metrics": {
-                "accuracy": 0.9736842105263158,
-                "precision": 1.0,
-                "sensitivity": 0.9285714285714286,
-                "specificity": 1.0,
-                "f1_score": 0.9629629629629629,
-                "roc_auc": 0.9854497354497355,
-                "log_loss": 0.16802209957332603,
-                "confusion_matrix": {
-                    "TP": 39,
-                    "FP": 0,
-                    "TN": 72,
-                    "FN": 3
-                },
-                "training_time_sec": 0.53394,
-                "inference_time_sec": 0.0,
-                "n_layers": 2,
-                "architecture": "(128, 64)"
-            },
-            "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_mlp_full.joblib"
-        }
-    },
-    "models_pca_features": {
-        "mlp": {
-            "best_params": {
-                "activation": "relu",
-                "alpha": 0.0001,
-                "hidden_layer_sizes": [
-                    16,
-                    8,
-                    4
-                ],
-                "learning_rate_init": 0.01
-            },
-            "cv_summary": {
-                "accuracy_mean": 0.9494505494505494,
-                "accuracy_std": 0.01318681318681319,
-                "accuracy_formatted": "94.95% +/- 1.32%",
-                "precision_mean": 0.9579099821746879,
-                "precision_std": 0.024029527118878072,
-                "precision_formatted": "95.79% +/- 2.40%",
-                "sensitivity_mean": 0.9058823529411765,
-                "sensitivity_std": 0.04705882352941178,
-                "sensitivity_formatted": "90.59% +/- 4.71%",
-                "specificity_mean": 0.9754385964912281,
-                "specificity_std": 0.014035087719298239,
-                "specificity_formatted": "97.54% +/- 1.40%",
-                "f1_score_mean": 0.9299787074632014,
-                "f1_score_std": 0.02019958612418754,
-                "f1_score_formatted": "93.00% +/- 2.02%",
-                "roc_auc_mean": 0.990092879256966,
-                "roc_auc_std": 0.008945648269461034,
-                "roc_auc_formatted": "99.01% +/- 0.89%"
-            },
-            "cv_folds": [
-                {
-                    "accuracy": 0.9340659340659341,
-                    "precision": 1.0,
-                    "sensitivity": 0.8235294117647058,
-                    "specificity": 1.0,
-                    "f1_score": 0.9032258064516129,
-                    "roc_auc": 0.9927760577915377,
-                    "log_loss": 0.20141511346305357,
-                    "confusion_matrix": {
-                        "TP": 28,
-                        "FP": 0,
-                        "TN": 57,
-                        "FN": 6
-                    },
-                    "fold": 1
-                },
-                {
-                    "accuracy": 0.9560439560439561,
-                    "precision": 0.9411764705882353,
-                    "sensitivity": 0.9411764705882353,
-                    "specificity": 0.9649122807017544,
-                    "f1_score": 0.9411764705882353,
-                    "roc_auc": 0.9979360165118679,
-                    "log_loss": 0.09044665362668694,
-                    "confusion_matrix": {
-                        "TP": 32,
-                        "FP": 2,
-                        "TN": 55,
-                        "FN": 2
-                    },
-                    "fold": 2
-                },
-                {
-                    "accuracy": 0.9560439560439561,
-                    "precision": 0.9411764705882353,
-                    "sensitivity": 0.9411764705882353,
-                    "specificity": 0.9649122807017544,
-                    "f1_score": 0.9411764705882353,
-                    "roc_auc": 0.9948400412796697,
-                    "log_loss": 0.09786419757539487,
-                    "confusion_matrix": {
-                        "TP": 32,
-                        "FP": 2,
-                        "TN": 55,
-                        "FN": 2
-                    },
-                    "fold": 3
-                },
-                {
-                    "accuracy": 0.9340659340659341,
-                    "precision": 0.9375,
-                    "sensitivity": 0.8823529411764706,
-                    "specificity": 0.9649122807017544,
-                    "f1_score": 0.9090909090909091,
-                    "roc_auc": 0.9726522187822497,
-                    "log_loss": 0.18697648282413756,
-                    "confusion_matrix": {
-                        "TP": 30,
-                        "FP": 2,
-                        "TN": 55,
-                        "FN": 4
-                    },
-                    "fold": 4
-                },
-                {
-                    "accuracy": 0.967032967032967,
-                    "precision": 0.9696969696969697,
-                    "sensitivity": 0.9411764705882353,
-                    "specificity": 0.9824561403508771,
-                    "f1_score": 0.9552238805970149,
-                    "roc_auc": 0.9922600619195047,
-                    "log_loss": 0.10215277322201624,
-                    "confusion_matrix": {
-                        "TP": 32,
-                        "FP": 1,
-                        "TN": 56,
-                        "FN": 2
-                    },
-                    "fold": 5
-                }
-            ],
-            "test_metrics": {
-                "accuracy": 0.9736842105263158,
-                "precision": 1.0,
-                "sensitivity": 0.9285714285714286,
-                "specificity": 1.0,
-                "f1_score": 0.9629629629629629,
-                "roc_auc": 0.998015873015873,
-                "log_loss": 0.09865727949472781,
-                "confusion_matrix": {
-                    "TP": 39,
-                    "FP": 0,
-                    "TN": 72,
-                    "FN": 3
-                },
-                "training_time_sec": 0.26848,
-                "inference_time_sec": 0.0,
-                "n_layers": 3,
-                "architecture": "(16, 8, 4)"
-            },
-            "model_path": "D:\\SIH26\\hybrid-ml-platform\\backend\\models\\cancer\\classical_mlp_pca.joblib"
-        }
+  "dataset_key": "cancer",
+  "model_name": "Classical Neural Network (MLP)",
+  "training_time_seconds": 0.7211,
+  "cross_validation_5fold": {
+    "mean_accuracy": 0.9692,
+    "std_accuracy": 0.0082,
+    "fold_scores": [
+      0.956,
+      0.967,
+      0.967,
+      0.978,
+      0.978
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.9649122807017544,
+    "sensitivity": 0.9047619047619048,
+    "specificity": 1.0,
+    "precision": 1.0,
+    "f1_score": 0.95,
+    "roc_auc": 0.9923941798941798,
+    "confusion_matrix": {
+      "tn": 72,
+      "fp": 0,
+      "fn": 4,
+      "tp": 38
     }
+  }
 }

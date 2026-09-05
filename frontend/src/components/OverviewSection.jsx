@@ -1,8 +1,10 @@
 import React from 'react';
-import { Layers, Cpu, LayoutGrid } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Layers, Cpu, LayoutGrid, Database, ArrowRight } from 'lucide-react';
 import Atom4Orbits from './Atom4Orbits';
 
 export default function OverviewSection({ activeDataset }) {
+  const navigate = useNavigate();
   const stages = [
     {
       number: 1,
@@ -11,8 +13,8 @@ export default function OverviewSection({ activeDataset }) {
     },
     {
       number: 2,
-      title: 'Biomedical Ingestion',
-      desc: "Multi-dataset loading (WDBC Cancer, Heart Disease, Diabetes, Parkinson's, Custom CSVs)."
+      title: 'Biomedical Ingestion & Radiomics',
+      desc: "Multi-dataset loading (WDBC Cancer, Heart Disease, MRI Archives, NIfTI, Custom CSVs)."
     },
     {
       number: 3,
@@ -56,14 +58,26 @@ export default function OverviewSection({ activeDataset }) {
       </div>
 
       <div className="card active-control-card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Atom4Orbits size={28} color="var(--classical-color)" />
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600 }}>SIH 2026 Problem Statement 139 Implementation</h3>
-            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              Bridging classical feature preprocessing, SMOTE class balancing, zero-data-leakage PCA feature compression down to 4 qubits, PennyLane quantum circuit statevector simulation, and real-time patient risk inference.
-            </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
+            <Atom4Orbits size={28} color="var(--classical-color)" />
+            <div>
+              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600 }}>SIH 2026 Problem Statement 139 Implementation</h3>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                Bridging classical feature preprocessing, SMOTE class balancing, zero-data-leakage PCA feature compression down to 4 qubits, PennyLane quantum circuit statevector simulation, and real-time patient risk inference.
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={() => navigate('/dataset-overview')}
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, padding: '8px 16px', whiteSpace: 'nowrap' }}
+          >
+            <Database size={16} />
+            <span>Explore Deep Dataset EDA & Radiomics</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
       </div>
 

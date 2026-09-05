@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 
 import Sidebar from './components/Sidebar';
 import OverviewSection from './components/OverviewSection';
+import DatasetOverview from './pages/DatasetOverview';
 import IndividualExperiment from './pages/IndividualExperiment';
 import CumulativeExperiment from './pages/CumulativeExperiment';
 import LivePatientInference from './pages/LivePatientInference';
@@ -17,6 +18,7 @@ function MainLayout() {
   const getActiveTab = () => {
     switch (location.pathname) {
       case '/overview': return 'overview';
+      case '/dataset-overview': return 'dataset-overview';
       case '/individual': return 'individual';
       case '/cumulative': return 'cumulative';
       case '/inference': return 'inference';
@@ -30,6 +32,7 @@ function MainLayout() {
 
   const handleTabChange = (tabId) => {
     if (tabId === 'overview') navigate('/overview');
+    else if (tabId === 'dataset-overview') navigate('/dataset-overview');
     else if (tabId === 'individual') navigate('/individual');
     else if (tabId === 'cumulative') navigate('/cumulative');
     else if (tabId === 'inference') navigate('/inference');
@@ -48,6 +51,7 @@ function MainLayout() {
         <Routes>
           <Route path="/" element={<OverviewSection activeDataset="cancer" />} />
           <Route path="/overview" element={<OverviewSection activeDataset="cancer" />} />
+          <Route path="/dataset-overview" element={<DatasetOverview />} />
           <Route path="/individual" element={<IndividualExperiment />} />
           <Route path="/cumulative" element={<CumulativeExperiment />} />
           <Route path="/inference" element={<LivePatientInference />} />

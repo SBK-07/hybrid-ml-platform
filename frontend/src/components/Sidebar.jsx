@@ -1,11 +1,12 @@
 import React from 'react';
-import { Compass, Zap, BarChart3, Activity, FileText, Bot, Radio } from 'lucide-react';
+import { Compass, Database, Zap, BarChart3, Activity, FileText, Bot, Radio } from 'lucide-react';
 import Atom4Orbits from './Atom4Orbits';
 
 export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = true }) {
 
   const navItems = [
     { id: 'overview', icon: <Compass size={18} />, label: 'Overview & Workflow' },
+    { id: 'dataset-overview', icon: <Database size={18} />, label: 'Dataset Overview & EDA', badge: 'DEEP EDA' },
     { id: 'individual', icon: <Zap size={18} />, label: 'Individual Experiment' },
     { id: 'cumulative', icon: <BarChart3 size={18} />, label: 'Cumulative Benchmark' },
     { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' },
