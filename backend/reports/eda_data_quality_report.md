@@ -1,7 +1,0 @@
-# EDA & Data Quality Report (Archived & Consolidated)
-
-> **Notice:** The comprehensive exploratory data analysis, data quality audits, and leak-free preprocessing specifications have been consolidated into the master architectural document:
-> 
-> 👉 [**`../../SYSTEM_WORKFLOW_ARCHITECTURE.md`**](../../SYSTEM_WORKFLOW_ARCHITECTURE.md)
-> 
-> For quickstart and deployment instructions, refer to [**`../../README.md`**](../../README.md).

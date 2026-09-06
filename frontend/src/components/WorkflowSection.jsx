@@ -3,7 +3,7 @@ import React from 'react';
 export default function WorkflowSection() {
   return (
     <div id="workflow" className="section">
-      <h2 className="section-title">🔄 How It Works - Simple Explanation</h2>
+      <h2 className="section-title">How It Works - Simple Explanation</h2>
 
       <div className="explainer">
         <div className="explainer-title">The Process (Step-by-Step)</div>
@@ -20,15 +20,15 @@ export default function WorkflowSection() {
         <h3>Understanding Diagnostic Metrics</h3>
         <table style={{ width: '100%', marginTop: '15px', borderCollapse: 'collapse' }}>
           <tbody>
-            <tr style={{ borderBottom: '1px solid #edf2f7', height: '36px' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', height: '36px' }}>
               <td style={{ width: '150px' }}><strong>Accuracy</strong></td>
               <td>Overall percentage of correct medical diagnoses</td>
             </tr>
-            <tr style={{ borderBottom: '1px solid #edf2f7', height: '36px' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', height: '36px' }}>
               <td><strong>Sensitivity</strong></td>
               <td>Ability to correctly identify patients with actual disease (catch true positives)</td>
             </tr>
-            <tr style={{ borderBottom: '1px solid #edf2f7', height: '36px' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', height: '36px' }}>
               <td><strong>Specificity</strong></td>
               <td>Ability to correctly identify healthy individuals (prevent false alarms)</td>
             </tr>
@@ -40,8 +40,8 @@ export default function WorkflowSection() {
         </table>
       </div>
 
-      <div className="explainer" style={{ background: '#fff3cd', borderLeftColor: '#ffc107' }}>
-        <div className="explainer-title" style={{ color: '#856404' }}>⚠️ Why Sensitivity Matters Most in Medicine</div>
+      <div className="explainer" style={{ background: 'var(--banner-warn-bg)', borderLeftColor: 'var(--banner-warn-border)' }}>
+        <div className="explainer-title" style={{ color: 'var(--banner-warn-text)' }}>Why Sensitivity Matters Most in Medicine</div>
         <p>
           In clinical diagnostic systems, <strong>missing an active disease (False Negative)</strong> has life-threatening consequences compared to a false alarm. High <strong>Sensitivity</strong> ensures deadly diagnostic misses are minimized.
         </p>

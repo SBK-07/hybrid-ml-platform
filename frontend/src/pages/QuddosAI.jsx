@@ -626,7 +626,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
           <div style={{
             padding: '12px 18px',
             borderBottom: '1px solid var(--border-color)',
-            background: '#FFFFFF',
+            background: 'var(--bg-card-solid)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
@@ -832,76 +832,17 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
             {loading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{
-                  padding: '12px 18px',
-                  background: '#FFFFFF',
-                  borderRadius: '12px 12px 12px 2px',
-                  border: '1px solid var(--border-color)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-secondary)'
-                }}>
-                  <RefreshCw size={16} className="spinner" style={{ color: 'var(--classical-color)' }} />
-                  <span>Quddos AI is formulating researcher-grade synthesis...</span>
+                <div className="card" style={{ padding: '12px 16px', color: 'var(--classical-color)', fontSize: '0.85rem', fontStyle: 'italic', background: 'var(--bg-card-solid)' }}>
+                  Quddos AI is evaluating context artifacts & generating grounded answer...
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Research Prompt Suggestions Bar */}
-          <div style={{
-            padding: '8px 16px',
-            background: '#FFFFFF',
-            borderTop: '1px solid var(--border-color)',
-            display: 'flex',
-            gap: '8px',
-            overflowX: 'auto',
-            whiteSpace: 'nowrap'
-          }}>
-            <button
-              onClick={() => handleSendMessage('Compare Classical SVM (97.4%) vs Quantum QSVM (85.1%) on Breast Cancer WDBC.')}
-              className="btn btn-sm btn-outline"
-              style={{ fontSize: '0.74rem', padding: '4px 10px', borderRadius: '12px', background: '#F8FAFC' }}
-            >
-              💡 Compare SVM vs QSVM on Cancer
-            </button>
-            <button
-              onClick={() => handleSendMessage('Explain 3D Bloch sphere projections and why Qubit 0 sensitivity matters for risk.')}
-              className="btn btn-sm btn-outline"
-              style={{ fontSize: '0.74rem', padding: '4px 10px', borderRadius: '12px', background: '#F8FAFC' }}
-            >
-              🌐 3D Bloch Coordinates & XAI
-            </button>
-            <button
-              onClick={() => handleSendMessage('Explain how depolarizing noise p=1% to 5% impacts NISQ circuit fidelity.')}
-              className="btn btn-sm btn-outline"
-              style={{ fontSize: '0.74rem', padding: '4px 10px', borderRadius: '12px', background: '#F8FAFC' }}
-            >
-              ⚛️ NISQ Depolarizing Noise Curves
-            </button>
-            <button
-              onClick={() => handleSendMessage('What is the difference between Epistemic vs Aleatoric clinical uncertainty?')}
-              className="btn btn-sm btn-outline"
-              style={{ fontSize: '0.74rem', padding: '4px 10px', borderRadius: '12px', background: '#F8FAFC' }}
-            >
-              ⚖️ Epistemic vs Aleatoric Uncertainty
-            </button>
-          </div>
-
-          {/* Chat Input Box */}
-          <div style={{
-            padding: '12px 16px',
-            background: '#FFFFFF',
-            borderTop: '1px solid var(--border-color)',
-            display: 'flex',
-            gap: '10px',
-            alignItems: 'center'
-          }}>
-            <input
-              type="text"
+          {/* Input Box */}
+          <div style={{ padding: '14px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-card-solid)', display: 'flex', gap: '10px' }}>
+            <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => {
@@ -914,7 +855,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
               style={{
                 flex: 1,
                 padding: '10px 14px',
-                borderRadius: '8px',
+                background: 'var(--bg-card-solid)',
                 border: '1px solid var(--border-color)',
                 fontSize: '0.875rem',
                 outline: 'none'

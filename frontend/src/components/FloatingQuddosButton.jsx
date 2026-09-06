@@ -4,7 +4,7 @@ import { Bot } from 'lucide-react';
 
 /**
  * Floating Quick-Access button for Quddos AI.
- * Minimal, circular icon button in dark navy, positioned bottom-right.
+ * Premium circular button with glow animation, positioned bottom-right.
  */
 export default function FloatingQuddosButton() {
   const navigate = useNavigate();
@@ -40,49 +40,65 @@ export default function FloatingQuddosButton() {
       onClick={() => navigate('/quddos')}
       style={{
         position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        width: '46px',
-        height: '46px',
+        bottom: '28px',
+        right: '28px',
+        width: '50px',
+        height: '50px',
         borderRadius: '50%',
-        background: '#101828',
+        background: 'linear-gradient(135deg, var(--classical-color), #2563EB)',
         color: '#FFFFFF',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+        boxShadow: '0 4px 16px var(--classical-glow), 0 2px 6px rgba(0, 0, 0, 0.15)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        transition: 'background-color 0.15s ease',
-        userSelect: 'none'
+        transition: 'all 0.25s ease',
+        userSelect: 'none',
+        animation: 'floatIn 0.4s ease-out'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#1E293B';
+        e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 6px 24px var(--classical-glow), 0 4px 10px rgba(0, 0, 0, 0.15)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#101828';
+        e.currentTarget.style.transform = 'scale(1) translateY(0)';
+        e.currentTarget.style.boxShadow = '0 4px 16px var(--classical-glow), 0 2px 6px rgba(0, 0, 0, 0.15)';
       }}
       title="Open Quddos AI Research Assistant"
     >
       <Bot size={22} />
       {artifactCount > 0 && (
-        <span style={{
-          position: 'absolute',
-          top: '-2px',
-          right: '-2px',
-          background: '#DC2626',
-          color: '#FFFFFF',
-          borderRadius: '50%',
-          width: '18px',
-          height: '18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '0.68rem',
-          fontWeight: 700
-        }}>
-          {artifactCount}
-        </span>
+        <>
+          {/* Pulsing ring */}
+          <span style={{
+            position: 'absolute',
+            inset: '-3px',
+            borderRadius: '50%',
+            border: '2px solid var(--classical-color)',
+            animation: 'ringPulse 1.5s ease-out infinite',
+            pointerEvents: 'none'
+          }} />
+          {/* Badge */}
+          <span style={{
+            position: 'absolute',
+            top: '-4px',
+            right: '-4px',
+            background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+            color: '#FFFFFF',
+            borderRadius: '50%',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+          }}>
+            {artifactCount}
+          </span>
+        </>
       )}
     </div>
   );

@@ -170,9 +170,10 @@ export default function DatasetOverview() {
               {datasetsList.map(ds => {
                 const dKey = ds.id || ds.key;
                 const fCount = ds.features_count || ds.features || 0;
+                const cleanName = ds.name.replace(/^Custom:\s*/i, '');
                 return (
                   <option key={dKey} value={dKey}>
-                    {!ds.built_in ? `[Custom] ${ds.name}` : `${ds.name} (${fCount} features)`}
+                    {!ds.built_in ? `[Custom] ${cleanName}` : `${cleanName} (${fCount} features)`}
                   </option>
                 );
               })}
@@ -437,7 +438,7 @@ export default function DatasetOverview() {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '0.75rem' }}>
                           {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
-                            <div key={mName} style={{ background: '#FFFFFF', padding: '3px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                            <div key={mName} style={{ background: 'var(--bg-card-solid)', padding: '3px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.06)' }}>
                               <span style={{ color: 'var(--text-secondary)' }}>{mName}: </span>
                               <strong>{mVal}</strong>
                             </div>
@@ -446,7 +447,7 @@ export default function DatasetOverview() {
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4, background: '#FFFFFF', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4, background: 'var(--bg-card-solid)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)' }}>
                       <strong style={{ color: 'var(--text-primary)' }}>Radiology Finding: </strong>
                       {sample.visual_breakdown}
                     </div>
@@ -675,7 +676,7 @@ export default function DatasetOverview() {
                           fontWeight: 700,
                           fontSize: '0.9rem',
                           color: pair.correlation > 0 ? 'var(--classical-color)' : '#E11D48',
-                          background: '#FFFFFF',
+                          background: 'var(--bg-card-solid)',
                           padding: '4px 8px',
                           borderRadius: '6px',
                           border: '1px solid rgba(0,0,0,0.08)'

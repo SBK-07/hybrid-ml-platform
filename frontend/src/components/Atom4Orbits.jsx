@@ -1,10 +1,10 @@
 import React from 'react';
 
 /**
- * 4-Orbit Quantum Atom SVG Icon.
+ * 4-Orbit Quantum Atom SVG Icon with optional spin animation.
  * Features 4 symmetrical rotated orbits (0°, 45°, 90°, 135°) around a central nucleus circle.
  */
-export default function Atom4Orbits({ size = 28, color = 'currentColor', style = {}, className = '' }) {
+export default function Atom4Orbits({ size = 28, color = 'currentColor', style = {}, className = '', animated = false }) {
   return (
     <svg
       width={size}
@@ -16,9 +16,9 @@ export default function Atom4Orbits({ size = 28, color = 'currentColor', style =
       strokeLinecap="round"
       strokeLinejoin="round"
       style={{ display: 'inline-block', verticalAlign: 'middle', ...style }}
-      className={className}
+      className={`${className} ${animated ? 'atom-animated' : ''}`}
     >
-      {/* Central nucleus */}
+      {/* Central nucleus with subtle glow */}
       <circle cx="12" cy="12" r="2.2" fill={color} stroke="none" />
 
       {/* Orbit 1: Vertical 0° */}

@@ -245,7 +245,7 @@ export default function PipelineExecutionModal({
     >
       <div
         style={{
-          background: '#FFFFFF',
+          background: 'var(--bg-card-solid)',
           borderRadius: '16px',
           width: '1080px',
           maxWidth: '96vw',
@@ -388,7 +388,7 @@ export default function PipelineExecutionModal({
           {/* Left Column: Dynamic Stages Stepper */}
           <div style={{
             borderRight: '1px solid var(--border-color)',
-            background: '#F8FAFC',
+            background: 'var(--bg-inset)',
             padding: '16px',
             overflowY: 'auto',
             display: 'flex',
@@ -475,7 +475,7 @@ export default function PipelineExecutionModal({
             {/* Upper Dynamic Visual Chamber */}
             <div style={{
               padding: '16px 20px',
-              background: '#FFFFFF',
+              background: 'var(--bg-card-solid)',
               borderBottom: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
@@ -534,7 +534,7 @@ export default function PipelineExecutionModal({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-around',
-                      background: '#FFFFFF',
+                      background: 'var(--bg-card-solid)',
                       borderRadius: '6px',
                       border: '1px solid #E2E8F0',
                       padding: '0 12px'
@@ -574,7 +574,7 @@ export default function PipelineExecutionModal({
                   <div style={{
                     padding: '12px 14px',
                     borderRadius: '8px',
-                    background: '#F8FAFC',
+                    background: 'var(--bg-inset)',
                     border: '1px solid #E2E8F0',
                     display: 'flex',
                     flexDirection: 'column',
@@ -646,7 +646,7 @@ export default function PipelineExecutionModal({
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-around',
-                      background: '#FFFFFF',
+                      background: 'var(--bg-card-solid)',
                       borderRadius: '6px',
                       border: '1px solid #E2E8F0',
                       padding: '4px 10px',
@@ -681,7 +681,7 @@ export default function PipelineExecutionModal({
                   <div style={{
                     padding: '10px 12px',
                     borderRadius: '8px',
-                    background: '#F8FAFC',
+                    background: 'var(--bg-inset)',
                     border: '1px solid #E2E8F0',
                     display: 'flex',
                     flexDirection: 'column',
@@ -732,7 +732,7 @@ export default function PipelineExecutionModal({
                   <div style={{
                     padding: '10px 12px',
                     borderRadius: '8px',
-                    background: '#F8FAFC',
+                    background: 'var(--bg-inset)',
                     border: '1px solid #E2E8F0',
                     fontSize: '0.75rem'
                   }}>
@@ -818,7 +818,7 @@ export default function PipelineExecutionModal({
         {/* Modal Footer Controls */}
         <div style={{
           padding: '12px 24px',
-          background: '#F8FAFC',
+          background: 'var(--bg-inset)',
           borderTop: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',

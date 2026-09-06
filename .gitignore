@@ -56,3 +56,15 @@ ehthumbs.db
 .gemini/
 *.swp
 *.swo
+
+# Generated Model Weights & Binaries
+*.joblib
+*.pkl
+backend/models/*.joblib
+
+# Generated Figures, Benchmark JSON Results & Markdown Export Reports
+backend/figures/
+backend/results/
+backend/reports/
+*_complete_report.md
+*_fusion_report.md
