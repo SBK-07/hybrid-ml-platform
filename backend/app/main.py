@@ -30,14 +30,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 from universal_preprocessor import clean_and_preprocess_dataframe, make_json_safe
-from ai_service import call_quddos_chat
+from ai_service import (
+    call_quddos_chat, generate_studio_action,
+    AI_PROVIDER, AI_MODEL, GEMINI_API_KEY, GROQ_API_KEY
+)
 
 # Import research modules
 from modules.data_intelligence import generate_dataset_profile, ingest_multimodal_archive_or_file
 from modules.common_representation import CommonRepresentationLayer
 from modules.fusion_engine import MultimodalFusionEngine
 from modules.quantum_feasibility import generate_quantum_feasibility_report, compute_circuit_complexity
-from modules.explainability import generate_explainability_report, compute_bloch_coordinates
+from modules.explainability import (
+    generate_explainability_report, compute_bloch_coordinates,
+    compute_counterfactual_explanation, compute_feature_attributions
+)
 from modules.uncertainty_engine import quantify_uncertainty
 from modules.experiment_tracker import log_experiment_run, get_experiment_history
 from modules.live_pipeline_runner import stream_live_pipeline
@@ -408,7 +414,8 @@ def predict_patient(req: PredictionRequest):
         patient_id=None,
         features=req.features,
         bloch_angles=x_quantum[0].tolist(),
-        predicted_risk_prob=fused_prob
+        predicted_risk_prob=fused_prob,
+        dataset_key=key
     )
 
     # Risk Tier & Color
@@ -1078,7 +1085,8 @@ def get_explainability_endpoint(req: ExplainRequest):
         patient_id=req.patient_id,
         features=req.features,
         bloch_angles=bloch_angles,
-        predicted_risk_prob=req.predicted_risk_prob
+        predicted_risk_prob=req.predicted_risk_prob,
+        dataset_key=req.dataset_key
     )
     return report.model_dump()
 
@@ -1203,33 +1211,180 @@ async def upload_custom_dataset(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process uploaded dataset: {str(e)}")
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process uploaded dataset: {str(e)}")
-
 
 class QuddosChatRequest(BaseModel):
     query: str
     artifacts: List[Dict[str, Any]] = []
     conversation_history: List[Dict[str, str]] = []
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    api_key: Optional[str] = None
+
+
+class QuddosStudioRequest(BaseModel):
+    action_type: str  # "study_guide", "audio_script", "clinical_briefing", "quantum_audit", "defense_faq", "counterfactual_analysis"
+    artifacts: List[Dict[str, Any]] = []
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    api_key: Optional[str] = None
+
+
+class CounterfactualComputeRequest(BaseModel):
+    dataset_key: str = "cancer"
+    features: Dict[str, float]
+    risk_probability: float = 0.5
+
+
+@app.get("/api/quddos/config")
+async def get_quddos_config_endpoint():
+    """
+    Returns active AI provider configurations and supported models list.
+    """
+    has_gemini_key = bool(os.getenv("GEMINI_API_KEY", "").strip())
+    has_groq_key = bool(os.getenv("GROQ_API_KEY", "").strip())
+
+    return JSONResponse(content={
+        "active_provider": os.getenv("AI_PROVIDER", "gemini"),
+        "active_model": os.getenv("AI_MODEL", "gemini-3.6-flash"),
+        "has_gemini_key": has_gemini_key,
+        "has_groq_key": has_groq_key,
+        "supported_providers": [
+            {
+                "id": "gemini",
+                "name": "Google AI Studio (Gemini)",
+                "description": "State-of-the-art multimodal reasoning, 1M context, 100% free tier",
+                "key_portal_url": "https://aistudio.google.com/app/apikey",
+                "models": [
+                    {"id": "gemini-3.6-flash", "name": "Gemini 3.6 Flash (Recommended)", "type": "Ultra-Fast Multimodal Reasoning"},
+                    {"id": "gemini-3.5-flash", "name": "Gemini 3.5 Flash", "type": "High Speed Multimodal"},
+                    {"id": "gemini-3.7-flash", "name": "Gemini 3.7 Flash", "type": "Next-Gen Flash"},
+                    {"id": "gemini-3.1-pro-preview", "name": "Gemini 3.1 Pro (Deep Research)", "type": "Elite Researcher Reasoning"}
+                ]
+            },
+            {
+                "id": "groq",
+                "name": "Groq Cloud (Ultra-Fast LPU)",
+                "description": "Ultra-fast LPU inference (300+ tok/s), open reasoning chains, 100% free tier",
+                "key_portal_url": "https://console.groq.com/keys",
+                "models": [
+                    {"id": "qwen/qwen3.8-27b", "name": "Qwen 3.8 27B (Recommended)", "type": "Deep Multimodal & Reasoning"},
+                    {"id": "openai/gpt-oss-120b", "name": "OpenAI GPT-OSS 120B", "type": "Flagship Deep Reasoning"},
+                    {"id": "openai/gpt-oss-20b", "name": "OpenAI GPT-OSS 20B", "type": "High-Speed Reasoning"},
+                    {"id": "groq/compound", "name": "Groq Compound", "type": "Compound Reasoning"}
+                ]
+            },
+            {
+                "id": "builtin",
+                "name": "Quddos 360° Grounded Core (Zero Setup)",
+                "description": "Built-in mathematical & empirical reasoning engine with complete platform grounding (works 100% offline)",
+                "key_portal_url": None,
+                "models": [
+                    {"id": "qmed-grounded-reasoning-v2.5", "name": "QMed Grounded Core v2.5", "type": "Domain-Expert Offline Engine"}
+                ]
+            }
+        ]
+    })
+
+
+@app.get("/api/quddos/system-context")
+async def get_quddos_system_context_endpoint():
+    """
+    Returns complete 360-degree platform metadata for Quddos AI grounding.
+    """
+    datasets = get_all_datasets()
+    return JSONResponse(content={
+        "platform_name": "Q-Med Hybrid Quantum-Classical Framework",
+        "version": "2.0.0",
+        "registered_datasets": [
+            {
+                "key": ds.get("key", ""),
+                "name": ds.get("name", ""),
+                "domain": ds.get("domain", ""),
+                "samples": ds.get("samples", ds.get("sample_count", 0)),
+                "features": ds.get("features_count", ds.get("features", 0)),
+                "is_builtin": ds.get("built_in", ds.get("is_builtin", True))
+            }
+            for ds in datasets
+        ],
+        "models": [
+            {"id": "svm", "name": "Classical RBF SVM", "paradigm": "Classical", "benchmark_accuracy": 0.974, "roc_auc": 0.996},
+            {"id": "mlp", "name": "Classical MLP (64, 32)", "paradigm": "Classical", "benchmark_accuracy": 0.974, "roc_auc": 0.985},
+            {"id": "qsvm", "name": "Quantum Kernel QSVM (ZZFeatureMap)", "paradigm": "Quantum", "benchmark_accuracy": 0.851, "roc_auc": 0.884},
+            {"id": "qnn", "name": "Quantum Neural Network (RealAmplitudes)", "paradigm": "Quantum", "benchmark_accuracy": 0.825, "roc_auc": 0.892},
+            {"id": "qvc", "name": "Quantum Variational Classifier (EfficientSU2)", "paradigm": "Quantum", "benchmark_accuracy": 0.818, "roc_auc": 0.916}
+        ],
+        "circuit_invariants": {
+            "n_qubits": 4,
+            "hilbert_space_dim": 16,
+            "zz_feature_map_gates": 22,
+            "zz_feature_map_depth": 19,
+            "pca_variance_retention": 0.7923
+        },
+        "multimodal_synergy": {
+            "early_fusion_auc": 0.997,
+            "intermediate_fusion_auc": 0.998,
+            "late_adaptive_consensus_auc": 0.999
+        }
+    })
 
 
 @app.post("/api/quddos/chat")
 async def quddos_chat_endpoint(req: QuddosChatRequest):
     """
     Main Quddos AI chat endpoint.
-    Accepts natural language research queries and attached artifacts (plots, feasibility, fusion, uncertainty).
+    Accepts natural language research queries, attached telemetry artifacts, and dynamic API key overrides.
     """
     try:
         result = call_quddos_chat(
             query=req.query,
             artifacts=req.artifacts,
-            conversation_history=req.conversation_history
+            conversation_history=req.conversation_history,
+            api_key=req.api_key,
+            provider=req.provider,
+            model=req.model
         )
-        return JSONResponse(content=result)
+        return JSONResponse(content=make_json_safe(result))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Quddos AI error: {str(e)}")
+
+
+@app.post("/api/quddos/studio-action")
+async def quddos_studio_action_endpoint(req: QuddosStudioRequest):
+    """
+    NotebookLM-Style Studio Generator:
+    Generates research study guides, 2-expert audio/podcast scripts, clinical XAI briefings,
+    quantum circuit audits, and defense viva FAQs.
+    """
+    try:
+        result = generate_studio_action(
+            action_type=req.action_type,
+            artifacts=req.artifacts,
+            api_key=req.api_key,
+            provider=req.provider,
+            model=req.model
+        )
+        return JSONResponse(content=make_json_safe(result))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Studio Action generation error: {str(e)}")
+
+
+@app.post("/api/quddos/counterfactual")
+async def quddos_counterfactual_endpoint(req: CounterfactualComputeRequest):
+    """
+    Compute actionable counterfactual risk-reversal trajectories for live patient cases.
+    """
+    try:
+        # Compute baseline feature attributions
+        attributions = compute_feature_attributions(req.features, req.risk_probability)
+        report = compute_counterfactual_explanation(
+            dataset_key=req.dataset_key,
+            features=req.features,
+            risk_probability=req.risk_probability,
+            top_attributions=attributions
+        )
+        return JSONResponse(content=make_json_safe(report.model_dump()))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Counterfactual calculation error: {str(e)}")
 
 
 # Mount Frontend static assets (React build in frontend/dist if present, else frontend)

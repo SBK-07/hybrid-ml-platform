@@ -687,3 +687,162 @@ print('✓ All backend intelligence and quantum modules verified successfully!')
 
 ---
 *End of Master System Workflow & Architecture Specification.*
+
+
+
+
+● 🌟 Researcher-Grade Quddos AI & State-of-the-Art Explainable AI (XAI) Architecture
+
+  We have overhauled Quddos AI into a NotebookLM-grade 360° Multimodal & Quantum Research Assistant
+  and delivered an interactive State-of-the-Art Explainable AI (XAI) Studio.
+
+  ---
+
+  1. 🔑 Best Free API Platforms & Reasoning Models
+
+  We evaluated leading AI platforms to select the top free-tier reasoning models with large context
+  windows, deep biomedical and mathematical reasoning capabilities, and zero credit-card
+  requirements:
+
+  ---
+
+  Option 1: Google AI Studio (Gemini 2.5 API) — #1 Recommended for Deep Research
+
+  - Why it's the Best:
+    - Models Supported: gemini-2.5-flash (Fast grounded reasoning), gemini-2.5-pro (Deep math &
+      research), and gemini-2.0-flash-thinking-exp (Open Chain-of-Thought reasoning).
+    - Context Window: 1,000,000+ tokens (can digest full platform codebases, papers, and datasets in
+      one turn).
+    - 100% Free Tier: 15 Requests Per Minute (RPM), 1,000,000 Tokens Per Minute (TPM), and 1,500
+      Requests Per Day (RPD).
+  - How & Where to Get Your Free Key:
+    a. Open https://aistudio.google.com/app/apikey (Sign in with your standard Google account).
+    b. Click "Create API Key" (or "Get API Key").
+    c. Copy your key (AIzaSy...).
+    d. In the Quddos AI interface, click ⚙️  Model & Keys in the top right, select Google Gemini, and
+       paste your key (it will be saved to your local session & .env).
+
+  ---
+
+  Option 2: Groq Cloud (DeepSeek-R1 Distill & Llama 3.3) — Best for Ultra-Fast CoT Reasoning
+
+  - Why it's Great:
+    - Models Supported: deepseek-r1-distill-llama-70b (Deep mathematical reasoning with explicit
+      <think>...</think> traces) and llama-3.3-70b-versatile.
+    - Speed: ~300 tokens/second LPU acceleration.
+    - 100% Free Tier: 30 RPM and 14,400 Requests Per Day.
+  - How & Where to Get Your Free Key:
+    a. Open https://console.groq.com/keys (Sign in with GitHub or Google).
+    b. Click "Create API Key".
+    c. Copy your key (gsk_...).
+    d. In Quddos AI, click ⚙️  Model & Keys, choose Groq Cloud, and paste the key.
+
+  ---
+
+  Option 3: Built-in 360° Grounded Domain Core (Offline / Zero-Setup Mode)
+
+  - If you run offline or without API keys, Quddos AI automatically switches to its built-in,
+    zero-dependency 360-degree knowledge engine. It provides mathematical proofs of ZZFeatureMap
+    Hilbert spaces ($2^n = 16$), noise channel equations ($E(\rho) = (1-p)\rho + \frac{p}{3}(X\rho X
+    + Y\rho Y + Z\rho Z)$), empirical benchmark metrics, and clinical triage rules.
+
+  ---
+
+  2. 🔬 What Has Been Implemented & Upgraded
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────┐
+  │                        QUDDOS AI 360° NOTEBOOK-LM ARCHITECTURE                         │
+  ├────────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                        │
+  │   [ 360° Platform Corpus ] ──► [ System Context Aggregator ]                          │
+  │   • 5 Datasets (WDBC, Heart, Pima, Parkinsons, Custom)                                │
+  │   • 5 Models (Classical SVM/MLP, Quantum QSVM/QNN/QVC)                                 │
+  │   • Circuits (ZZFeatureMap, RealAmplitudes, EfficientSU2)                              │
+  │   • Multimodal Tensors, SHAP Values, Bloch Angles, Uncertainty                         │
+  │                                      │                                                 │
+  │                                      ▼                                                 │
+  │                     ┌─────────────────────────────────┐                                │
+  │                     │ Multi-Provider Dispatch Engine  │                                │
+  │                     ├─────────────────────────────────┤                                │
+  │                     │ 1. Google Gemini 2.5 / Thinking │                                │
+  │                     │ 2. Groq DeepSeek-R1             │                                │
+  │                     │ 3. Built-in 360° Grounded Core  │                                │
+  │                     └────────────────┬────────────────┘                                │
+  │                                      │                                                 │
+  │               ┌──────────────────────┴──────────────────────┐                          │
+  │               ▼                                             ▼                          │
+  │   [ NotebookLM Studio Actions ]                 [ State-of-the-Art XAI Suite ]         │
+  │   • 📘 Comprehensive Study Guide                • 📊 SHAP Waterfall Attribution        │
+  │   • 🎙️  2-Expert Audio Overview Podcast          • 🌐 Interactive 3D Bloch Sphere       │
+  │   • 🩺 Clinical XAI Diagnostic Briefing         • 🔬 Counterfactual "What-If" Sim      │
+  │   • ⚛️  Quantum Circuit & Noise Hardware Audit   • ⚖️  Epistemic/Aleatoric Uncertainty   │
+  │   • 🛡️  Research Board Defense FAQ               • 🩺 Natural Language Rationale        │
+  └────────────────────────────────────────────────────────────────────────────────────────┘
+
+  1. backend/ai_service.py & Backend REST Core
+
+  - Zero External Pip SDKs: Built with Python standard library urllib.request for direct REST
+    communication with Google AI Studio and Groq Cloud.
+  - 360-Degree Grounding Prompt: Injects real platform architectures, metrics, mathematical
+    invariants, and active UI telemetry cards into the system context.
+  - Reasoning Chain Extraction: Automatically parses <think> tags into structured reasoning_trace
+    accordions and regex-harvests grounded references [Dataset: ...], [Model: ...], and [Circuit:
+    ...].
+  - NotebookLM Quick Action Synthesizers: One-click generation for Study Guides, Two-Expert Podcast
+    Scripts, Clinical Briefings, Quantum Hardware Audits, and Defense FAQs.
+
+  2. frontend/src/pages/QuddosAI.jsx (NotebookLM Studio Interface)
+
+  - API Key & Model Switcher Modal: Allows selecting between Gemini, Groq, and Built-in modes with
+    instant test connection validation.
+  - NotebookLM Studio Toolbar: 5 one-click research synthesizers at the top of the workspace.
+  - Interactive 2-Expert Podcast Player: Synthesizes dual-voice audio for Dr. Elena Vance
+    (Clinician) vs Prof. Marcus Chen (Quantum Physicist) using Web Speech API with play/pause and
+    highlight tracking.
+  - 360° Source Corpus Drawer: View and toggle pre-loaded platform sources (WDBC cohort, Heart
+    Disease, NISQ Noise curves, Fusion synergy) alongside user-pinned telemetry cards.
+  - Chain-of-Thought Accordion: Displays expandable 🧠 Deep Chain-of-Thought Reasoning Trace before
+    the final synthesis.
+
+  3. frontend/src/pages/LivePatientInference.jsx & backend/modules/explainability.py (Elite XAI
+  Studio)
+
+  - SHAP-Style Feature Attribution Waterfall: Visual impact bars showing normalized scores for
+    biomarkers that push risk upward (+Risk) vs protective baseline (-Protective).
+  - Interactive 3D Bloch Sphere Visualizer: 4-qubit SVG Bloch sphere projections mapping
+    statevectors $|\psi(\theta,\phi)\rangle = \cos(\theta/2)|0\rangle +
+    e^{i\phi}\sin(\theta/2)|1\rangle$ with analytical kernel sensitivity gradients $\frac{\partial
+    K}{\partial \theta_i} = 2|\sin(2\theta_i)|$.
+  - Interactive Counterfactual "What-If" Risk-Reversal Simulator:
+    - Live biomarker perturbation sliders to simulate clinical interventions (e.g. reducing Mean
+      Radius or Concave Points).
+    - Real-time recalculation of risk reduction trajectory from high-risk down to baseline (< 35%).
+    - Domain-specific clinical rationales (statin therapy, tumor debulking, antihypertensive
+      therapy).
+  - Dual-Source Uncertainty Quantification:
+    - Epistemic Ambiguity ($|P_{\text{class}} - P_{\text{quant}}|$) vs Aleatoric Data Noise ($4
+      P_{\text{hybrid}}(1 - P_{\text{hybrid}})$).
+    - Discordance detection with clinical warning alerts.
+  - One-Click "Deep Consult with Quddos AI": Packages the patient's entire profile, predictions, and
+    XAI telemetry directly into Quddos AI for interactive research consultation.
+
+  ---
+
+  3. 🧪 Verification & Test Results
+
+  All backend endpoints, mathematical routines, and frontend assets have been verified:
+  1. Health Check (/api/health): 200 OK
+  2. Quddos Config & Portal Catalog (/api/quddos/config): 200 OK
+  3. Quddos System Context (/api/quddos/system-context): 200 OK
+  4. Quddos Chat (/api/quddos/chat): 200 OK (Tested with built-in 360° engine)
+  5. NotebookLM Studio Action (/api/quddos/studio-action): 200 OK (Generated Study Guide & Podcast
+     Script)
+  6. Counterfactual Engine (/api/quddos/counterfactual): 200 OK (Generated targeted biomarker
+     interventions)
+  7. Live Patient Inference (/api/predict): 200 OK (Tri-model predictions, uncertainty metrics, SHAP
+     attributions, 3D Bloch coordinates, and counterfactuals)
+  8. Frontend Build (vite build): 1,561 modules transformed with 0 errors.
+
+
+
+

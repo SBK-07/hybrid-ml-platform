@@ -40,6 +40,7 @@ pnpm-debug.log*
 .env.test.local
 .env.production.local
 frontend/.env
+.env.example
 
 # OS specific files
 desktop.ini

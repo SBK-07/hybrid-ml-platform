@@ -245,6 +245,29 @@ class BlochCoordinate(BaseModel):
     x: float
     y: float
     z: float
+    alpha_real: float = 1.0
+    beta_real: float = 0.0
+    quantum_state_str: str = "|0>"
+
+
+class CounterfactualItem(BaseModel):
+    feature_name: str
+    original_value: float
+    recommended_value: float
+    delta_change: float
+    percentage_change: float
+    clinical_rationale: str
+
+
+class CounterfactualReport(BaseModel):
+    dataset_key: str
+    original_risk_probability: float
+    target_risk_probability: float
+    original_risk_tier: str
+    target_risk_tier: str
+    is_reversible: bool = True
+    key_interventions: List[CounterfactualItem] = Field(default_factory=list)
+    clinical_takeaway: str
 
 
 class ExplainabilityReport(BaseModel):
@@ -254,6 +277,7 @@ class ExplainabilityReport(BaseModel):
     top_attributions: List[FeatureAttribution]
     quantum_bloch_coordinates: List[BlochCoordinate] = Field(default_factory=list)
     quantum_kernel_sensitivity: Dict[str, float] = Field(default_factory=dict)
+    counterfactual: Optional[CounterfactualReport] = None
     clinical_rationale: str
 
 
