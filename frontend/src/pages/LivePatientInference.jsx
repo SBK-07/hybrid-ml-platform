@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope, Sparkles, Layers, AlertCircle, Compass, HelpCircle, Loader2 } from 'lucide-react';
+import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope, Sparkles, Layers, AlertCircle, Compass, HelpCircle, Loader2, Bot,ArrowRight } from 'lucide-react';
 import { predictPatient } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
 

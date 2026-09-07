@@ -8,6 +8,7 @@ import IndividualExperiment from './pages/IndividualExperiment';
 import CumulativeExperiment from './pages/CumulativeExperiment';
 import LivePatientInference from './pages/LivePatientInference';
 import AdaptiveReport from './pages/AdaptiveReport';
+import RealQCExperiment from './pages/RealQCExperiment';
 import QuddosAI from './pages/QuddosAI';
 import FloatingQuddosButton from './components/FloatingQuddosButton';
 
@@ -22,6 +23,7 @@ function MainLayout() {
       case '/individual': return 'individual';
       case '/cumulative': return 'cumulative';
       case '/inference': return 'inference';
+      case '/real-qc': return 'real-qc';
       case '/report': return 'report';
       case '/quddos': return 'quddos';
       default: return 'overview';
@@ -36,6 +38,7 @@ function MainLayout() {
     else if (tabId === 'individual') navigate('/individual');
     else if (tabId === 'cumulative') navigate('/cumulative');
     else if (tabId === 'inference') navigate('/inference');
+    else if (tabId === 'real-qc') navigate('/real-qc');
     else if (tabId === 'report') navigate('/report');
     else if (tabId === 'quddos') navigate('/quddos');
   };
@@ -55,6 +58,7 @@ function MainLayout() {
           <Route path="/individual" element={<IndividualExperiment />} />
           <Route path="/cumulative" element={<CumulativeExperiment />} />
           <Route path="/inference" element={<LivePatientInference />} />
+          <Route path="/real-qc" element={<RealQCExperiment />} />
           <Route path="/report" element={<AdaptiveReport />} />
           <Route path="/quddos" element={<QuddosAI />} />
         </Routes>

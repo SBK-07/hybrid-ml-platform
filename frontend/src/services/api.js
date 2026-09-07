@@ -312,3 +312,183 @@ export const deleteDataset = async (datasetKey) => {
     throw err;
   }
 };
+
+// ==========================================
+// REAL QUANTUM HARDWARE & IBM RUNTIME API
+// ==========================================
+
+export const getRealQCStatus = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/real-qc/status`);
+    return res.data;
+  } catch (err) {
+    console.warn('Real QC status fetch failed, returning fallback state:', err);
+    return {
+      status: "UNAVAILABLE",
+      has_runtime: false,
+      authenticated: false,
+      active_account: null,
+      predefined_experiments: [
+        {
+          id: "quantum_kernel_overlap",
+          name: "Quantum Kernel State Overlap (ZZFeatureMap)",
+          description: "Computes quantum transition probability |⟨ϕ(x_A)|ϕ(x_B)⟩|² between 2 diagnostic patient feature states in a 2-qubit Hilbert space.",
+          qubits: 2,
+          category: "Quantum Kernel Estimation (QSVM)"
+        },
+        {
+          id: "vqc_ansatz_execution",
+          name: "4-Qubit Variational Quantum Circuit (VQC) Parameterized Ansatz",
+          description: "Runs a 4-qubit parameterized classification circuit with multi-axis rotations and full entangling ladder.",
+          qubits: 4,
+          category: "Variational Quantum Classifiers (VQC)"
+        },
+        {
+          id: "ghz_entanglement_fidelity",
+          name: "4-Qubit GHZ Hardware Coherence & Entanglement Benchmark",
+          description: "Prepares maximum entanglement state 1/√2(|0000⟩ + |1111⟩) to benchmark transmon qubit dephasing and hardware gate fidelity.",
+          qubits: 4,
+          category: "Hardware Characterization"
+        },
+        {
+          id: "patient_biomarker_embedding",
+          name: "Patient Biomarker Hilbert Space Angle Embedding",
+          description: "Embeds actual normalized clinical patient biomarkers into quantum amplitudes using RX/RY rotation maps.",
+          qubits: 4,
+          category: "State Encoding & Feature Mapping"
+        }
+      ]
+    };
+  }
+};
+
+export const getRealQCBackends = async (channel = null) => {
+  try {
+    const params = channel ? { channel } : {};
+    const res = await axios.get(`${API_BASE}/real-qc/backends`, { params });
+    return res.data;
+  } catch (err) {
+    console.warn('Real QC backends fetch failed, returning fallback fleet:', err);
+    return {
+      source: "FALLBACK_CATALOG",
+      backends: [
+        {
+          name: "ibm_brisbane",
+          qubits: 127,
+          simulator: false,
+          status: "active",
+          pending_jobs: 14,
+          basis_gates: ["ecr", "id", "rz", "sx", "x"],
+          processor_type: "Eagle r3",
+          avg_t1_us: 284.5,
+          avg_t2_us: 142.0,
+          avg_2q_error: 0.0078
+        },
+        {
+          name: "ibm_kyoto",
+          qubits: 127,
+          simulator: false,
+          status: "active",
+          pending_jobs: 8,
+          basis_gates: ["ecr", "id", "rz", "sx", "x"],
+          processor_type: "Eagle r3",
+          avg_t1_us: 245.1,
+          avg_t2_us: 118.4,
+          avg_2q_error: 0.0089
+        },
+        {
+          name: "ibm_osaka",
+          qubits: 127,
+          simulator: false,
+          status: "active",
+          pending_jobs: 22,
+          basis_gates: ["ecr", "id", "rz", "sx", "x"],
+          processor_type: "Eagle r3",
+          avg_t1_us: 265.0,
+          avg_t2_us: 130.2,
+          avg_2q_error: 0.0082
+        },
+        {
+          name: "ibm_sherbrooke",
+          qubits: 127,
+          simulator: false,
+          status: "active",
+          pending_jobs: 5,
+          basis_gates: ["ecr", "id", "rz", "sx", "x"],
+          processor_type: "Eagle r3",
+          avg_t1_us: 310.2,
+          avg_t2_us: 165.7,
+          avg_2q_error: 0.0065
+        },
+        {
+          name: "ibmq_qasm_simulator",
+          qubits: 32,
+          simulator: true,
+          status: "active",
+          pending_jobs: 0,
+          basis_gates: ["u1", "u2", "u3", "cx", "id"],
+          processor_type: "Cloud QASM Simulator",
+          avg_t1_us: 9999.0,
+          avg_t2_us: 9999.0,
+          avg_2q_error: 0.0
+        }
+      ]
+    };
+  }
+};
+
+export const saveRealQCCredentials = async (payload) => {
+  const res = await axios.post(`${API_BASE}/real-qc/credentials`, payload);
+  return res.data;
+};
+
+export const deleteRealQCCredentials = async (channel = null, name = null) => {
+  const params = {};
+  if (channel) params.channel = channel;
+  if (name) params.name = name;
+  const res = await axios.delete(`${API_BASE}/real-qc/credentials`, { params });
+  return res.data;
+};
+
+export const runRealQCExperiment = async (payload) => {
+  const res = await axios.post(`${API_BASE}/real-qc/run`, payload);
+  return res.data;
+};
+
+// ==========================================
+// CUSTOM IMPORTED MODELS API
+// ==========================================
+
+export const getCustomModels = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/models/custom`);
+    return res.data.custom_models || [];
+  } catch (err) {
+    console.warn('Failed to fetch custom models, returning empty list:', err);
+    return [];
+  }
+};
+
+export const uploadCustomModel = async (formData) => {
+  const res = await axios.post(`${API_BASE}/models/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return res.data;
+};
+
+export const deleteCustomModel = async (modelId) => {
+  const res = await axios.delete(`${API_BASE}/models/custom/${modelId}`);
+  return res.data;
+};
+
+export const getCustomModelTemplates = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/models/template-code`);
+    return res.data.templates || {};
+  } catch (err) {
+    console.warn('Failed to fetch custom model templates:', err);
+    return {};
+  }
+};
+
+

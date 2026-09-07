@@ -15,6 +15,7 @@ joblib>=1.2.0
 # Quantum Machine Learning
 qiskit>=1.0.0
 qiskit-aer>=0.13.0
+qiskit-ibm-runtime>=0.30.0
 
 # Visualization & Data Analysis
 matplotlib>=3.7.0

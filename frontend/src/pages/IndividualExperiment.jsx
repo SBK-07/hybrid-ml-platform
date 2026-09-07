@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronDown, ChevronUp, ChevronRight, Plus, Zap, Database, Play,
   FlaskConical, CheckCircle2, Loader2, Trash2, HelpCircle, Sparkles,
-  BookOpen, Cpu, ShieldAlert, BarChart2, Settings, GraduationCap, Image, Atom, LineChart
+  BookOpen, Cpu, ShieldAlert, BarChart2, Settings, GraduationCap, Image, Atom, LineChart, UploadCloud, Layers
 } from 'lucide-react';
 import CardActionMenu from '../components/CardActionMenu';
 import Atom4Orbits from '../components/Atom4Orbits';
-import { getQuantumFeasibility, getDatasets, deleteDataset } from '../services/api';
+import CustomModelModal from '../components/CustomModelModal';
+import { getQuantumFeasibility, getDatasets, deleteDataset, getCustomModels, deleteCustomModel } from '../services/api';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend
 } from 'chart.js';
@@ -87,9 +88,12 @@ export default function IndividualExperiment() {
     { id: 'diabetes', key: 'diabetes', name: 'Pima Indians Diabetes', features_count: 8, total_samples: 768, description: 'Metabolic & diagnostic profile', modality: 'Tabular', built_in: true },
     { id: 'parkinsons', key: 'parkinsons', name: 'Parkinson\'s Biomedical Voice', features_count: 22, total_samples: 195, description: 'Phonation acoustic measures', modality: 'Biosignal', built_in: true }
   ]);
+  const [customModels, setCustomModels] = useState([]);
+  const [isCustomModelModalOpen, setIsCustomModelModalOpen] = useState(false);
 
   useEffect(() => {
     fetchDatasets();
+    fetchCustomModels();
   }, []);
 
   const fetchDatasets = async () => {
@@ -100,6 +104,40 @@ export default function IndividualExperiment() {
       }
     } catch (err) {
       console.error('Failed to fetch datasets:', err);
+    }
+  };
+
+  const fetchCustomModels = async () => {
+    try {
+      const cms = await getCustomModels();
+      setCustomModels(cms);
+    } catch (err) {
+      console.error('Failed to fetch custom models:', err);
+    }
+  };
+
+  const handleDeleteCustomModel = async (e, modelId, modelName) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!window.confirm(`Are you sure you want to permanently delete custom model "${modelName}"?`)) {
+      return;
+    }
+    try {
+      await deleteCustomModel(modelId);
+      await fetchCustomModels();
+      if (selectedModel === modelId) {
+        setSelectedModel('svm');
+      }
+      setUploadMessage({
+        type: 'success',
+        text: `✓ Successfully removed custom model "${modelName}".`
+      });
+    } catch (err) {
+      console.error('Error deleting custom model:', err);
+      setUploadMessage({
+        type: 'error',
+        text: `Failed to remove custom model: ${err.message}`
+      });
     }
   };
 
@@ -133,7 +171,7 @@ export default function IndividualExperiment() {
     }
   };
 
-  const models = [
+  const baseModels = [
     { id: 'svm', name: 'SVM (RBF Kernel)', type: 'classical', description: 'Support Vector Machine with RBF kernel for optimal non-linear classification.' },
     { id: 'mlp', name: 'Neural Network (MLP)', type: 'classical', description: 'Multi-Layer Perceptron neural network with gradient descent backpropagation.' },
     { id: 'qsvm', name: 'Kernel SVM (QSVM)', type: 'quantum', description: 'Quantum Support Vector Machine mapping features via Qiskit ZZFeatureMap.' },
@@ -141,11 +179,33 @@ export default function IndividualExperiment() {
     { id: 'qvc', name: 'Variational Circuit (QVC)', type: 'quantum', description: 'Quantum Variational Classifier with entangling layers.' }
   ];
 
+  const models = [
+    ...baseModels,
+    ...customModels.map(cm => ({
+      id: cm.id,
+      name: cm.display_name || cm.name,
+      type: (cm.paradigm || 'custom').toLowerCase().includes('quantum') ? 'quantum' : 'custom',
+      is_custom: true,
+      description: cm.description || `Custom imported estimator (${cm.filename}) with dynamic feature adapter.`
+    }))
+  ];
+
   const currentModelObj = models.find(m => m.id === selectedModel);
   const currentDatasetObj = datasetsList.find(d => (d.id || d.key) === selectedDataset);
   const isQuantum = selectedModel !== 'svm' && selectedModel !== 'mlp';
 
   const getStageDefinitions = (mType) => {
+    const isCustom = mType?.startsWith('custom_') || currentModelObj?.is_custom;
+    if (isCustom) {
+      return [
+        { id: 'ingest', title: '1. Ingestion & Modality Ingestion', icon: Database, color: '#38BDF8' },
+        { id: 'custom_deserialization', title: '2. Artifact Deserialization & Validation', icon: Settings, color: '#F59E0B' },
+        { id: 'feature_alignment', title: '3. Dynamic Feature Alignment Adapter', icon: Layers, color: '#F59E0B' },
+        { id: 'train', title: '4. Model Inference & Platt Calibration', icon: Zap, color: '#F59E0B' },
+        { id: 'eval', title: '5. 5-Fold Stratified Cross-Validation', icon: BarChart2, color: 'var(--classical-color)' },
+        { id: 'finalize', title: '6. Diagnostic Metrics & Provenance Hashing', icon: CheckCircle2, color: 'var(--status-success)' }
+      ];
+    }
     const isQ = ['qsvm', 'qnn', 'qvc'].includes(mType);
     if (isQ) {
       return [
@@ -171,9 +231,11 @@ export default function IndividualExperiment() {
     if (rawId) {
       const rid = String(rawId).toLowerCase();
       if (rid === 'ingestion' || rid === 'ingest') return 'ingest';
+      if (rid === 'custom_deserialization' || rid === 'deserialization') return 'custom_deserialization';
+      if (rid === 'feature_alignment' || rid === 'alignment') return 'feature_alignment';
       if (rid === 'preprocessing' || rid === 'preprocess' || rid === 'eda_features') return 'preprocess';
       if (rid === 'quantum_compression' || rid === 'quantum_circuit' || rid === 'encode') return 'encode';
-      if (rid === 'classical_optimization' || rid === 'qpu_simulation' || rid === 'quantum_optimization' || rid === 'train') return 'train';
+      if (rid === 'classical_optimization' || rid === 'qpu_simulation' || rid === 'quantum_optimization' || rid === 'model_inference' || rid === 'train') return 'train';
       if (rid === 'cross_validation' || rid === 'test_evaluation' || rid === 'quantum_evaluation' || rid === 'eval') return 'eval';
       if (rid === 'explainability_reporting' || rid === 'quantum_bloch_xai' || rid === 'statistical_verdict' || rid === 'finalize') return 'finalize';
     }
@@ -184,6 +246,12 @@ export default function IndividualExperiment() {
     if (!lineText) return 'ingest';
     if (lineText.startsWith('[INGEST]') || lineText.startsWith('[SYSTEM]')) return 'ingest';
     if (lineText.startsWith('[PREPROC]') || lineText.startsWith('[EDA]')) return 'preprocess';
+    if (lineText.startsWith('[CUSTOM]')) {
+      const lower = lineText.toLowerCase();
+      if (lower.includes('deserializ') || lower.includes('contract') || lower.includes('protocol')) return 'custom_deserialization';
+      if (lower.includes('align') || lower.includes('dimension') || lower.includes('pca') || lower.includes('pad')) return 'feature_alignment';
+      return 'train';
+    }
     if (lineText.startsWith('[QUANTUM]') || lineText.startsWith('[QISKIT]') || lineText.startsWith('[SIMULATOR]')) {
       const lower = lineText.toLowerCase();
       if (lower.includes('pca') || lower.includes('hilbert') || lower.includes('qubit') || lower.includes('feature map') || lower.includes('angle')) {
@@ -199,6 +267,7 @@ export default function IndividualExperiment() {
 
   const getLogTagColor = (lineText) => {
     if (!lineText || typeof lineText !== 'string') return 'var(--text-primary)';
+    if (lineText.startsWith('[CUSTOM]')) return '#F59E0B';
     if (lineText.startsWith('[CLASSICAL]')) return 'var(--classical-color)';
     if (lineText.startsWith('[QISKIT]') || lineText.startsWith('[QUANTUM]') || lineText.startsWith('[SIMULATOR]')) return 'var(--quantum-color)';
     if (lineText.startsWith('[PREPROC]')) return '#C084FC';
@@ -571,7 +640,7 @@ export default function IndividualExperiment() {
           <div ref={modelDropdownRef} style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
             <div onClick={() => !loading && setIsModelOpen(!isModelOpen)} style={dropdownTriggerStyle(isModelOpen)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1 }}>
-                <Zap size={18} style={{ color: currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)', flexShrink: 0 }} />
+                <Zap size={18} style={{ color: currentModelObj?.is_custom ? '#F59E0B' : currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)', flexShrink: 0 }} />
                 <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Model</span>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -580,9 +649,15 @@ export default function IndividualExperiment() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <span className={`badge-paradigm ${currentModelObj?.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
-                  {currentModelObj?.type === 'classical' ? 'Classical' : 'Quantum'}
-                </span>
+                {currentModelObj?.is_custom ? (
+                  <span className="badge-paradigm" style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    Custom
+                  </span>
+                ) : (
+                  <span className={`badge-paradigm ${currentModelObj?.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
+                    {currentModelObj?.type === 'classical' ? 'Classical' : 'Quantum'}
+                  </span>
+                )}
                 <ChevronDown size={16} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isModelOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </div>
             </div>
@@ -611,12 +686,36 @@ export default function IndividualExperiment() {
                         setHoveredModelItem(null);
                       }}
                     >
-                      <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isSelected ? 'var(--classical-color)' : 'var(--text-primary)' }}>
+                      <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isSelected ? 'var(--classical-color)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {model.name}
                       </span>
-                      <span className={`badge-paradigm ${model.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.7rem', padding: '2px 8px' }}>
-                        {model.type === 'classical' ? 'Classical' : 'Quantum'}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {model.is_custom ? (
+                          <>
+                            <span className="badge-paradigm" style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                              Custom
+                            </span>
+                            <button
+                              type="button"
+                              title="Delete custom model"
+                              onClick={(e) => handleDeleteCustomModel(e, model.id, model.name)}
+                              style={{
+                                background: 'transparent', border: 'none', cursor: 'pointer',
+                                color: 'var(--text-tertiary)', padding: '2px 4px', borderRadius: '4px',
+                                display: 'flex', alignItems: 'center'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--status-danger)'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        ) : (
+                          <span className={`badge-paradigm ${model.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.7rem', padding: '2px 8px' }}>
+                            {model.type === 'classical' ? 'Classical' : 'Quantum'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -632,12 +731,18 @@ export default function IndividualExperiment() {
                     animation: 'stageFadeIn 0.15s ease-out'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: hoveredModelItem.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: hoveredModelItem.is_custom ? '#F59E0B' : hoveredModelItem.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)' }}>
                         {hoveredModelItem.name}
                       </span>
-                      <span className={`badge-paradigm ${hoveredModelItem.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
-                        {hoveredModelItem.type === 'classical' ? 'Classical' : 'Quantum'}
-                      </span>
+                      {hoveredModelItem.is_custom ? (
+                        <span className="badge-paradigm" style={{ fontSize: '0.65rem', padding: '1px 6px', background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B' }}>
+                          Custom
+                        </span>
+                      ) : (
+                        <span className={`badge-paradigm ${hoveredModelItem.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
+                          {hoveredModelItem.type === 'classical' ? 'Classical' : 'Quantum'}
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                       {hoveredModelItem.description}
@@ -787,6 +892,18 @@ export default function IndividualExperiment() {
           >
             {uploading ? <Loader2 size={16} className="spinner" /> : <Plus size={16} />}
             {uploading ? 'Preprocessing...' : 'Upload Custom CSV'}
+          </button>
+
+          {/* 5. Import Custom Model (.joblib / .pkl) Button */}
+          <button
+            type="button"
+            onClick={() => setIsCustomModelModalOpen(true)}
+            disabled={loading || uploading}
+            className="btn btn-outline"
+            style={{ height: '44px', padding: '0 18px', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0, borderColor: 'rgba(245, 158, 11, 0.4)', color: '#F59E0B' }}
+          >
+            <UploadCloud size={16} />
+            Import Model (.joblib / .pkl)
           </button>
         </div>
 
@@ -1626,6 +1743,22 @@ export default function IndividualExperiment() {
           </div>
         </div>
       )}
+
+      {/* Custom Model Upload Modal */}
+      <CustomModelModal
+        isOpen={isCustomModelModalOpen}
+        onClose={() => setIsCustomModelModalOpen(false)}
+        onModelUploaded={async (newModel) => {
+          await fetchCustomModels();
+          if (newModel?.id) {
+            setSelectedModel(newModel.id);
+          }
+          setUploadMessage({
+            type: 'success',
+            text: `✓ Custom model "${newModel?.name || 'Imported Model'}" registered and selected.`
+          });
+        }}
+      />
 
     </div>
   );

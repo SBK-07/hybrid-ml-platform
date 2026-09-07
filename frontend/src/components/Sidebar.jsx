@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, Database, Zap, BarChart3, Activity, FileText, Bot, Radio, Sun, Moon } from 'lucide-react';
+import { Compass, Database, Zap, BarChart3, Activity, Cpu, FileText, Bot, Radio, Sun, Moon } from 'lucide-react';
 import Atom4Orbits from './Atom4Orbits';
 
 export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = true }) {
@@ -19,6 +19,7 @@ export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = tru
     { id: 'individual', icon: <Zap size={18} />, label: 'Individual Experiment' },
     { id: 'cumulative', icon: <BarChart3 size={18} />, label: 'Cumulative Benchmark' },
     { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' },
+    { id: 'real-qc', icon: <Cpu size={18} />, label: 'Real QC Hardware', badge: 'IBM QPU' },
     { id: 'report', icon: <FileText size={18} />, label: 'Adaptive Report Builder' },
     { id: 'quddos', icon: <Bot size={18} />, label: 'Quddos AI Assistant' }
   ];

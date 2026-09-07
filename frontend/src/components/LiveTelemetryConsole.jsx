@@ -3,6 +3,7 @@ import { Terminal, ChevronRight, ChevronDown } from 'lucide-react';
 
 const getLogColor = (log) => {
   if (!log || typeof log !== 'string') return 'var(--text-primary)';
+  if (log.startsWith('[CUSTOM]')) return '#F59E0B';
   if (log.startsWith('[CLASSICAL]') || log.startsWith('[INGEST]')) return 'var(--classical-color)';
   if (log.startsWith('[QISKIT]') || log.startsWith('[QUANTUM]') || log.startsWith('[SIMULATOR]')) return 'var(--quantum-color)';
   if (log.startsWith('[FUSION]')) return 'var(--hybrid-color)';

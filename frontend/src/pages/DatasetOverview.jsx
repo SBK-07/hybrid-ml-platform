@@ -4,9 +4,11 @@ import {
   Database, Eye, Sparkles, Layers, CheckCircle2, AlertTriangle,
   Upload, Trash2, ArrowRight, ShieldCheck, Activity, Info, BarChart2,
   Table, Image as ImageIcon, Cpu, FileText, Download, Zap, RefreshCw,
-  Search, Sliders, PieChart, TrendingUp
+  Search, Sliders, PieChart, TrendingUp, Heart, Microscope, Waves,
+  Stethoscope, FileSpreadsheet
 } from 'lucide-react';
 import { getDatasets, getDatasetOverview, deleteDataset, uploadCustomDataset } from '../services/api';
+import CardActionMenu from '../components/CardActionMenu';
 
 export default function DatasetOverview() {
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ export default function DatasetOverview() {
   const [overviewData, setOverviewData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'advanced'
-  const [sampleView, setSampleView] = useState('images'); // 'images' | 'table'
+  const [sampleView, setSampleView] = useState('cases'); // 'cases' | 'table'
   const [searchTerm, setSearchTerm] = useState('');
 
   // Upload modal state
@@ -78,7 +80,7 @@ export default function DatasetOverview() {
     e.preventDefault();
     if (!uploadFile) return;
     setUploading(true);
-    setUploadMsg('Ingesting, extracting radiomics & preprocessing dataset...');
+    setUploadMsg('Ingesting, extracting clinical metrics & preprocessing dataset...');
     try {
       const res = await uploadCustomDataset(uploadFile);
       setUploadMsg('Dataset uploaded and preprocessed successfully!');
@@ -109,7 +111,7 @@ export default function DatasetOverview() {
     f.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const sampleImages = overviewData?.sample_images || [];
+  const sampleCases = overviewData?.sample_cases || overviewData?.sample_images || [];
   const sampleRecords = overviewData?.sample_records || [];
   const classDist = overviewData?.class_distribution || {};
   const totalSamples = overviewData?.total_samples || 0;
@@ -119,6 +121,18 @@ export default function DatasetOverview() {
   const diseasedPct = 100 - healthyPct;
 
   const pcaData = advanced?.pca_quantum_compression || {};
+  const sampleType = overviewData?.sample_breakdown_type || 'tabular_generic';
+  const isVisualSample = sampleCases.some(s => !!s.image_data_url);
+
+  // Helper for domain-specific icon
+  const getDomainIcon = () => {
+    const key = (overviewData?.dataset_key || selectedDataset).toLowerCase();
+    if (key.includes('cancer') || sampleType === 'cytology') return <Microscope size={18} style={{ color: 'var(--classical-color)' }} />;
+    if (key.includes('cardio')) return <Heart size={18} style={{ color: '#DC2626' }} />;
+    if (key.includes('diabetes')) return <Activity size={18} style={{ color: '#2563EB' }} />;
+    if (key.includes('parkinson')) return <Waves size={18} style={{ color: '#7C3AED' }} />;
+    return <FileSpreadsheet size={18} style={{ color: 'var(--classical-color)' }} />;
+  };
 
   return (
     <div className="dataset-overview-page" style={{ paddingBottom: '60px' }}>
@@ -128,7 +142,7 @@ export default function DatasetOverview() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span className="badge-sih" style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--classical-color)', borderColor: 'rgba(37, 99, 235, 0.3)' }}>
-                EXPLORATORY DATA ANALYSIS & RADIOMICS
+                {isVisualSample ? 'MULTIMODAL RADIOMICS & CYTOPATHOLOGY' : 'STRUCTURED CLINICAL BIOMARKERS & TABULAR EDA'}
               </span>
               <span className="badge-sih" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--status-success)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
                 LEAK-FREE 80/20 SPLIT VERIFIED
@@ -138,7 +152,7 @@ export default function DatasetOverview() {
               Dataset Overview & Deep Diagnostic Profile
             </h1>
             <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '0.9rem' }}>
-              Comprehensive statistical EDA, clinical biomarker interpretations, multimodal MRI radiomics, and quantum state preparation telemetry.
+              Modal-adaptive exploratory analysis, authentic cohort profiles, statistical distributions, and 4-qubit Hilbert space telemetry.
             </p>
           </div>
 
@@ -149,7 +163,7 @@ export default function DatasetOverview() {
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', fontWeight: 600 }}
             >
               <Upload size={15} />
-              <span>Upload CSV / MRI Archive</span>
+              <span>Upload CSV Dataset</span>
             </button>
           </div>
         </div>
@@ -203,51 +217,74 @@ export default function DatasetOverview() {
             )}
           </div>
 
-          {/* Perspective View Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary, #F1F5F9)', padding: '4px', borderRadius: '8px' }}>
-            <button
-              onClick={() => setActiveTab('basic')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                background: activeTab === 'basic' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
-                color: activeTab === 'basic' ? 'var(--classical-color)' : 'var(--text-secondary)',
-                boxShadow: activeTab === 'basic' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Info size={15} />
-              <span>Basic (Student Level)</span>
-            </button>
+          {/* Perspective View Toggle & Action Menu */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary, #F1F5F9)', padding: '4px', borderRadius: '8px' }}>
+              <button
+                onClick={() => setActiveTab('basic')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  background: activeTab === 'basic' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
+                  color: activeTab === 'basic' ? 'var(--classical-color)' : 'var(--text-secondary)',
+                  boxShadow: activeTab === 'basic' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Info size={15} />
+                <span>Basic (Student Level)</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('advanced')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                background: activeTab === 'advanced' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
-                color: activeTab === 'advanced' ? 'var(--quantum-color, #7C3AED)' : 'var(--text-secondary)',
-                boxShadow: activeTab === 'advanced' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Cpu size={15} />
-              <span>Advanced (Researcher & QML)</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('advanced')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  background: activeTab === 'advanced' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
+                  color: activeTab === 'advanced' ? 'var(--quantum-color, #7C3AED)' : 'var(--text-secondary)',
+                  boxShadow: activeTab === 'advanced' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Cpu size={15} />
+                <span>Advanced (Researcher & QML)</span>
+              </button>
+            </div>
+
+            {overviewData && (
+              <CardActionMenu
+                title={`${overviewData.dataset_name || selectedDataset} - Complete Dataset Profile`}
+                category="dataset_overview"
+                data={{
+                  dataset_key: selectedDataset,
+                  dataset_name: overviewData.dataset_name,
+                  domain: overviewData.domain,
+                  modality: overviewData.modality,
+                  total_samples: overviewData.total_samples,
+                  total_features: overviewData.total_features,
+                  positive_label: overviewData.positive_label,
+                  negative_label: overviewData.negative_label,
+                  class_distribution: classDist,
+                  basic_summary: basic.summary_headline,
+                  quantum_variance: pcaData.cumulative_variance_pct
+                }}
+                metadata={{ dataset: selectedDataset }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -257,7 +294,7 @@ export default function DatasetOverview() {
           <RefreshCw size={32} className="spin-slow" style={{ color: 'var(--classical-color)', margin: '0 auto 12px auto' }} />
           <h3 style={{ margin: '0 0 4px 0' }}>Computing Deep Exploratory Diagnostics...</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-            Extracting statistical distributions, GLCM radiomics, correlation tensors, and 4-qubit PCA projections.
+            Extracting statistical distributions, correlation tensors, domain biomarkers, and 4-qubit PCA projections.
           </p>
         </div>
       ) : (
@@ -310,66 +347,91 @@ export default function DatasetOverview() {
           </div>
 
           {/* ================================================================= */}
-          {/* SECTION: VISUAL SAMPLE BREAKDOWN (IMAGE & TABULAR BREAKDOWN) */}
+          {/* SECTION: MODAL-ADAPTIVE SAMPLE BREAKDOWN */}
           {/* ================================================================= */}
           <div className="card" style={{ marginBottom: '24px', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ImageIcon size={20} style={{ color: 'var(--classical-color)' }} />
-                  <span>Multimodal Sample Breakdown & Visual Inspection</span>
+                  {getDomainIcon()}
+                  <span>
+                    {isVisualSample
+                      ? 'Multimodal Sample Breakdown & Microscopy / Scan Inspection'
+                      : 'Modal-Adaptive Cohort Sample Records & Clinical Biomarker Profiles'}
+                  </span>
                 </h3>
                 <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                  Inspection of representative patient scans / records with extracted radiomics biomarkers and diagnostic interpretation.
+                  {isVisualSample
+                    ? 'Inspection of representative cytopathology / radiomics patient cases with morphometric features and diagnostic findings.'
+                    : `Inspection of authentic ${overviewData?.domain || 'clinical'} patient records with structured laboratory biomarkers, risk stratification, and phenotypic findings.`}
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-secondary, #F1F5F9)', padding: '3px', borderRadius: '6px' }}>
-                <button
-                  onClick={() => setSampleView('images')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 12px',
-                    borderRadius: '5px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: sampleView === 'images' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
-                    color: sampleView === 'images' ? 'var(--classical-color)' : 'var(--text-secondary)'
-                  }}
-                >
-                  <ImageIcon size={14} />
-                  <span>Visual Scans ({sampleImages.length})</span>
-                </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-secondary, #F1F5F9)', padding: '3px', borderRadius: '6px' }}>
+                  <button
+                    onClick={() => setSampleView('cases')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '5px 12px',
+                      borderRadius: '5px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      background: sampleView === 'cases' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
+                      color: sampleView === 'cases' ? 'var(--classical-color)' : 'var(--text-secondary)'
+                    }}
+                  >
+                    {isVisualSample ? <ImageIcon size={14} /> : <Stethoscope size={14} />}
+                    <span>{isVisualSample ? `Visual Cases (${sampleCases.length})` : `Clinical Profiles (${sampleCases.length})`}</span>
+                  </button>
 
-                <button
-                  onClick={() => setSampleView('table')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 12px',
-                    borderRadius: '5px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: sampleView === 'table' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
-                    color: sampleView === 'table' ? 'var(--classical-color)' : 'var(--text-secondary)'
+                  <button
+                    onClick={() => setSampleView('table')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '5px 12px',
+                      borderRadius: '5px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      background: sampleView === 'table' ? 'var(--card-bg, #FFFFFF)' : 'transparent',
+                      color: sampleView === 'table' ? 'var(--classical-color)' : 'var(--text-secondary)'
+                    }}
+                  >
+                    <Table size={14} />
+                    <span>Raw Table ({sampleRecords.length})</span>
+                  </button>
+                </div>
+
+                <CardActionMenu
+                  title={`${overviewData?.dataset_name || selectedDataset} - Sample Cohort Breakdowns`}
+                  category="sample_cases"
+                  data={{
+                    sample_type: sampleType,
+                    cases_count: sampleCases.length,
+                    samples: sampleCases.map(s => ({
+                      case_id: s.case_id,
+                      sample_id: s.sample_id,
+                      label: s.label,
+                      metrics: s.key_metrics,
+                      finding: s.visual_breakdown
+                    }))
                   }}
-                >
-                  <Table size={14} />
-                  <span>Raw Table ({sampleRecords.length})</span>
-                </button>
+                  metadata={{ dataset: selectedDataset }}
+                />
               </div>
             </div>
 
-            {sampleView === 'images' ? (
+            {sampleView === 'cases' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-                {sampleImages.map((sample, idx) => (
+                {sampleCases.map((sample, idx) => (
                   <div
                     key={idx}
                     style={{
@@ -383,9 +445,14 @@ export default function DatasetOverview() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                        {sample.sample_id}
-                      </span>
+                      <div>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', display: 'block' }}>
+                          {sample.sample_id}
+                        </span>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                          {sample.case_id}
+                        </span>
+                      </div>
                       <span
                         className="badge-sih"
                         style={{
@@ -400,8 +467,9 @@ export default function DatasetOverview() {
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                      {sample.image_data_url ? (
+                    {/* If visual smear/scan available */}
+                    {sample.image_data_url ? (
+                      <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
                         <img
                           src={sample.image_data_url}
                           alt={sample.sample_id}
@@ -414,41 +482,45 @@ export default function DatasetOverview() {
                             background: '#000'
                           }}
                         />
-                      ) : (
-                        <div
-                          style={{
-                            width: '110px',
-                            height: '110px',
-                            borderRadius: '8px',
-                            background: '#1E293B',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#94A3B8',
-                            fontSize: '0.75rem'
-                          }}
-                        >
-                          Scan Preview
-                        </div>
-                      )}
 
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                          EXTRACTED RADIOMICS:
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                            EXTRACTED MORPHOMETRICS:
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '0.75rem' }}>
+                            {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
+                              <div key={mName} style={{ background: 'var(--bg-card-solid)', padding: '3px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                                <span style={{ color: 'var(--text-secondary)' }}>{mName}: </span>
+                                <strong>{typeof mVal === 'number' ? mVal.toFixed(2) : String(mVal)}</strong>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '0.75rem' }}>
+                      </div>
+                    ) : (
+                      /* Tabular biomarker patient case card */
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Activity size={13} style={{ color: 'var(--classical-color)' }} />
+                          <span>STRUCTURED CLINICAL BIOMARKERS & VITALS:</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '6px', fontSize: '0.75rem' }}>
                           {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
-                            <div key={mName} style={{ background: 'var(--bg-card-solid)', padding: '3px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.06)' }}>
-                              <span style={{ color: 'var(--text-secondary)' }}>{mName}: </span>
-                              <strong>{mVal}</strong>
+                            <div key={mName} style={{ background: 'var(--bg-card-solid)', padding: '5px 8px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                              <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>{mName}</div>
+                              <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                                {typeof mVal === 'number' ? mVal.toFixed(2) : String(mVal)}
+                              </strong>
                             </div>
                           ))}
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4, background: 'var(--bg-card-solid)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)' }}>
-                      <strong style={{ color: 'var(--text-primary)' }}>Radiology Finding: </strong>
+                      <strong style={{ color: 'var(--text-primary)' }}>
+                        {sample.image_data_url ? 'Diagnostic Finding: ' : 'Clinical Case Summary: '}
+                      </strong>
                       {sample.visual_breakdown}
                     </div>
                   </div>
@@ -494,9 +566,21 @@ export default function DatasetOverview() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Concept & Relevance Card */}
               <div className="card" style={{ borderLeft: '4px solid var(--classical-color)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Info size={20} style={{ color: 'var(--classical-color)' }} />
-                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Clinical Context & Pathology Overview</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Info size={20} style={{ color: 'var(--classical-color)' }} />
+                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Clinical Context & Pathology Overview</h3>
+                  </div>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Clinical Context & Pathology Overview`}
+                    category="clinical_context"
+                    data={{
+                      dataset: selectedDataset,
+                      headline: basic.summary_headline,
+                      relevance: basic.clinical_relevance
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
                 </div>
                 <p style={{ fontSize: '0.92rem', lineHeight: 1.5, color: 'var(--text-primary)', margin: '0 0 10px 0' }}>
                   {basic.summary_headline}
@@ -508,10 +592,22 @@ export default function DatasetOverview() {
 
               {/* Class Balance Breakdown */}
               <div className="card">
-                <h3 style={{ margin: '0 0 14px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <PieChart size={18} style={{ color: 'var(--status-success)' }} />
-                  <span>Cohort Class Balance & Data Quality</span>
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <PieChart size={18} style={{ color: 'var(--status-success)' }} />
+                    <span>Cohort Class Balance & Data Quality</span>
+                  </h3>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Cohort Class Balance`}
+                    category="class_balance"
+                    data={{
+                      healthy_cohort: `${overviewData?.negative_label} (${healthyCount} patients, ${healthyPct}%)`,
+                      pathological_cohort: `${overviewData?.positive_label} ({diseasedCount} patients, ${diseasedPct}%)`,
+                      data_hygiene_verdict: basic.data_hygiene_verdict
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', alignItems: 'center' }}>
                   <div>
@@ -545,10 +641,20 @@ export default function DatasetOverview() {
 
               {/* Key Biomarkers Explained */}
               <div className="card">
-                <h3 style={{ margin: '0 0 14px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Layers size={18} style={{ color: 'var(--classical-color)' }} />
-                  <span>Key Diagnostic Biomarkers & Features Explained</span>
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Layers size={18} style={{ color: 'var(--classical-color)' }} />
+                    <span>Key Diagnostic Biomarkers & Features Explained</span>
+                  </h3>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Key Biomarkers Explained`}
+                    category="biomarkers_explained"
+                    data={{
+                      biomarkers: basic.key_biomarkers_explained || []
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
                   {(basic.key_biomarkers_explained || []).map((bm, idx) => (
@@ -579,10 +685,20 @@ export default function DatasetOverview() {
 
               {/* Student Takeaways */}
               <div className="card" style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(124, 58, 237, 0.03) 100%)' }}>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sparkles size={16} style={{ color: 'var(--quantum-color)' }} />
-                  <span>Student & Clinician Takeaways</span>
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={16} style={{ color: 'var(--quantum-color)' }} />
+                    <span>Student & Clinician Takeaways</span>
+                  </h3>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Student & Clinician Takeaways`}
+                    category="takeaways"
+                    data={{
+                      takeaways: basic.student_takeaways || []
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
+                </div>
                 <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
                   {(basic.student_takeaways || []).map((t, idx) => (
                     <li key={idx}>{t}</li>
@@ -602,9 +718,22 @@ export default function DatasetOverview() {
                     <Cpu size={20} style={{ color: 'var(--quantum-color)' }} />
                     <span>4-Qubit Quantum Hilbert Space Embedding (Qiskit PCA)</span>
                   </h3>
-                  <span className="badge-sih" style={{ background: 'rgba(124, 58, 237, 0.1)', color: 'var(--quantum-color)', borderColor: 'rgba(124, 58, 237, 0.3)' }}>
-                    DIMENSION: 2⁴ = 16 HILBERT STATES
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="badge-sih" style={{ background: 'rgba(124, 58, 237, 0.1)', color: 'var(--quantum-color)', borderColor: 'rgba(124, 58, 237, 0.3)' }}>
+                      DIMENSION: 2⁴ = 16 HILBERT STATES
+                    </span>
+                    <CardActionMenu
+                      title={`${overviewData?.dataset_name || selectedDataset} - 4-Qubit Quantum PCA Compression`}
+                      category="quantum_pca"
+                      data={{
+                        cumulative_variance: pcaData.cumulative_variance_pct,
+                        barren_plateau_risk: pcaData.barren_plateau_risk,
+                        encoding_formula: pcaData.encoding_formula,
+                        components: pcaData.components
+                      }}
+                      metadata={{ dataset: selectedDataset }}
+                    />
+                  </div>
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 14px 0' }}>
@@ -644,10 +773,20 @@ export default function DatasetOverview() {
 
               {/* Feature Correlation Matrix & Top Pairs */}
               <div className="card">
-                <h3 style={{ margin: '0 0 14px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TrendingUp size={18} style={{ color: 'var(--classical-color)' }} />
-                  <span>Feature Correlation & Multi-Collinearity Analysis</span>
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <TrendingUp size={18} style={{ color: 'var(--classical-color)' }} />
+                    <span>Feature Correlation & Multi-Collinearity Analysis</span>
+                  </h3>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Feature Correlation Pairs`}
+                    category="correlation_analysis"
+                    data={{
+                      top_pairs: advanced.top_correlated_pairs || []
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
                   {(advanced.top_correlated_pairs || []).map((pair, pIdx) => (
@@ -699,7 +838,7 @@ export default function DatasetOverview() {
                     </h3>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ position: 'relative' }}>
                       <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                       <input
@@ -716,6 +855,21 @@ export default function DatasetOverview() {
                         }}
                       />
                     </div>
+
+                    <CardActionMenu
+                      title={`${overviewData?.dataset_name || selectedDataset} - Feature Statistical Distributions`}
+                      category="feature_statistics"
+                      data={{
+                        features_summary: statTable.map(f => ({
+                          name: f.name,
+                          mean: f.mean,
+                          std: f.std,
+                          median: f.median,
+                          skewness: f.skewness
+                        }))
+                      }}
+                      metadata={{ dataset: selectedDataset }}
+                    />
                   </div>
                 </div>
 
@@ -759,10 +913,22 @@ export default function DatasetOverview() {
 
               {/* Covariate Shift Verification */}
               <div className="card">
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} style={{ color: 'var(--status-success)' }} />
-                  <span>Covariate Shift & Train/Test Partition Drift (Kolmogorov-Smirnov Test)</span>
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ShieldCheck size={18} style={{ color: 'var(--status-success)' }} />
+                    <span>Covariate Shift & Train/Test Partition Drift (Kolmogorov-Smirnov Test)</span>
+                  </h3>
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Covariate Shift KS Analysis`}
+                    category="covariate_shift"
+                    data={{
+                      methodology: advanced.covariate_shift_analysis?.methodology,
+                      verdict: advanced.covariate_shift_analysis?.drift_verdict,
+                      results: advanced.covariate_shift_analysis?.tested_features
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
+                </div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary, #F8FAFC)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                   <strong>Statistical Verdict: </strong> {advanced.covariate_shift_analysis?.drift_verdict}
                 </div>
@@ -814,7 +980,7 @@ export default function DatasetOverview() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Upload size={20} style={{ color: 'var(--classical-color)' }} />
-                <span>Upload Clinical Dataset / MRI Archive</span>
+                <span>Upload Clinical Dataset (CSV)</span>
               </h3>
               <button
                 onClick={() => setShowUploadModal(false)}
@@ -827,22 +993,27 @@ export default function DatasetOverview() {
             <form onSubmit={handleFileUpload}>
               <div style={{ border: '2px dashed var(--border-color)', borderRadius: '8px', padding: '24px', textAlign: 'center', marginBottom: '16px', background: 'var(--bg-secondary, #F8FAFC)' }}>
                 <Database size={36} style={{ color: 'var(--classical-color)', margin: '0 auto 8px auto' }} />
-                <p style={{ margin: '0 0 8px 0', fontSize: '0.88rem', fontWeight: 600 }}>
-                  Select a CSV or ZIP / TAR archive
-                </p>
-                <p style={{ margin: '0 0 14px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  Accepts Clinical Tabular CSVs, Brain MRI Scans, DICOM archives, and NIfTI volumes.
+                <p style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Select a clinical tabular dataset (.csv) with numeric biomarkers and target diagnosis column.
                 </p>
                 <input
                   type="file"
-                  accept=".csv,.zip,.tar,.tar.gz,.tgz,.png,.jpg,.jpeg"
+                  accept=".csv"
                   onChange={(e) => setUploadFile(e.target.files[0])}
                   style={{ fontSize: '0.85rem' }}
                 />
               </div>
 
               {uploadMsg && (
-                <div style={{ padding: '10px', borderRadius: '6px', fontSize: '0.82rem', marginBottom: '14px', background: uploading ? 'rgba(37, 99, 235, 0.08)' : 'rgba(16, 185, 129, 0.08)', color: uploading ? 'var(--classical-color)' : 'var(--status-success)' }}>
+                <div style={{
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  marginBottom: '14px',
+                  fontSize: '0.82rem',
+                  background: uploadMsg.startsWith('Error') ? '#FEF2F2' : '#F0FDF4',
+                  color: uploadMsg.startsWith('Error') ? '#DC2626' : '#16A34A',
+                  border: `1px solid ${uploadMsg.startsWith('Error') ? '#FCA5A5' : '#86EFAC'}`
+                }}>
                   {uploadMsg}
                 </div>
               )}
@@ -860,10 +1031,8 @@ export default function DatasetOverview() {
                   type="submit"
                   className="btn btn-primary"
                   disabled={!uploadFile || uploading}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  {uploading ? <RefreshCw size={15} className="spin-slow" /> : <Upload size={15} />}
-                  <span>{uploading ? 'Processing...' : 'Upload & Preprocess'}</span>
+                  {uploading ? 'Processing...' : 'Upload & Preprocess'}
                 </button>
               </div>
             </form>
