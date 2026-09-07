@@ -602,9 +602,9 @@ QiskitRuntimeService.save_account(
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: authFeedback.type === 'success' ? 'rgba(34, 197, 94, 0.12)' : (authFeedback.type === 'info' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(239, 68, 68, 0.12)'),
-                color: authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? '#3b82f6' : 'var(--status-danger)'),
-                border: `1px solid ${authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? '#3b82f6' : 'var(--status-danger)')}`
+                background: authFeedback.type === 'success' ? 'rgba(34, 197, 94, 0.12)' : (authFeedback.type === 'info' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)'),
+                color: authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? 'var(--brand-primary)' : 'var(--status-danger)'),
+                border: `1px solid ${authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? 'var(--brand-primary)' : 'var(--status-danger)')}`
               }}>
                 {authFeedback.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
                 <span>{authFeedback.message}</span>
@@ -705,8 +705,8 @@ QiskitRuntimeService.save_account(
                         fontSize: '0.7rem',
                         padding: '2px 6px',
                         borderRadius: '4px',
-                        background: backend.simulator ? 'rgba(59, 130, 246, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-                        color: backend.simulator ? '#3b82f6' : 'var(--primary-color)',
+                        background: backend.simulator ? 'rgba(20, 184, 166, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                        color: backend.simulator ? '#0D9488' : 'var(--primary-color)',
                         fontWeight: '600'
                       }}>
                         {backend.simulator ? 'SIMULATOR' : backend.processor_type}
@@ -970,8 +970,8 @@ QiskitRuntimeService.save_account(
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
-                background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#3b82f6',
+                background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(20, 184, 166, 0.15)',
+                color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#0D9488',
                 padding: '8px',
                 borderRadius: '8px'
               }}>
@@ -987,8 +987,8 @@ QiskitRuntimeService.save_account(
                     fontWeight: '700',
                     padding: '2px 8px',
                     borderRadius: '4px',
-                    background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                    color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#3b82f6'
+                    background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(20, 184, 166, 0.2)',
+                    color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#0D9488'
                   }}>
                     {experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'PHYSICAL QPU EXECUTED' : 'QISKIT SAMPLERV2 SIMULATION'}
                   </span>

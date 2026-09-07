@@ -35,7 +35,7 @@ export default function CumulativeExperiment() {
   const [sortConfig, setSortConfig] = useState({ key: 'accuracy', direction: 'desc' });
   const [showSyncTooltip, setShowSyncTooltip] = useState(false);
 
-  // Q-Med Diagnostic Consensus & Research Validation Tier States
+  // Quddos Diagnostic Consensus & Research Validation Tier States
   const [inferenceTier, setInferenceTier] = useState('basic'); // 'basic' | 'researcher'
   const [expandedQuestions, setExpandedQuestions] = useState({ q1: true, q2: true, q3: true });
   const [activeValidationTab, setActiveValidationTab] = useState('hypothesis'); // 'hypothesis' | 'perturbation' | 'discordance' | 'kfold'
@@ -117,10 +117,10 @@ export default function CumulativeExperiment() {
     };
   };
 
-  const getQMedConsensusMetrics = () => {
+  const getQuddosConsensusMetrics = () => {
     if (!results?.models || results.models.length === 0) {
       return {
-        qMedScore: 98.8,
+        quddosScore: 98.8,
         accuracy: 98.8,
         sensitivity: 99.2,
         specificity: 98.4,
@@ -149,7 +149,7 @@ export default function CumulativeExperiment() {
     const accMlp = mlp ? Number(mlp.accuracy) : 96.5;
 
     const lateAcc = fusionResults?.late_fusion?.accuracy || fusionResults?.late_adaptive_consensus?.accuracy;
-    const qMedScore = lateAcc ? Number((Number(lateAcc) * 100).toFixed(1)) : Math.min(99.4, Number((Math.max(accSvm, accMlp) + 1.4).toFixed(1)));
+    const quddosScore = lateAcc ? Number((Number(lateAcc) * 100).toFixed(1)) : Math.min(99.4, Number((Math.max(accSvm, accMlp) + 1.4).toFixed(1)));
 
     const sensSvm = svm ? Number(svm.sensitivity) : 97.8;
     const sensMlp = mlp ? Number(mlp.sensitivity) : 96.7;
@@ -162,8 +162,8 @@ export default function CumulativeExperiment() {
     const latencyMs = fusionResults?.late_fusion?.latency_ms || fusionResults?.late_adaptive_consensus?.latency_ms || 18;
 
     return {
-      qMedScore,
-      accuracy: qMedScore,
+      quddosScore,
+      accuracy: quddosScore,
       sensitivity: consensusSensitivity,
       specificity: consensusSpecificity,
       rocAuc: 0.998,
@@ -173,7 +173,7 @@ export default function CumulativeExperiment() {
       cohenD: 1.34,
       perturbationRetention: 98.2,
       borderlineResolved: '14 / 15',
-      kFoldMean: (qMedScore - 0.2).toFixed(1),
+      kFoldMean: (quddosScore - 0.2).toFixed(1),
       kFoldStd: '0.38',
       classicalWeight: '50% (SVM Dual Margins + MLP Attributions)',
       quantumWeight: '50% (QSVM Hilbert Kernel + QNN & QVC Variational Phases)',
@@ -483,19 +483,19 @@ export default function CumulativeExperiment() {
 
       {/* Multimodal Fusion & Benchmark Outputs (Revealed only upon stream completion) */}
       {results && (() => {
-        const qmed = getQMedConsensusMetrics();
+        const quddos = getQuddosConsensusMetrics();
 
         return (
           <>
-            {/* 1. TOP HERO: Q-MED DIAGNOSTIC CONSENSUS SCORE & COMPOSITE RELIABILITY INDEX */}
-            <div className="qmed-hero-card" style={{ marginBottom: '28px' }}>
+            {/* 1. TOP HERO: QUDDOS DIAGNOSTIC CONSENSUS SCORE & COMPOSITE RELIABILITY INDEX */}
+            <div className="quddos-hero-card" style={{ marginBottom: '28px' }}>
               <div style={{ position: 'relative', zIndex: 2 }}>
                 {/* Hero Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                      <span className="qmed-badge-pulse">
-                        <Sparkles size={13} /> Q-MED CANONICAL CONSENSUS ENGINE
+                      <span className="quddos-badge-pulse">
+                        <Sparkles size={13} /> QUDDOS CANONICAL CONSENSUS ENGINE
                       </span>
                       <span style={{ fontSize: '0.78rem', color: '#94A3B8', border: '1px solid rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
                         5-Model Bayesian Fusion · Verified Research-Grade
@@ -503,7 +503,7 @@ export default function CumulativeExperiment() {
                     </div>
                     <h2 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '10px', letterSpacing: '-0.3px' }}>
                       <Award size={28} style={{ color: '#F59E0B' }} />
-                      Q-Med Consensus Score: <span className="qmed-glow-score">{qmed.qMedScore}%</span>
+                      Quddos Consensus Score: <span className="quddos-glow-score">{quddos.quddosScore}%</span>
                     </h2>
                     <p style={{ margin: '6px 0 0 0', fontSize: '0.86rem', color: '#CBD5E1', maxWidth: '780px', lineHeight: '1.5' }}>
                       Authoritative clinical composite combining <strong>Classical Dual Margins</strong> (SVM + MLP) with <strong>Quantum Hilbert Space Projections</strong> (QSVM, QNN, QVC). Designed to provide the ultimate ground-truth confidence index for students, clinicians, and researchers.
@@ -514,88 +514,88 @@ export default function CumulativeExperiment() {
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{
-                        background: 'rgba(59, 130, 246, 0.15)',
-                        border: '1px solid rgba(59, 130, 246, 0.4)',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        border: '1px solid rgba(16, 185, 129, 0.4)',
                         borderRadius: '8px',
                         padding: '8px 14px',
                         textAlign: 'right'
                       }}>
-                        <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#93C5FD', fontWeight: 700, letterSpacing: '0.5px' }}>
+                        <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#6EE7B7', fontWeight: 700, letterSpacing: '0.5px' }}>
                           Diagnostic Confidence
                         </div>
                         <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF' }}>
-                          {qmed.clinicalGrade}
+                          {quddos.clinicalGrade}
                         </div>
                       </div>
                       <CardActionMenu
-                        title="Q-Med Consensus Diagnostic Score & Research Suite"
+                        title="Quddos Consensus Diagnostic Score & Research Suite"
                         category="metrics"
-                        data={qmed}
-                        metadata={{ page: 'cumulative', dataset: selectedDataset, section: 'qmed_consensus' }}
+                        data={quddos}
+                        metadata={{ page: 'cumulative', dataset: selectedDataset, section: 'quddos_consensus' }}
                       />
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
-                      Hypothesis Test: <strong style={{ color: '#34D399' }}>p = {qmed.pValue} (Significant)</strong>
+                      Hypothesis Test: <strong style={{ color: '#34D399' }}>p = {quddos.pValue} (Significant)</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Metric Summary Ribbon */}
                 <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '22px' }}>
-                  <div className="qmed-stat-card">
+                  <div className="quddos-stat-card">
                     <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <Activity size={13} style={{ color: '#34D399' }} /> Sensitivity / Recall
                     </div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#34D399', margin: '4px 0 2px 0' }}>
-                      {qmed.sensitivity}%
+                      {quddos.sensitivity}%
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                       False-Negative Risk: &lt; 0.4%
                     </div>
                   </div>
 
-                  <div className="qmed-stat-card">
+                  <div className="quddos-stat-card">
                     <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <ShieldCheck size={13} style={{ color: '#60A5FA' }} /> Specificity
+                      <ShieldCheck size={13} style={{ color: '#34D399' }} /> Specificity
                     </div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#60A5FA', margin: '4px 0 2px 0' }}>
-                      {qmed.specificity}%
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#34D399', margin: '4px 0 2px 0' }}>
+                      {quddos.specificity}%
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                       False-Alarm Rejection: 98.4%
                     </div>
                   </div>
 
-                  <div className="qmed-stat-card">
+                  <div className="quddos-stat-card">
                     <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <TrendingUp size={13} style={{ color: '#F59E0B' }} /> Area Under ROC
                     </div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F59E0B', margin: '4px 0 2px 0' }}>
-                      {qmed.rocAuc}
+                      {quddos.rocAuc}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                       Near-Perfect Discriminative Power
                     </div>
                   </div>
 
-                  <div className="qmed-stat-card">
+                  <div className="quddos-stat-card">
                     <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Zap size={13} style={{ color: '#38BDF8' }} /> Latency
+                      <Zap size={13} style={{ color: '#2DD4BF' }} /> Latency
                     </div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#38BDF8', margin: '4px 0 2px 0' }}>
-                      {qmed.latencyMs}ms
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#2DD4BF', margin: '4px 0 2px 0' }}>
+                      {quddos.latencyMs}ms
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                       Instant Real-Time Triage
                     </div>
                   </div>
 
-                  <div className="qmed-stat-card">
+                  <div className="quddos-stat-card">
                     <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Gauge size={13} style={{ color: '#C084FC' }} /> Epistemic Uncertainty
+                      <Gauge size={13} style={{ color: '#A7F3D0' }} /> Epistemic Uncertainty
                     </div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#C084FC', margin: '4px 0 2px 0' }}>
-                      ±{qmed.uncertaintyMargin}%
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#A7F3D0', margin: '4px 0 2px 0' }}>
+                      ±{quddos.uncertaintyMargin}%
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                       5-Fold Stratified Variance
@@ -618,32 +618,32 @@ export default function CumulativeExperiment() {
                       <button
                         type="button"
                         onClick={() => setActiveValidationTab('hypothesis')}
-                        className={`qmed-validation-tab ${activeValidationTab === 'hypothesis' ? 'active' : ''}`}
-                        style={{ background: activeValidationTab === 'hypothesis' ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'hypothesis' ? '#93C5FD' : '#94A3B8', borderColor: activeValidationTab === 'hypothesis' ? '#3B82F6' : 'rgba(255,255,255,0.1)' }}
+                        className={`quddos-validation-tab ${activeValidationTab === 'hypothesis' ? 'active' : ''}`}
+                        style={{ background: activeValidationTab === 'hypothesis' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'hypothesis' ? '#6EE7B7' : '#94A3B8', borderColor: activeValidationTab === 'hypothesis' ? '#10B981' : 'rgba(255,255,255,0.1)' }}
                       >
                         <Scale size={13} /> Hypothesis Testing (p &lt; 0.001)
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveValidationTab('perturbation')}
-                        className={`qmed-validation-tab ${activeValidationTab === 'perturbation' ? 'active' : ''}`}
-                        style={{ background: activeValidationTab === 'perturbation' ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'perturbation' ? '#93C5FD' : '#94A3B8', borderColor: activeValidationTab === 'perturbation' ? '#3B82F6' : 'rgba(255,255,255,0.1)' }}
+                        className={`quddos-validation-tab ${activeValidationTab === 'perturbation' ? 'active' : ''}`}
+                        style={{ background: activeValidationTab === 'perturbation' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'perturbation' ? '#6EE7B7' : '#94A3B8', borderColor: activeValidationTab === 'perturbation' ? '#10B981' : 'rgba(255,255,255,0.1)' }}
                       >
                         <Activity size={13} /> Perturbation Noise (±5%)
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveValidationTab('discordance')}
-                        className={`qmed-validation-tab ${activeValidationTab === 'discordance' ? 'active' : ''}`}
-                        style={{ background: activeValidationTab === 'discordance' ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'discordance' ? '#93C5FD' : '#94A3B8', borderColor: activeValidationTab === 'discordance' ? '#3B82F6' : 'rgba(255,255,255,0.1)' }}
+                        className={`quddos-validation-tab ${activeValidationTab === 'discordance' ? 'active' : ''}`}
+                        style={{ background: activeValidationTab === 'discordance' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'discordance' ? '#6EE7B7' : '#94A3B8', borderColor: activeValidationTab === 'discordance' ? '#10B981' : 'rgba(255,255,255,0.1)' }}
                       >
                         <Atom size={13} /> Epistemic Boundary Arbitration
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveValidationTab('kfold')}
-                        className={`qmed-validation-tab ${activeValidationTab === 'kfold' ? 'active' : ''}`}
-                        style={{ background: activeValidationTab === 'kfold' ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'kfold' ? '#93C5FD' : '#94A3B8', borderColor: activeValidationTab === 'kfold' ? '#3B82F6' : 'rgba(255,255,255,0.1)' }}
+                        className={`quddos-validation-tab ${activeValidationTab === 'kfold' ? 'active' : ''}`}
+                        style={{ background: activeValidationTab === 'kfold' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', color: activeValidationTab === 'kfold' ? '#6EE7B7' : '#94A3B8', borderColor: activeValidationTab === 'kfold' ? '#10B981' : 'rgba(255,255,255,0.1)' }}
                       >
                         <Layers size={13} /> 5-Fold Stratified Stability
                       </button>
@@ -654,12 +654,12 @@ export default function CumulativeExperiment() {
                   <div style={{ fontSize: '0.82rem', color: '#E2E8F0', lineHeight: '1.6', background: 'rgba(15, 23, 42, 0.6)', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
                     {activeValidationTab === 'hypothesis' && (
                       <div className="fade-in">
-                        <div style={{ fontWeight: 700, color: '#60A5FA', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ fontWeight: 700, color: '#34D399', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <CheckCircle size={14} style={{ color: '#34D399' }} /> Paired Student's t-Test & Effect Size Verification
                         </div>
                         <p style={{ margin: 0, color: '#CBD5E1' }}>
-                          <strong>Null Hypothesis (H₀):</strong> Q-Med composite ensemble confers no statistically superior diagnostic benefit over individual models.<br />
-                          <strong>Empirical Finding:</strong> Paired <em>t</em>-test across 100 bootstrap splits yields <strong>t = 4.82, p = {qmed.pValue}</strong> (rejecting H₀ with 99.96% confidence). Cohen's <em>d</em> effect size is <strong>{qmed.cohenD}</strong> (classified as a <em>Very Large Clinical Effect Size</em>), proving high reproducibility across distinct patient splits.
+                          <strong>Null Hypothesis (H₀):</strong> Quddos composite ensemble confers no statistically superior diagnostic benefit over individual models.<br />
+                          <strong>Empirical Finding:</strong> Paired <em>t</em>-test across 100 bootstrap splits yields <strong>t = 4.82, p = {quddos.pValue}</strong> (rejecting H₀ with 99.96% confidence). Cohen's <em>d</em> effect size is <strong>{quddos.cohenD}</strong> (classified as a <em>Very Large Clinical Effect Size</em>), proving high reproducibility across distinct patient splits.
                         </p>
                       </div>
                     )}
@@ -671,7 +671,7 @@ export default function CumulativeExperiment() {
                         </div>
                         <p style={{ margin: 0, color: '#CBD5E1' }}>
                           <strong>Stress Protocol:</strong> Injected zero-mean Gaussian measurement noise (σ = 0.05 · std(X)) across all radiomic/clinical continuous features to simulate clinical scanner calibration variance and patient movement.<br />
-                          <strong>Diagnostic Retention:</strong> The ensemble maintains <strong>{qmed.perturbationRetention}% baseline diagnostic accuracy</strong> (&lt;0.6% deviation), whereas standalone baseline trees suffered 3.8% degradation. Proves field readiness for noisy real-world hospital data.
+                          <strong>Diagnostic Retention:</strong> The ensemble maintains <strong>{quddos.perturbationRetention}% baseline diagnostic accuracy</strong> (&lt;0.6% deviation), whereas standalone baseline trees suffered 3.8% degradation. Proves field readiness for noisy real-world hospital data.
                         </p>
                       </div>
                     )}
@@ -683,7 +683,7 @@ export default function CumulativeExperiment() {
                         </div>
                         <p style={{ margin: 0, color: '#CBD5E1' }}>
                           <strong>Borderline Ambiguity Criterion:</strong> Cases where classical SVM margin distance |d(x, H)| &lt; 0.12 or MLP softmax probability P ∈ [0.45, 0.55].<br />
-                          <strong>Quantum Arbitration Outcome:</strong> In 15 high-discordance borderline cases, the 4-qubit Hilbert kernel projection correctly arbitrated <strong>{qmed.borderlineResolved} cases</strong> (93.3% accuracy in ambiguous regimes), converting potential classical false negatives into accurate diagnoses.
+                          <strong>Quantum Arbitration Outcome:</strong> In 15 high-discordance borderline cases, the 4-qubit Hilbert kernel projection correctly arbitrated <strong>{quddos.borderlineResolved} cases</strong> (93.3% accuracy in ambiguous regimes), converting potential classical false negatives into accurate diagnoses.
                         </p>
                       </div>
                     )}
@@ -695,7 +695,7 @@ export default function CumulativeExperiment() {
                         </div>
                         <p style={{ margin: 0, color: '#CBD5E1' }}>
                           <strong>Fold Consistency:</strong> Fold 1 (98.8%), Fold 2 (98.4%), Fold 3 (98.9%), Fold 4 (98.5%), Fold 5 (98.6%).<br />
-                          <strong>Aggregate Distribution:</strong> Cross-validation mean is <strong>{qmed.kFoldMean}% ± {qmed.kFoldStd}%</strong>. Zero catastrophic fold collapse observed, confirming absence of data leakage and validating out-of-distribution generalizability.
+                          <strong>Aggregate Distribution:</strong> Cross-validation mean is <strong>{quddos.kFoldMean}% ± {quddos.kFoldStd}%</strong>. Zero catastrophic fold collapse observed, confirming absence of data leakage and validating out-of-distribution generalizability.
                         </p>
                       </div>
                     )}
@@ -719,11 +719,11 @@ export default function CumulativeExperiment() {
                 </div>
 
                 {/* Perspective Mode Switcher */}
-                <div className="qmed-tier-toggle">
+                <div className="quddos-tier-toggle">
                   <button
                     type="button"
                     onClick={() => setInferenceTier('basic')}
-                    className={`qmed-tier-btn ${inferenceTier === 'basic' ? 'active' : ''}`}
+                    className={`quddos-tier-btn ${inferenceTier === 'basic' ? 'active' : ''}`}
                     title="Student & Clinician Overview"
                   >
                     <GraduationCap size={15} />
@@ -732,7 +732,7 @@ export default function CumulativeExperiment() {
                   <button
                     type="button"
                     onClick={() => setInferenceTier('researcher')}
-                    className={`qmed-tier-btn ${inferenceTier === 'researcher' ? 'active' : ''}`}
+                    className={`quddos-tier-btn ${inferenceTier === 'researcher' ? 'active' : ''}`}
                     title="In-depth Mathematical & Quantum Foundations"
                   >
                     <Microscope size={15} />
@@ -745,8 +745,8 @@ export default function CumulativeExperiment() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                 {/* QUESTION 1: What information do classical algorithms provide for clinical decision-making? */}
-                <div className={`qmed-question-card ${expandedQuestions.q1 ? 'active-q' : ''}`}>
-                  <div className="qmed-question-header" onClick={() => toggleQuestion('q1')}>
+                <div className={`quddos-question-card ${expandedQuestions.q1 ? 'active-q' : ''}`}>
+                  <div className="quddos-question-header" onClick={() => toggleQuestion('q1')}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
                         width: '28px',
@@ -767,7 +767,7 @@ export default function CumulativeExperiment() {
                           What information do classical algorithms provide for clinical decision-making?
                         </div>
                         <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                          Tamil Context: <em>Classical algos use panni kedaikara results la irunthu yena informations vechi oru decision making ku varalam?</em>
+                          Clinical Objective: <em>Core diagnostic parameters, probability margins, and feature attributions derived from classical models.</em>
                         </div>
                       </div>
                     </div>
@@ -777,7 +777,7 @@ export default function CumulativeExperiment() {
                   </div>
 
                   {expandedQuestions.q1 && (
-                    <div className="qmed-question-body">
+                    <div className="quddos-question-body">
                       {inferenceTier === 'basic' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)', lineHeight: '1.55' }}>
@@ -821,8 +821,8 @@ export default function CumulativeExperiment() {
                 </div>
 
                 {/* QUESTION 2: Why is this classical information useful? */}
-                <div className={`qmed-question-card ${expandedQuestions.q2 ? 'active-q' : ''}`}>
-                  <div className="qmed-question-header" onClick={() => toggleQuestion('q2')}>
+                <div className={`quddos-question-card ${expandedQuestions.q2 ? 'active-q' : ''}`}>
+                  <div className="quddos-question-header" onClick={() => toggleQuestion('q2')}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
                         width: '28px',
@@ -853,7 +853,7 @@ export default function CumulativeExperiment() {
                   </div>
 
                   {expandedQuestions.q2 && (
-                    <div className="qmed-question-body">
+                    <div className="quddos-question-body">
                       {inferenceTier === 'basic' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)', lineHeight: '1.55' }}>
@@ -894,8 +894,8 @@ export default function CumulativeExperiment() {
                 </div>
 
                 {/* QUESTION 3: What is Quantum computing uniquely delivering that classical models lack? */}
-                <div className={`qmed-question-card ${expandedQuestions.q3 ? 'active-q' : ''}`} style={{ borderLeft: '4px solid var(--quantum-color)' }}>
-                  <div className="qmed-question-header" onClick={() => toggleQuestion('q3')}>
+                <div className={`quddos-question-card ${expandedQuestions.q3 ? 'active-q' : ''}`} style={{ borderLeft: '4px solid var(--quantum-color)' }}>
+                  <div className="quddos-question-header" onClick={() => toggleQuestion('q3')}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
                         width: '28px',
@@ -926,7 +926,7 @@ export default function CumulativeExperiment() {
                   </div>
 
                   {expandedQuestions.q3 && (
-                    <div className="qmed-question-body">
+                    <div className="quddos-question-body">
                       {inferenceTier === 'basic' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)', lineHeight: '1.55' }}>

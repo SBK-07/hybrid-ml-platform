@@ -287,8 +287,8 @@ export const sendQuddosChat = async (query, artifacts = [], conversationHistory 
     return {
       status: "SUCCESS",
       provider: "Offline Simulation",
-      model: "qmed-offline-agent",
-      reply: `### Quddos AI (Offline Mode)\n\nI have received your query: *"**${query}**"*. \n\nThe Q-Med Hybrid Platform combines Classical ML baselines (SVM/MLP) with Quantum QML (QSVM/QNN/QVC) using leak-free preprocessing and multimodal adaptive consensus. Connect to the FastAPI backend for full real-time model interaction.`,
+      model: "quddos-offline-agent",
+      reply: `### Quddos AI (Offline Mode)\n\nI have received your query: *"**${query}**"*. \n\nThe Quddos Hybrid Platform combines Classical ML baselines (SVM/MLP) with Quantum QML (QSVM/QNN/QVC) using leak-free preprocessing and multimodal adaptive consensus. Connect to the FastAPI backend for full real-time model interaction.`,
       attached_artifacts_count: artifacts.length
     };
   }

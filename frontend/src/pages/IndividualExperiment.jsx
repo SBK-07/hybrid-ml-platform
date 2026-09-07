@@ -198,7 +198,7 @@ export default function IndividualExperiment() {
     const isCustom = mType?.startsWith('custom_') || currentModelObj?.is_custom;
     if (isCustom) {
       return [
-        { id: 'ingest', title: '1. Ingestion & Modality Ingestion', icon: Database, color: '#38BDF8' },
+        { id: 'ingest', title: '1. Ingestion & Modality Ingestion', icon: Database, color: '#10B981' },
         { id: 'custom_deserialization', title: '2. Artifact Deserialization & Validation', icon: Settings, color: '#F59E0B' },
         { id: 'feature_alignment', title: '3. Dynamic Feature Alignment Adapter', icon: Layers, color: '#F59E0B' },
         { id: 'train', title: '4. Model Inference & Platt Calibration', icon: Zap, color: '#F59E0B' },
@@ -209,7 +209,7 @@ export default function IndividualExperiment() {
     const isQ = ['qsvm', 'qnn', 'qvc'].includes(mType);
     if (isQ) {
       return [
-        { id: 'ingest', title: 'Dataset Ingestion & Quality Audit', icon: Database, color: '#38BDF8' },
+        { id: 'ingest', title: 'Dataset Ingestion & Quality Audit', icon: Database, color: '#10B981' },
         { id: 'preprocess', title: 'Preprocessing & SMOTE Class Balancing', icon: Settings, color: '#C084FC' },
         { id: 'encode', title: 'QPU Feature Map & Hilbert Space Projection', icon: Atom, color: 'var(--quantum-color)' },
         { id: 'train', title: 'Quantum Model Training & Optimization', icon: Zap, color: 'var(--quantum-color)' },
@@ -218,7 +218,7 @@ export default function IndividualExperiment() {
       ];
     } else {
       return [
-        { id: 'ingest', title: 'Dataset Ingestion & Quality Audit', icon: Database, color: '#38BDF8' },
+        { id: 'ingest', title: 'Dataset Ingestion & Quality Audit', icon: Database, color: '#10B981' },
         { id: 'preprocess', title: 'Preprocessing & SMOTE Class Balancing', icon: Settings, color: '#C084FC' },
         { id: 'train', title: 'Classical Model Training & Optimization', icon: Zap, color: 'var(--classical-color)' },
         { id: 'eval', title: '5-Fold Cross-Validation Evaluation', icon: BarChart2, color: 'var(--classical-color)' },
@@ -271,8 +271,8 @@ export default function IndividualExperiment() {
     if (lineText.startsWith('[CLASSICAL]')) return 'var(--classical-color)';
     if (lineText.startsWith('[QISKIT]') || lineText.startsWith('[QUANTUM]') || lineText.startsWith('[SIMULATOR]')) return 'var(--quantum-color)';
     if (lineText.startsWith('[PREPROC]')) return '#C084FC';
-    if (lineText.startsWith('[INGEST]')) return '#38BDF8';
-    if (lineText.startsWith('[EDA]')) return '#818CF8';
+    if (lineText.startsWith('[INGEST]')) return 'var(--brand-primary)';
+    if (lineText.startsWith('[EDA]')) return 'var(--quantum-color)';
     if (lineText.startsWith('[FUSION]')) return 'var(--hybrid-color)';
     if (lineText.startsWith('[XAI]') || lineText.startsWith('[BLOCH]') || lineText.startsWith('[UNCERTAINTY]')) return '#F472B6';
     if (lineText.startsWith('->') || lineText.startsWith('[SUCCESS]') || lineText.startsWith('>>>')) return 'var(--status-success)';
@@ -572,7 +572,7 @@ export default function IndividualExperiment() {
       {
         label: 'Importance',
         data: featureImportances.map(f => f.importance || f.importance_score),
-        backgroundColor: isQuantum ? '#0D9488' : '#2563EB',
+        backgroundColor: isQuantum ? '#0D9488' : '#059669',
         borderRadius: 4,
         barThickness: 14
       }
@@ -842,7 +842,7 @@ export default function IndividualExperiment() {
                       </span>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {hoveredDatasetItem.features_count && (
-                          <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.12)', color: '#38BDF8', fontWeight: 600 }}>
+                           <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.12)', color: '#10B981', fontWeight: 600 }}>
                             {hoveredDatasetItem.features_count} features
                           </span>
                         )}
@@ -1200,7 +1200,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             Accuracy
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.accuracy}
                           </div>
                         </div>
@@ -1210,7 +1210,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             Sensitivity / Recall
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.sensitivity}
                           </div>
                         </div>
@@ -1220,7 +1220,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             Specificity
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.specificity}
                           </div>
                         </div>
@@ -1230,7 +1230,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             Precision
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.precision}
                           </div>
                         </div>
@@ -1240,7 +1240,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             F1-Score
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.f1Score}
                           </div>
                         </div>
@@ -1250,7 +1250,7 @@ export default function IndividualExperiment() {
                           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                             AUC-ROC
                           </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#2563EB' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
                             {metrics?.aucRoc}
                           </div>
                         </div>
@@ -1586,8 +1586,8 @@ export default function IndividualExperiment() {
                           {
                             label: 'Fold Accuracy (%)',
                             data: foldNumArr,
-                            backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.7)' : 'rgba(37, 99, 235, 0.7)',
-                            borderColor: isQuantum ? '#0D9488' : '#2563EB',
+                            backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.7)' : 'rgba(16, 185, 129, 0.7)',
+                            borderColor: isQuantum ? '#0D9488' : '#059669',
                             borderWidth: 1.5,
                             borderRadius: 4
                           }
@@ -1640,8 +1640,8 @@ export default function IndividualExperiment() {
                         {
                           label: `Model ROC (AUC = ${realAuc})`,
                           data: rocDataObj.tpr,
-                          borderColor: isQuantum ? '#0D9488' : '#2563EB',
-                          backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.1)' : 'rgba(37, 99, 235, 0.1)',
+                          borderColor: isQuantum ? '#0D9488' : '#059669',
+                          backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.1)' : 'rgba(5, 150, 105, 0.1)',
                           fill: true,
                           tension: 0.35,
                           borderWidth: 2,
@@ -1715,7 +1715,7 @@ export default function IndividualExperiment() {
                           </div>
 
                           {/* Graphic Qiskit Wire Schematic */}
-                          <div style={{ padding: '12px 16px', background: '#0F172A', color: '#38BDF8', borderRadius: '8px', fontFamily: 'Consolas, monospace', fontSize: '0.75rem', overflowX: 'auto', lineHeight: 1.6, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                          <div style={{ padding: '12px 16px', background: '#0F172A', color: '#5EEAD4', borderRadius: '8px', fontFamily: 'Consolas, monospace', fontSize: '0.75rem', overflowX: 'auto', lineHeight: 1.6, border: '1px solid rgba(20, 184, 166, 0.25)' }}>
                             <div style={{ color: '#94A3B8', marginBottom: '8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                               // {qSchematic.type} Wire Diagram
                             </div>

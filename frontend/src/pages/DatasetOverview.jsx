@@ -127,11 +127,11 @@ export default function DatasetOverview() {
   // Helper for domain-specific icon
   const getDomainIcon = () => {
     const key = (overviewData?.dataset_key || selectedDataset).toLowerCase();
-    if (key.includes('cancer') || sampleType === 'cytology') return <Microscope size={18} style={{ color: 'var(--classical-color)' }} />;
+    if (key.includes('cancer') || sampleType === 'cytology') return <Microscope size={18} style={{ color: 'var(--brand-primary)' }} />;
     if (key.includes('cardio')) return <Heart size={18} style={{ color: '#DC2626' }} />;
-    if (key.includes('diabetes')) return <Activity size={18} style={{ color: '#2563EB' }} />;
-    if (key.includes('parkinson')) return <Waves size={18} style={{ color: '#7C3AED' }} />;
-    return <FileSpreadsheet size={18} style={{ color: 'var(--classical-color)' }} />;
+    if (key.includes('diabetes')) return <Activity size={18} style={{ color: 'var(--brand-primary)' }} />;
+    if (key.includes('parkinson')) return <Waves size={18} style={{ color: '#0D9488' }} />;
+    return <FileSpreadsheet size={18} style={{ color: 'var(--brand-primary)' }} />;
   };
 
   return (
@@ -141,7 +141,7 @@ export default function DatasetOverview() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span className="badge-sih" style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--classical-color)', borderColor: 'rgba(37, 99, 235, 0.3)' }}>
+              <span className="badge-sih" style={{ background: 'var(--brand-bg)', color: 'var(--brand-primary)', borderColor: 'var(--brand-glow)' }}>
                 {isVisualSample ? 'MULTIMODAL RADIOMICS & CYTOPATHOLOGY' : 'STRUCTURED CLINICAL BIOMARKERS & TABULAR EDA'}
               </span>
               <span className="badge-sih" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--status-success)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
@@ -668,10 +668,10 @@ export default function DatasetOverview() {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--classical-color)', textTransform: 'capitalize' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--brand-primary)', textTransform: 'capitalize' }}>
                           {bm.feature_name}
                         </span>
-                        <span className="badge-sih" style={{ fontSize: '0.68rem', background: 'rgba(37, 99, 235, 0.08)', color: 'var(--classical-color)', borderColor: 'rgba(37, 99, 235, 0.2)' }}>
+                        <span className="badge-sih" style={{ fontSize: '0.68rem', background: 'var(--brand-bg)', color: 'var(--brand-primary)', borderColor: 'var(--brand-glow)' }}>
                           {bm.importance_tier}
                         </span>
                       </div>
@@ -684,10 +684,10 @@ export default function DatasetOverview() {
               </div>
 
               {/* Student Takeaways */}
-              <div className="card" style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(124, 58, 237, 0.03) 100%)' }}>
+              <div className="card" style={{ background: 'linear-gradient(135deg, var(--brand-bg) 0%, var(--quantum-bg) 100%)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Sparkles size={16} style={{ color: 'var(--quantum-color)' }} />
+                    <Sparkles size={16} style={{ color: 'var(--brand-primary)' }} />
                     <span>Student & Clinician Takeaways</span>
                   </h3>
                   <CardActionMenu

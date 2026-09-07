@@ -4,7 +4,7 @@ import { Bot } from 'lucide-react';
 
 /**
  * Floating Quick-Access button for Quddos AI.
- * Premium circular button with glow animation, positioned bottom-right.
+ * Premium circular button with Emerald glow animation, positioned bottom-right.
  */
 export default function FloatingQuddosButton() {
   const navigate = useNavigate();
@@ -45,9 +45,9 @@ export default function FloatingQuddosButton() {
         width: '50px',
         height: '50px',
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, var(--classical-color), #2563EB)',
+        background: 'linear-gradient(135deg, #059669, #10B981)',
         color: '#FFFFFF',
-        boxShadow: '0 4px 16px var(--classical-glow), 0 2px 6px rgba(0, 0, 0, 0.15)',
+        boxShadow: '0 4px 20px rgba(16, 185, 129, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -59,11 +59,11 @@ export default function FloatingQuddosButton() {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)';
-        e.currentTarget.style.boxShadow = '0 6px 24px var(--classical-glow), 0 4px 10px rgba(0, 0, 0, 0.15)';
+        e.currentTarget.style.boxShadow = '0 6px 28px rgba(16, 185, 129, 0.5), 0 4px 10px rgba(0, 0, 0, 0.25)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'scale(1) translateY(0)';
-        e.currentTarget.style.boxShadow = '0 4px 16px var(--classical-glow), 0 2px 6px rgba(0, 0, 0, 0.15)';
+        e.currentTarget.style.boxShadow = '0 4px 20px rgba(16, 185, 129, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2)';
       }}
       title="Open Quddos AI Research Assistant"
     >
@@ -75,7 +75,7 @@ export default function FloatingQuddosButton() {
             position: 'absolute',
             inset: '-3px',
             borderRadius: '50%',
-            border: '2px solid var(--classical-color)',
+            border: '2px solid var(--brand-primary)',
             animation: 'ringPulse 1.5s ease-out infinite',
             pointerEvents: 'none'
           }} />

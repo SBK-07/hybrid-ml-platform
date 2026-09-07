@@ -262,7 +262,7 @@ export default function AdaptiveReport() {
             font-size: 13px;
           }
           .header-banner {
-            border-bottom: 2px solid #2563EB;
+            border-bottom: 2px solid #059669;
             padding-bottom: 16px;
             margin-bottom: 24px;
             display: flex;
@@ -287,9 +287,9 @@ export default function AdaptiveReport() {
           }
           .badge-sih {
             display: inline-block;
-            background: #EFF6FF;
-            color: #2563EB;
-            border: 1px solid #BFDBFE;
+            background: #ECFDF5;
+            color: #059669;
+            border: 1px solid #A7F3D0;
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 10px;
@@ -305,8 +305,8 @@ export default function AdaptiveReport() {
             padding: 16px 18px;
           }
           .pinned-section {
-            border-left: 4px solid #2563EB;
-            background: #F8FAFC;
+            border-left: 4px solid #059669;
+            background: #F8FAF9;
           }
           .section-title {
             display: flex;
@@ -316,7 +316,7 @@ export default function AdaptiveReport() {
           }
           .section-num {
             font-weight: 800;
-            color: #2563EB;
+            color: #059669;
             font-size: 15px;
           }
           .section-heading {
@@ -325,7 +325,7 @@ export default function AdaptiveReport() {
             font-size: 14px;
           }
           .badge-pinned {
-            background: #2563EB;
+            background: #059669;
             color: #FFFFFF;
             font-size: 10px;
             font-weight: 600;
@@ -358,9 +358,9 @@ export default function AdaptiveReport() {
             color: #1E293B;
           }
           .footer-sign {
-            margin-top: 36px;
-            padding-top: 16px;
+            margin-top: 40px;
             border-top: 1px solid #E2E8F0;
+            padding-top: 14px;
             display: flex;
             justify-content: space-between;
             font-size: 10.5px;
@@ -371,9 +371,9 @@ export default function AdaptiveReport() {
       <body>
         <div class="header-banner">
           <div class="title-area">
-            <span class="badge-sih">Q-MED CLINICAL SYNTHESIS & BENCHMARK REPORT</span>
+            <span class="badge-sih">QUDDOS CLINICAL SYNTHESIS & BENCHMARK REPORT</span>
             <h1>${reportTitle}</h1>
-            <p>Q-Med Hybrid Classical & Quantum Biomedical Diagnostic Studio</p>
+            <p>Quddos Hybrid Classical & Quantum Biomedical Diagnostic Platform</p>
           </div>
           <div class="meta-area">
             <div><strong>Generated:</strong> ${reportDate}</div>
@@ -385,7 +385,7 @@ export default function AdaptiveReport() {
         ${sectionsHtml}
 
         <div class="footer-sign">
-          <div>Report synthesized via Q-Med Adaptive Diagnostic Engine</div>
+          <div>Report synthesized via Quddos Adaptive Diagnostic Engine</div>
           <div>Page 1 of 1 • Certified Diagnostic Synthesis</div>
         </div>
 

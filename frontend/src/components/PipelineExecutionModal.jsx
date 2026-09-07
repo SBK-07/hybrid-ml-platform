@@ -75,7 +75,7 @@ export default function PipelineExecutionModal({
     setLiveTelemetry({});
     setFinalResults(null);
     setTerminalLogs([
-      `[SYSTEM] Connecting to Q-Med Live Execution Engine...`,
+      `[SYSTEM] Connecting to Quddos Live Execution Engine...`,
       `[SYSTEM] Dataset: [${datasetKey.toUpperCase()}] | Model: [${modelType.toUpperCase()}] | Mode: Real Computation`,
       `[SYSTEM] Pacing factor: ${playbackSpeed}x`
     ]);
@@ -203,7 +203,7 @@ export default function PipelineExecutionModal({
 
   const getLogColor = (log) => {
     if (!log || typeof log !== 'string') return '#E2E8F0';
-    if (log.startsWith('[CLASSICAL]') || log.startsWith('[INGEST]')) return '#93C5FD';
+    if (log.startsWith('[CLASSICAL]') || log.startsWith('[INGEST]')) return '#A7F3D0';
     if (log.startsWith('[QISKIT]') || log.startsWith('[QUANTUM]') || log.startsWith('[SIMULATOR]')) return '#5EEAD4';
     if (log.startsWith('[FUSION]')) return '#FDE047';
     if (log.startsWith('[PREPROC]')) return '#C084FC';
@@ -274,8 +274,8 @@ export default function PipelineExecutionModal({
               width: '40px',
               height: '40px',
               borderRadius: '8px',
-              background: isQuantum ? 'rgba(13, 148, 136, 0.2)' : (isClassical ? 'rgba(37, 99, 235, 0.2)' : 'rgba(217, 119, 6, 0.2)'),
-              border: `1px solid ${isQuantum ? 'rgba(13, 148, 136, 0.5)' : (isClassical ? 'rgba(37, 99, 235, 0.5)' : 'rgba(217, 119, 6, 0.5)')}`,
+              background: isQuantum ? 'rgba(13, 148, 136, 0.2)' : (isClassical ? 'rgba(16, 185, 129, 0.2)' : 'rgba(217, 119, 6, 0.2)'),
+              border: `1px solid ${isQuantum ? 'rgba(13, 148, 136, 0.5)' : (isClassical ? 'rgba(16, 185, 129, 0.5)' : 'rgba(217, 119, 6, 0.5)')}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -283,7 +283,7 @@ export default function PipelineExecutionModal({
               {isQuantum ? (
                 <Atom size={22} style={{ color: '#5EEAD4' }} />
               ) : isClassical ? (
-                <Zap size={22} style={{ color: '#60A5FA' }} />
+                <Zap size={22} style={{ color: '#34D399' }} />
               ) : (
                 <Layers size={22} style={{ color: '#FBBF24' }} />
               )}
@@ -301,9 +301,9 @@ export default function PipelineExecutionModal({
                   fontSize: '0.72rem',
                   padding: '2px 8px',
                   borderRadius: '12px',
-                  background: isFinished ? 'rgba(22, 163, 74, 0.2)' : 'rgba(37, 99, 235, 0.2)',
-                  color: isFinished ? '#4ADE80' : '#93C5FD',
-                  border: isFinished ? '1px solid rgba(74, 222, 128, 0.4)' : '1px solid rgba(147, 197, 253, 0.4)',
+                  background: isFinished ? 'rgba(22, 163, 74, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                  color: isFinished ? '#4ADE80' : '#34D399',
+                  border: isFinished ? '1px solid rgba(74, 222, 128, 0.4)' : '1px solid rgba(52, 211, 153, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px'
@@ -337,7 +337,7 @@ export default function PipelineExecutionModal({
                   onClick={() => setPlaybackSpeed(spd)}
                   type="button"
                   style={{
-                    background: playbackSpeed === spd ? '#2563EB' : 'transparent',
+                    background: playbackSpeed === spd ? '#059669' : 'transparent',
                     border: 'none',
                     color: '#FFFFFF',
                     padding: '2px 6px',
@@ -377,7 +377,7 @@ export default function PipelineExecutionModal({
           <div style={{
             height: '100%',
             width: `${overallProgress}%`,
-            background: isQuantum ? 'linear-gradient(90deg, #0D9488 0%, #06B6D4 100%)' : (isClassical ? 'linear-gradient(90deg, #2563EB 0%, #3B82F6 100%)' : 'linear-gradient(90deg, #2563EB 0%, #0D9488 60%, #D97706 100%)'),
+            background: isQuantum ? 'linear-gradient(90deg, #0D9488 0%, #14B8A6 100%)' : (isClassical ? 'linear-gradient(90deg, #059669 0%, #10B981 100%)' : 'linear-gradient(90deg, #059669 0%, #0D9488 60%, #D97706 100%)'),
             transition: 'width 0.15s linear'
           }} />
         </div>
@@ -413,7 +413,7 @@ export default function PipelineExecutionModal({
                 bgColor = '#F0FDF4';
                 borderColor = '#BBF7D0';
               } else if (isCurrent) {
-                bgColor = isRunning ? '#EFF6FF' : '#F1F5F9';
+                bgColor = isRunning ? 'var(--brand-bg)' : '#F1F5F9';
                 borderColor = stage.category === 'quantum' ? 'var(--quantum-color)' : (stage.category === 'classical' ? 'var(--classical-color)' : 'var(--hybrid-color)');
                 badgeColor = borderColor;
               }
@@ -513,13 +513,13 @@ export default function PipelineExecutionModal({
                   <div style={{
                     padding: '12px 14px',
                     borderRadius: '8px',
-                    background: '#F0F6FF',
-                    border: '1px solid #BFDBFE',
+                    background: 'var(--brand-bg)',
+                    border: '1px solid var(--border-color)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '6px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, color: '#1D4ED8' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, color: 'var(--brand-primary)' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Zap size={14} /> {mtype === 'mlp' ? 'Neural Network Feedforward & Backpropagation' : 'Dual Convex Quadratic Programming (SVM)'}
                       </span>
@@ -544,19 +544,19 @@ export default function PipelineExecutionModal({
                           width: '24px',
                           height: '24px',
                           borderRadius: '50%',
-                          background: isRunning ? '#2563EB' : '#94A3B8',
+                          background: isRunning ? '#059669' : '#94A3B8',
                           color: '#FFFFFF',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '0.65rem',
                           fontWeight: 700,
-                          boxShadow: isRunning ? '0 0 8px rgba(37, 99, 235, 0.5)' : 'none'
+                          boxShadow: isRunning ? '0 0 8px rgba(5, 150, 105, 0.5)' : 'none'
                         }}>
                           x{idx}
                         </div>
                       ))}
-                      <ArrowRight size={14} style={{ color: '#2563EB' }} />
+                      <ArrowRight size={14} style={{ color: '#059669' }} />
                       <div style={{
                         padding: '4px 10px',
                         borderRadius: '12px',
@@ -785,7 +785,7 @@ export default function PipelineExecutionModal({
                 flex: 1,
                 minHeight: '180px',
                 background: '#0B1120',
-                color: '#38BDF8',
+                color: '#34D399',
                 fontFamily: 'Consolas, Monaco, "Courier New", monospace',
                 fontSize: '0.78rem',
                 padding: '14px 18px',
@@ -799,8 +799,8 @@ export default function PipelineExecutionModal({
                 <span style={{ color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem' }}>
                   <Terminal size={14} /> LIVE SERVER COMPUTATION & TELEMETRY STREAM
                 </span>
-                <span style={{ color: isRunning ? '#38BDF8' : '#4ADE80', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isRunning ? '#38BDF8' : '#4ADE80', display: 'inline-block' }} />
+                <span style={{ color: isRunning ? '#34D399' : '#4ADE80', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isRunning ? '#34D399' : '#4ADE80', display: 'inline-block' }} />
                   {isRunning ? 'STREAMING REAL-TIME SSE' : 'EXECUTION FINISHED'}
                 </span>
               </div>
@@ -866,7 +866,7 @@ export default function PipelineExecutionModal({
               onClick={handleApplyResults}
               type="button"
               style={{
-                background: isFinished ? '#16A34A' : '#2563EB',
+                background: isFinished ? '#16A34A' : '#059669',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '8px 22px',

@@ -172,7 +172,7 @@ model.fit(X_train, y_train)
 
 # 2. Export serialized artifact
 joblib.dump(model, "custom_random_forest.joblib")
-print("Saved custom_random_forest.joblib for Q-Med import!")`,
+print("Saved custom_random_forest.joblib for Quddos import!")`,
 
     xgboost_classifier: `# XGBoost / LightGBM Classifier Export
 import joblib
@@ -187,7 +187,7 @@ model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.05, max_depth=4, eva
 model.fit(X_train, y_train)
 
 joblib.dump(model, "custom_xgboost_model.joblib")
-print("Saved custom_xgboost_model.joblib for Q-Med import!")`,
+print("Saved custom_xgboost_model.joblib for Quddos import!")`,
 
     pytorch_cpu_wrapper: `# PyTorch Estimator Wrapper (.predict(X) compatible)
 import torch
@@ -309,18 +309,18 @@ joblib.dump(qmodel, "custom_quantum_kernel.joblib")`
               width: '40px',
               height: '40px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(13, 148, 136, 0.2))',
+              background: 'linear-gradient(135deg, var(--brand-bg), var(--quantum-bg))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '1px solid rgba(37, 99, 235, 0.3)'
+              border: '1px solid var(--brand-glow)'
             }}>
-              <Upload size={20} style={{ color: 'var(--classical-color)' }} />
+              <Upload size={20} style={{ color: 'var(--brand-primary)' }} />
             </div>
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Import Custom Model Artifact
-                <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--classical-bg)', color: 'var(--classical-color)', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--brand-bg)', color: 'var(--brand-primary)', fontWeight: 600 }}>
                   .joblib / .pkl
                 </span>
               </h2>
@@ -615,7 +615,7 @@ joblib.dump(qmodel, "custom_quantum_kernel.joblib")`
           {activeTab === 'templates' && (
             <div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                Use these standardized Python snippets in your local environment to train and export models compatible with the Q-Med hybrid benchmark suite.
+                Use these standardized Python snippets in your local environment to train and export models compatible with the Quddos hybrid benchmark suite.
               </div>
 
               {/* Template Selectors */}

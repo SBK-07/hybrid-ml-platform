@@ -21,7 +21,7 @@ export default function QuddosAI() {
     {
       role: 'assistant',
       content: `### 🔬 Welcome to Quddos AI Research Assistant
-I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** for the Q-Med Hybrid Biomedical Intelligence Platform (SIH 2026 PS 139).
+I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** for the Quddos Hybrid Biomedical Intelligence Platform (SIH 2026 PS 139).
 
 #### 💡 How to Conduct Deep Research:
 1. **Studio Quick Actions**: Click any action button above (e.g. **📘 Study Guide**, **🎙️ Audio Overview**, **🩺 Clinical XAI Briefing**) to generate publication-grade syntheses.
@@ -30,7 +30,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
 *What hypothesis or dataset would you like to investigate today?*`,
       timestamp: new Date().toLocaleTimeString(),
-      metadata: { provider: 'Quddos 360° Grounded Core', model: 'qmed-grounded-reasoning-v2.5' }
+      metadata: { provider: 'Quddos 360° Grounded Core', model: 'quddos-grounded-reasoning-v2.5' }
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -454,7 +454,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
             className="btn btn-sm btn-outline"
             style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
           >
-            <BookOpen size={15} style={{ color: '#2563EB' }} />
+            <BookOpen size={15} style={{ color: 'var(--brand-primary)' }} />
             <span>{studioLoading === 'study_guide' ? 'Synthesizing...' : '📘 Study Guide'}</span>
           </button>
 
@@ -796,13 +796,13 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                       <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Grounded References:</span>
                       {msg.citations.map((c, cIdx) => (
                         <span key={cIdx} style={{
-                          background: '#EFF6FF',
-                          border: '1px solid #DBEAFE',
+                          background: 'var(--brand-bg)',
+                          border: '1px solid var(--brand-glow)',
                           borderRadius: '12px',
                           padding: '2px 8px',
                           fontSize: '0.68rem',
                           fontWeight: 600,
-                          color: '#1D4ED8'
+                          color: 'var(--brand-primary)'
                         }}>
                           📌 {c.type}: {c.reference}
                         </span>
@@ -923,13 +923,13 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                     style={{
                       padding: '10px 8px',
                       borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'gemini' ? 'var(--classical-color)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'gemini' ? '#EFF6FF' : '#FFFFFF',
+                      border: `2px solid ${aiConfig.provider === 'gemini' ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+                      background: aiConfig.provider === 'gemini' ? 'var(--brand-bg)' : 'var(--bg-card-solid)',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#1D4ED8' }}>✨ Google Gemini</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--brand-primary)' }}>✨ Google Gemini</div>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '2px' }}>1M Ctx • 100% Free</div>
                   </button>
 
@@ -939,8 +939,8 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                     style={{
                       padding: '10px 8px',
                       borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'groq' ? 'var(--classical-color)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'groq' ? '#EFF6FF' : '#FFFFFF',
+                      border: `2px solid ${aiConfig.provider === 'groq' ? 'var(--hybrid-color)' : 'var(--border-color)'}`,
+                      background: aiConfig.provider === 'groq' ? 'var(--hybrid-bg)' : 'var(--bg-card-solid)',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
@@ -951,17 +951,17 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
                   <button
                     type="button"
-                    onClick={() => setAiConfig(prev => ({ ...prev, provider: 'builtin', model: 'qmed-grounded-reasoning-v2.5' }))}
+                    onClick={() => setAiConfig(prev => ({ ...prev, provider: 'builtin', model: 'quddos-grounded-reasoning-v2.5' }))}
                     style={{
                       padding: '10px 8px',
                       borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'builtin' ? 'var(--classical-color)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'builtin' ? '#EFF6FF' : '#FFFFFF',
+                      border: `2px solid ${aiConfig.provider === 'builtin' ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+                      background: aiConfig.provider === 'builtin' ? 'var(--brand-bg)' : 'var(--bg-card-solid)',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#475569' }}>🔬 360° Grounded</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--brand-primary)' }}>🔬 360° Grounded</div>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Zero Setup • Offline</div>
                   </button>
                 </div>
@@ -1013,7 +1013,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                       href="https://aistudio.google.com/app/apikey"
                       target="_blank"
                       rel="noreferrer"
-                      style={{ fontSize: '0.75rem', color: '#2563EB', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                      style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
                     >
                       Get 100% Free Key <ExternalLink size={12} />
                     </a>

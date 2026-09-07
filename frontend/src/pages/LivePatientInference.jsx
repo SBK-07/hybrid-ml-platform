@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, Cpu, Play, BookOpen, Sliders, Stethoscope, Sparkles, Layers, AlertCircle, Compass, HelpCircle, Loader2, Bot,ArrowRight } from 'lucide-react';
+import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, BookOpen, Sliders, Stethoscope, AlertCircle, Compass, Loader2, Bot, ArrowRight } from 'lucide-react';
 import { predictPatient } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
 
@@ -9,7 +9,7 @@ export default function LivePatientInference() {
 
   const [presets, setPresets] = useState([]);
   const [selectedPresetId, setSelectedPresetId] = useState('high_risk_malignant');
-  const [activeDataset, setActiveDataset] = useState('cancer');
+  const activeDataset = 'cancer';
   const [features, setFeatures] = useState({});
   const [predictionResult, setPredictionResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,6 @@ export default function LivePatientInference() {
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
   const [showExplainability, setShowExplainability] = useState(true);
-  const [showBlochSpheres, setShowBlochSpheres] = useState(true);
   const [showCounterfactual, setShowCounterfactual] = useState(true);
 
   // Counterfactual interactive simulation state
@@ -38,15 +37,15 @@ export default function LivePatientInference() {
       if (list.length > 0) {
         const defaultPreset = list.find(p => p.id === 'high_risk_malignant') || list[0];
         setSelectedPresetId(defaultPreset.id);
-        loadPresetFeatures(defaultPreset, activeDataset);
+        loadPresetFeatures(defaultPreset);
       }
     } catch (err) {
       console.error('Error loading patient presets:', err);
     }
   };
 
-  const loadPresetFeatures = (preset, datasetKey) => {
-    const featMap = datasetKey === 'cancer' ? preset.cancer_features : preset.cardio_features;
+  const loadPresetFeatures = (preset) => {
+    const featMap = preset.cancer_features || preset.cardio_features;
     setFeatures(featMap || {});
     setPredictionResult(null);
     setSimulatedDeltas({});
@@ -58,16 +57,7 @@ export default function LivePatientInference() {
     setSelectedPresetId(presetId);
     const preset = presets.find(p => p.id === presetId);
     if (preset) {
-      loadPresetFeatures(preset, activeDataset);
-    }
-  };
-
-  const handleDatasetChange = (e) => {
-    const newDs = e.target.value;
-    setActiveDataset(newDs);
-    const preset = presets.find(p => p.id === selectedPresetId);
-    if (preset) {
-      loadPresetFeatures(preset, newDs);
+      loadPresetFeatures(preset);
     }
   };
 
@@ -195,41 +185,34 @@ export default function LivePatientInference() {
         </div>
       </div>
 
-      {/* Preset & Domain Selection Grid */}
-      <div className="grid-2" style={{ gap: '16px', marginBottom: '20px' }}>
-        <div className="card active-control-card" style={{ margin: 0, padding: '16px 20px', border: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <UserCheck size={16} style={{ color: 'var(--classical-color)' }} /> Clinical Patient Profile Archetype:
+      {/* Clinical Patient Profile Archetype Selector */}
+      <div className="card active-control-card" style={{ marginBottom: '20px', padding: '16px 20px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <UserCheck size={18} style={{ color: 'var(--classical-color)' }} /> Clinical Patient Profile Archetype:
             </label>
-            <select
-              value={selectedPresetId}
-              onChange={handlePresetChange}
-              className="form-select-inline"
-              style={{ width: '100%', padding: '8px 12px', fontSize: '0.88rem' }}
-            >
-              {presets.map(p => (
-                <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
-              ))}
-            </select>
+            {selectedPreset && (
+              <span className="badge-paradigm badge-classical" style={{ fontSize: '0.72rem' }}>
+                {selectedPreset.category}
+              </span>
+            )}
           </div>
-        </div>
-
-        <div className="card active-control-card" style={{ margin: 0, padding: '16px 20px', border: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Activity size={16} style={{ color: 'var(--classical-color)' }} /> Disease Domain:
-            </label>
-            <select
-              value={activeDataset}
-              onChange={handleDatasetChange}
-              className="form-select-inline"
-              style={{ width: '100%', padding: '8px 12px', fontSize: '0.88rem' }}
-            >
-              <option value="cancer">Breast Cancer Wisconsin Diagnostic (WDBC)</option>
-              <option value="cardiovascular">UCI Heart Disease (Cardiovascular Medicine)</option>
-            </select>
-          </div>
+          <select
+            value={selectedPresetId}
+            onChange={handlePresetChange}
+            className="form-select-inline"
+            style={{ width: '100%', padding: '10px 14px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)' }}
+          >
+            {presets.map(p => (
+              <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
+            ))}
+          </select>
+          {selectedPreset && (
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+              {selectedPreset.description}
+            </div>
+          )}
         </div>
       </div>
 
@@ -415,6 +398,75 @@ export default function LivePatientInference() {
                   </div>
                 )}
 
+                {/* Counterfactual "What-If" Therapeutic Simulation */}
+                {counterfactual && counterfactual.key_interventions && counterfactual.key_interventions.length > 0 && (
+                  <div>
+                    <button
+                      onClick={() => setShowCounterfactual(!showCounterfactual)}
+                      className="btn btn-sm btn-outline full-width-btn"
+                      type="button"
+                    >
+                      <ShieldAlert size={14} style={{ color: 'var(--status-success)' }} /> {showCounterfactual ? 'Hide' : 'Show'} Counterfactual Risk-Reversal Simulator
+                      {showCounterfactual ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {showCounterfactual && (
+                      <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Simulated Risk Trajectory:</span>
+                          <span style={{
+                            fontWeight: 700,
+                            color: (simulatedRisk ?? counterfactual.original_risk_probability) > 0.4 ? 'var(--status-danger)' : 'var(--status-success)',
+                            fontSize: '0.95rem'
+                          }}>
+                            {(((simulatedRisk ?? counterfactual.original_risk_probability)) * 100).toFixed(1)}% ({((simulatedRisk ?? counterfactual.original_risk_probability)) > 0.4 ? 'Elevated' : 'Therapeutic Safe Tier'})
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                          Adjust sliders to simulate biomarker reduction through targeted intervention:
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {counterfactual.key_interventions.map((inv, idx) => {
+                            const sliderVal = simulatedDeltas[inv.feature_name]?.percentAchieved || 0;
+                            const currentVal = simulatedDeltas[inv.feature_name]?.currentVal ?? inv.original_value;
+                            return (
+                              <div key={idx} style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{inv.feature_name}</span>
+                                  <span style={{ color: 'var(--quantum-color)', fontWeight: 600, fontSize: '0.78rem' }}>
+                                    Target: {inv.recommended_target} (-{inv.percentage_reduction}%)
+                                  </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={sliderVal}
+                                    onChange={(e) => handleCounterfactualSlider(inv.feature_name, inv.original_value, inv.recommended_target, parseFloat(e.target.value))}
+                                    style={{ flex: 1, accentColor: 'var(--classical-color)' }}
+                                  />
+                                  <span style={{ minWidth: '45px', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {sliderVal}%
+                                  </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                  <span>Current: {typeof currentVal === 'number' ? currentVal.toFixed(2) : currentVal}</span>
+                                  <span>Orig: {inv.original_value}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.76rem', lineHeight: '1.4' }}>
+                          <strong>Takeaway:</strong> {counterfactual.clinical_takeaway}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Advanced Quantum State Coordinates */}
                 <div>
                   <button
@@ -485,34 +537,34 @@ export default function LivePatientInference() {
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.98rem', fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1rem', fontWeight: 700 }}>
               Profile Archetype: {selectedPreset.name}
             </h4>
-            <span className="val-badge ready" style={{ fontSize: '0.72rem', background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A' }}>
+            <span className="badge-paradigm badge-hybrid" style={{ fontSize: '0.74rem' }}>
               Expected: {selectedPreset.risk_profile}
             </span>
           </div>
 
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.45', margin: '0 0 10px 0' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5', margin: '0 0 12px 0' }}>
             {selectedPreset.description}
           </p>
 
           {/* Student View Summary */}
-          <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> Student View (Basic Clinical Summary):
             </strong>
-            <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', marginTop: '4px' }}>
+            <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.4' }}>
               <strong>Clinical Presentation:</strong> {selectedPreset.basic_info?.clinical_notes}
             </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
-              <strong>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', lineHeight: '1.4' }}>
+              <strong style={{ color: 'var(--status-success)' }}>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
             </p>
           </div>
 
           {/* Advanced Preset Info */}
-          <div style={{ marginTop: '12px' }}>
+          <div style={{ marginTop: '14px' }}>
             <button
               onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
               className="btn btn-sm btn-outline"
@@ -523,26 +575,18 @@ export default function LivePatientInference() {
             </button>
 
             {showAdvancedInputs && (
-              <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
-                <p style={{ color: 'var(--text-primary)' }}>
+              <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <p style={{ color: 'var(--text-primary)', margin: 0 }}>
                   <strong style={{ color: 'var(--classical-color)' }}>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
                 </p>
-                <p style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
+                <p style={{ color: 'var(--text-primary)', marginTop: '6px' }}>
                   <strong style={{ color: 'var(--quantum-color)' }}>Hemodynamics:</strong> {selectedPreset.advanced_info?.hemodynamics}
                 </p>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
                   <strong style={{ color: 'var(--hybrid-color)' }}>Theoretical Risk Range:</strong> {selectedPreset.advanced_info?.risk_score_expected}
                 </p>
               </div>
             )}
-            <div>
-              <strong style={{ color: 'var(--text-primary)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Stethoscope size={14} style={{ color: '#059669' }} /> Standard Protocol:
-              </strong>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                {selectedPreset.basic_info?.typical_action}
-              </div>
-            </div>
           </div>
         </div>
       )}

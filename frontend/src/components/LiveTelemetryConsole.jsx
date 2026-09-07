@@ -17,7 +17,7 @@ const getLogColor = (log) => {
 
 const LiveTelemetryConsole = forwardRef(({ datasetKey = 'cancer', onComplete }, ref) => {
   const [terminalLogs, setTerminalLogs] = useState([
-    `[SYSTEM] Q-Med Live Telemetry Console Initialized.`,
+    `[SYSTEM] Quddos Live Telemetry Console Initialized.`,
     `[SYSTEM] Target Dataset: [${datasetKey.toUpperCase()}] | Engine: Scikit-Learn & Qiskit 2.x Statevector`,
     `[SYSTEM] Ready to execute cumulative server computation stream.`
   ]);
@@ -59,7 +59,7 @@ const LiveTelemetryConsole = forwardRef(({ datasetKey = 'cancer', onComplete }, 
     setIsCollapsed(false); // Automatically expand when execution starts
 
     setTerminalLogs([
-      `[SYSTEM] Connecting to Q-Med Cumulative Execution Engine...`,
+      `[SYSTEM] Connecting to Quddos Cumulative Execution Engine...`,
       `[SYSTEM] Dataset: [${datasetKey.toUpperCase()}] | Model: [ALL] | Mode: Real Computation`,
       `[SYSTEM] Establishing Server-Sent Events (SSE) telemetry stream...`
     ]);

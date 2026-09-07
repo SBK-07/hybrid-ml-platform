@@ -4,13 +4,13 @@ import Atom4Orbits from './Atom4Orbits';
 
 export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = true }) {
   const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem('qmed-theme');
+    const stored = localStorage.getItem('quddos-theme') || localStorage.getItem('qmed-theme');
     return stored === 'dark';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('qmed-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('quddos-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   const navItems = [
@@ -28,13 +28,16 @@ export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = tru
     <aside className="sidebar">
       <div className="brand">
         <div className="logo-icon" style={{ display: 'flex', alignItems: 'center' }}>
-          <Atom4Orbits size={28} color="var(--classical-color)" animated />
+          <Atom4Orbits size={28} color="var(--brand-primary)" animated />
         </div>
-        <div>
-          <h2>Q-Med AI Studio</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <h2>Quddos</h2>
+          <span className="badge-sih" style={{ fontSize: '0.62rem', padding: '1px 6px', letterSpacing: '0.04em' }}>
+            STUDIO
+          </span>
         </div>
       </div>
-      <div className="brand-tagline">Hybrid Quantum-Classical ML Platform</div>
+      <div className="brand-tagline">Hybrid Quantum-Classical Intelligence Platform</div>
 
       <nav className="nav-menu">
         {navItems.map(item => (
@@ -60,7 +63,7 @@ export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = tru
             {isDark ? <Moon size={14} /> : <Sun size={14} />}
             <span>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
           </span>
-          <label className="theme-switch">
+          <label className="theme-switch" title="Toggle theme">
             <input
               type="checkbox"
               checked={isDark}
@@ -71,7 +74,7 @@ export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = tru
         </div>
         <div className="quantum-status">
           <span className="status-dot" style={{ backgroundColor: isBackendOnline ? 'var(--status-success)' : 'var(--status-danger)' }}></span>
-          {isBackendOnline ? 'Qiskit / PennyLane Online' : 'Backend Disconnected'}
+          {isBackendOnline ? 'IBM Quantum & PennyLane Online' : 'Backend Disconnected'}
         </div>
       </div>
     </aside>
