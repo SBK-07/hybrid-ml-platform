@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <rect width="400" height="400" fill="#eed5c5"/>
+  <circle cx="200" cy="200" r="160" fill="#e0bfac"/>
+  <!-- Lesion boundary (Benign Melanocytic Nevus) -->
+  <circle cx="200" cy="200" r="75" fill="#7a4a35"/>
+  <circle cx="200" cy="200" r="60" fill="#593322"/>
+  <circle cx="200" cy="200" r="35" fill="#422416"/>
+  
+  <rect x="20" y="350" width="360" height="35" rx="6" fill="rgba(0,0,0,0.75)"/>
+  <text x="200" y="373" fill="#4ade80" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">
+    ISIC Sample: Melanocytic Nevus (Benign / Healthy)
+  </text>
+</svg>

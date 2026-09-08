@@ -15,10 +15,10 @@ export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = tru
 
   const navItems = [
     { id: 'overview', icon: <Compass size={18} />, label: 'Overview & Workflow' },
+    { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' },
     { id: 'dataset-overview', icon: <Database size={18} />, label: 'Dataset Overview & EDA', badge: 'DEEP EDA' },
     { id: 'individual', icon: <Zap size={18} />, label: 'Individual Experiment' },
     { id: 'cumulative', icon: <BarChart3 size={18} />, label: 'Cumulative Benchmark' },
-    { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' },
     { id: 'real-qc', icon: <Cpu size={18} />, label: 'Real QC Hardware', badge: 'IBM QPU' },
     { id: 'report', icon: <FileText size={18} />, label: 'Adaptive Report Builder' },
     { id: 'quddos', icon: <Bot size={18} />, label: 'Quddos AI Assistant' }

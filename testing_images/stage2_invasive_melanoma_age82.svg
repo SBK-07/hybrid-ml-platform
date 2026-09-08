@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <rect width="400" height="400" fill="#c9957d"/>
+  <circle cx="200" cy="200" r="165" fill="#c9957d" opacity="0.95"/>
+  
+  <path d="M 125 125 Q 225 95 295 145 T 305 265 T 195 305 T 105 215 Z" fill="#120504" opacity="0.88" />
+  <circle cx="200" cy="200" r="45" fill="#120605" opacity="0.9" />
+  <circle cx="180" cy="180" r="6" fill="#8c3e34"/>
+  <circle cx="220" cy="210" r="5" fill="#cf786e"/>
+        
+  <rect x="15" y="348" width="370" height="38" rx="6" fill="rgba(0,0,0,0.78)"/>
+  <text x="200" y="372" fill="#f87171" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">
+    Stage II Invasive Melanoma (Age 82 - Neck)
+  </text>
+</svg>

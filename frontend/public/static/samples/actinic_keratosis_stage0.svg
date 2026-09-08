@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <rect width="400" height="400" fill="#f4dcd0"/>
+  <rect width="400" height="400" fill="#e8c4b0" opacity="0.9"/>
+  <circle cx="200" cy="200" r="160" fill="#dfb39d"/>
+  
+  <!-- Lesion boundary (Stage 0 Actinic Keratosis - Rough reddish lesion) -->
+  <path d="M 160 150 Q 210 130 250 160 T 270 230 T 210 270 T 140 220 Z" fill="#b85b51" opacity="0.75" />
+  <path d="M 175 165 Q 220 145 240 175 T 255 220 T 195 250 T 155 200 Z" fill="#8c3932" opacity="0.65" />
+  <circle cx="205" cy="195" r="25" fill="#66221c" opacity="0.5" />
+  <circle cx="180" cy="170" r="4" fill="#cf786e"/>
+  <circle cx="220" cy="190" r="5" fill="#d9897e"/>
+  <circle cx="195" cy="225" r="4" fill="#cf786e"/>
+  <circle cx="230" cy="210" r="3" fill="#e29b91"/>
+  
+  <rect x="20" y="350" width="360" height="35" rx="6" fill="rgba(0,0,0,0.75)"/>
+  <text x="200" y="373" fill="#38bdf8" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">
+    ISIC Sample: Actinic Keratosis (Stage 0 Pre-Cancerous)
+  </text>
+</svg>

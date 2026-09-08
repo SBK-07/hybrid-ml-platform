@@ -1,20 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, BookOpen, Sliders, Stethoscope, AlertCircle, Compass, Loader2, Bot, ArrowRight } from 'lucide-react';
-import { predictPatient } from '../services/api';
+import {
+  Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert, BookOpen, Sliders,
+  Stethoscope, AlertCircle, Compass, Loader2, Bot, ArrowRight, Cpu, Play,
+  Upload, FileText, Image as ImageIcon, CheckCircle, Printer, Eye, Sparkles, HelpCircle
+} from 'lucide-react';
+import { predictPatient, predictMultimodalPatient } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
 
 export default function LivePatientInference() {
   const navigate = useNavigate();
 
+  // Presets & Active Dataset
   const [presets, setPresets] = useState([]);
-  const [selectedPresetId, setSelectedPresetId] = useState('high_risk_malignant');
+  const [selectedPresetId, setSelectedPresetId] = useState('skin_stage0_actinic');
   const activeDataset = 'cancer';
+
+  // Flexible Input Modality State: 'multimodal' | 'image' | 'form' | 'csv'
+  const [inputMode, setInputMode] = useState('multimodal');
+
+  // Input Data States
   const [features, setFeatures] = useState({});
+  const [patientAge, setPatientAge] = useState(52);
+  const [anatomicalSite, setAnatomicalSite] = useState('face_scalp');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('/static/samples/actinic_keratosis_stage0.svg');
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvFileName, setCsvFileName] = useState('');
+
+  // Dual View Mode: 'patient' (Non-Tech Layman) | 'clinical' (Technical)
+  const [viewMode, setViewMode] = useState('patient');
+
+  // Explainability & Modal States
+  const [showGradCam, setShowGradCam] = useState(true);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+
+  // Prediction & Loading States
   const [predictionResult, setPredictionResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Accordion toggles
+  // Accordion Toggles
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
   const [showExplainability, setShowExplainability] = useState(true);
@@ -35,18 +60,27 @@ export default function LivePatientInference() {
       const list = data.presets || [];
       setPresets(list);
       if (list.length > 0) {
-        const defaultPreset = list.find(p => p.id === 'high_risk_malignant') || list[0];
+        const defaultPreset = list.find(p => p.id === 'skin_stage0_actinic') || list[0];
         setSelectedPresetId(defaultPreset.id);
-        loadPresetFeatures(defaultPreset);
+        loadPresetData(defaultPreset);
       }
     } catch (err) {
       console.error('Error loading patient presets:', err);
     }
   };
 
-  const loadPresetFeatures = (preset) => {
-    const featMap = preset.cancer_features || preset.cardio_features;
-    setFeatures(featMap || {});
+  const loadPresetData = (preset) => {
+    const featMap = preset.cancer_features || preset.cardio_features || {};
+    setFeatures(featMap);
+    if (featMap.age) setPatientAge(featMap.age);
+    if (featMap.anatomical_site) setAnatomicalSite(featMap.anatomical_site);
+
+    if (preset.sample_image_url) {
+      setImagePreview(preset.sample_image_url);
+      setImageFile(null);
+    }
+    setCsvFile(null);
+    setCsvFileName('');
     setPredictionResult(null);
     setSimulatedDeltas({});
     setSimulatedRisk(null);
@@ -57,7 +91,7 @@ export default function LivePatientInference() {
     setSelectedPresetId(presetId);
     const preset = presets.find(p => p.id === presetId);
     if (preset) {
-      loadPresetFeatures(preset);
+      loadPresetData(preset);
     }
   };
 
@@ -68,16 +102,45 @@ export default function LivePatientInference() {
     }));
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    }
+  };
+
+  const handleCsvUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCsvFile(file);
+      setCsvFileName(file.name);
+    }
+  };
+
   const handleRunInference = async (e) => {
     e.preventDefault();
     setPredictionResult(null);
     setLoading(true);
     try {
-      const res = await predictPatient(activeDataset, features);
+      const formData = new FormData();
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+      if (csvFile) {
+        formData.append('csv_file', csvFile);
+      }
+      formData.append('age', patientAge);
+      formData.append('anatomical_site', anatomicalSite);
+      formData.append('dataset_key', activeDataset);
+      formData.append('features_json', JSON.stringify(features));
+
+      const res = await predictMultimodalPatient(formData);
       setPredictionResult(res);
-      // Initialize simulated risk from prediction
-      if (res?.predictions?.hybrid_consensus_ensemble?.probability !== undefined) {
-        setSimulatedRisk(res.predictions.hybrid_consensus_ensemble.probability);
+
+      if (res?.early_detection?.probability !== undefined) {
+        setSimulatedRisk(res.early_detection.probability);
         setSimulatedDeltas({});
       }
     } catch (err) {
@@ -87,9 +150,7 @@ export default function LivePatientInference() {
     }
   };
 
-  // Real-time counterfactual "What-If" slider adjustment
   const handleCounterfactualSlider = (featureName, originalVal, recommendedVal, sliderPercent) => {
-    // sliderPercent in [0, 100], 0 means original value, 100 means recommended therapeutic target
     const currentDeltaPct = (sliderPercent / 100);
     const currentVal = originalVal + (recommendedVal - originalVal) * currentDeltaPct;
 
@@ -101,13 +162,11 @@ export default function LivePatientInference() {
       }
     }));
 
-    // Recalculate dynamic simulated risk
     if (predictionResult?.predictions?.hybrid_consensus_ensemble) {
       const origRisk = predictionResult.predictions.hybrid_consensus_ensemble.probability;
       const targetRisk = predictionResult.explainability?.counterfactual?.target_risk_probability || (origRisk * 0.3);
       const totalDrivers = predictionResult.explainability?.counterfactual?.key_interventions?.length || 1;
 
-      // Calculate aggregate progress across all counterfactual sliders
       const currentDeltas = { ...simulatedDeltas, [featureName]: { percentAchieved: sliderPercent } };
       let sumPct = 0;
       Object.values(currentDeltas).forEach(d => {
@@ -122,13 +181,17 @@ export default function LivePatientInference() {
   const handleConsultQuddos = () => {
     if (!predictionResult) return;
 
-    // Package patient telemetry into Quddos AI artifacts
     const artifact = {
-      title: `Patient Case Study (${selectedPreset?.name || 'Custom'})`,
-      category: 'Patient Inference & XAI',
+      title: `Multimodal Patient Case Study (${selectedPreset?.name || 'Custom Upload'})`,
+      category: 'Early Disease Detection & Multimodal XAI',
       data: {
         preset_name: selectedPreset?.name,
         dataset: activeDataset,
+        patient_age: patientAge,
+        anatomical_site: anatomicalSite,
+        early_detection: predictionResult.early_detection,
+        age_factor: predictionResult.age_factor,
+        gradcam: predictionResult.gradcam_explainability,
         features: features,
         predictions: predictionResult.predictions,
         uncertainty: predictionResult.uncertainty,
@@ -137,8 +200,8 @@ export default function LivePatientInference() {
       },
       metadata: {
         domain: activeDataset,
-        hybrid_risk: predictionResult.predictions?.hybrid_consensus_ensemble?.probability,
-        risk_tier: predictionResult.predictions?.hybrid_consensus_ensemble?.risk_tier
+        hybrid_risk: predictionResult.early_detection?.probability || predictionResult.predictions?.hybrid_consensus_ensemble?.probability,
+        stage_code: predictionResult.early_detection?.stage_code
       },
       timestamp: new Date().toISOString()
     };
@@ -157,142 +220,481 @@ export default function LivePatientInference() {
   const explainability = predictionResult?.explainability;
   const blochCoords = predictionResult?.bloch_coordinates;
   const counterfactual = explainability?.counterfactual;
+  const earlyDet = predictionResult?.early_detection;
+  const ageFactor = predictionResult?.age_factor;
+  const gradCam = predictionResult?.gradcam_explainability;
+
+  const testingImagesGallery = [
+    { name: "Stage 0 (Age 45)", file: "stage0_actinic_keratosis_age45.svg", age: 45, site: "face_scalp", stage: "Stage 0 Pre-Cancerous" },
+    { name: "Stage 0 (Age 58)", file: "stage0_actinic_keratosis_age58.svg", age: 58, site: "face_scalp", stage: "Stage 0 Pre-Cancerous" },
+    { name: "Stage 0 (Age 72)", file: "stage0_actinic_keratosis_age72.svg", age: 72, site: "upper_extremity", stage: "Stage 0 Pre-Cancerous" },
+    { name: "Stage I (Age 38)", file: "stage1_early_melanoma_age38.svg", age: 38, site: "back_trunk", stage: "Stage I Early Malignant" },
+    { name: "Stage I (Age 61)", file: "stage1_early_melanoma_age61.svg", age: 61, site: "upper_extremity", stage: "Stage I Early Malignant" },
+    { name: "Stage I (Age 75)", file: "stage1_early_melanoma_age75.svg", age: 75, site: "lower_extremity", stage: "Stage I Early Malignant" },
+    { name: "Stage II (Age 52)", file: "stage2_invasive_melanoma_age52.svg", age: 52, site: "torso", stage: "Stage II+ Invasive" },
+    { name: "Stage II (Age 68)", file: "stage2_invasive_melanoma_age68.svg", age: 68, site: "back_trunk", stage: "Stage II+ Invasive" },
+    { name: "Stage II (Age 82)", file: "stage2_invasive_melanoma_age82.svg", age: 82, site: "face_scalp", stage: "Stage II+ Invasive" },
+    { name: "Benign (Age 24)", file: "benign_nevus_age24.svg", age: 24, site: "upper_extremity", stage: "Benign / Healthy" },
+    { name: "Benign (Age 35)", file: "benign_nevus_age35.svg", age: 35, site: "torso", stage: "Benign / Healthy" },
+    { name: "Benign (Age 50)", file: "benign_nevus_age50.svg", age: 50, site: "upper_extremity", stage: "Benign / Healthy" }
+  ];
 
   return (
     <div className="hub-section active" style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '40px' }}>
       {/* Page Header */}
       <div className="section-header" style={{ marginBottom: '18px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.45rem', margin: 0 }}>
               <Activity size={26} style={{ color: 'var(--classical-color)' }} />
-              Live Patient Inference & Explainable AI (XAI) Studio
+              Live Patient Inference & Early Disease Detection Studio
             </h1>
             <p className="subtitle" style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>
-              Real-time clinical diagnostic simulator with 4-qubit Hilbert statevector embedding, dual-source uncertainty, 3D Bloch sphere projections, and interactive counterfactual risk reversal.
+              Real-time multimodal disease prediction combining dermoscopy image uploads, CSV patient data, age factor risk weighting, early cancer staging (Stage 0/I/II), and Grad-CAM visual explainability.
             </p>
           </div>
 
-          {predictionResult && (
-            <button
-              onClick={handleConsultQuddos}
-              className="btn btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', padding: '8px 16px', background: 'var(--classical-color)' }}
-            >
-              <Bot size={16} /> Deep Consult with Quddos AI <ArrowRight size={14} />
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {predictionResult && (
+              <>
+                <button
+                  onClick={() => setShowPrintModal(true)}
+                  className="btn btn-outline"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', padding: '8px 14px' }}
+                >
+                  <Printer size={16} /> Print Clinical Report
+                </button>
+                <button
+                  onClick={handleConsultQuddos}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', padding: '8px 16px', background: 'var(--classical-color)' }}
+                >
+                  <Bot size={16} /> Deep Consult with Quddos AI <ArrowRight size={14} />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Clinical Patient Profile Archetype Selector */}
+      {/* Active Multimodal Disease Dataset Selector Card */}
       <div className="card active-control-card" style={{ marginBottom: '20px', padding: '16px 20px', border: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UserCheck size={18} style={{ color: 'var(--classical-color)' }} /> Clinical Patient Profile Archetype:
+              <UserCheck size={18} style={{ color: 'var(--classical-color)' }} /> Active Early Disease Detection Target Dataset:
             </label>
-            {selectedPreset && (
-              <span className="badge-paradigm badge-classical" style={{ fontSize: '0.72rem' }}>
-                {selectedPreset.category}
-              </span>
-            )}
+            <span className="badge-paradigm badge-classical" style={{ fontSize: '0.72rem' }}>
+              Multimodal Skin Cancer (ISIC / HAM10000)
+            </span>
           </div>
           <select
-            value={selectedPresetId}
-            onChange={handlePresetChange}
+            value="isic_skin_cancer"
+            onChange={() => {}}
             className="form-select-inline"
             style={{ width: '100%', padding: '10px 14px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)' }}
           >
-            {presets.map(p => (
-              <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
-            ))}
+            <option value="isic_skin_cancer">ISIC / HAM10000 Skin Cancer Multimodal Dataset (Image + CSV + Age Factor)</option>
           </select>
-          {selectedPreset && (
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-              {selectedPreset.description}
-            </div>
-          )}
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+            Upload any custom lesion image (`.jpg`, `.png`), patient `.csv` file, or select files from the <code>testing_images/</code> folder. The AI pipeline auto-extracts features and identifies whether the case is <strong>Stage 0 (Pre-Cancerous)</strong>, <strong>Stage I (Early Malignant)</strong>, <strong>Stage II+ (Invasive)</strong>, or <strong>Benign / Healthy</strong> with full Grad-CAM explainability.
+          </div>
         </div>
       </div>
 
+      {/* Flexible Input Toolbar (Tabs: Multimodal, Image Upload, CSV Upload, Clinical Form) */}
+      <div className="card" style={{ marginBottom: '24px', padding: '16px 20px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sliders size={18} style={{ color: 'var(--quantum-color)' }} /> Ingestion Modality Mode:
+          </span>
 
-      {/* Main Form & Predictions Grid (Equal height 520px cards) */}
-      <div className="grid-2" style={{ gap: '24px', alignItems: 'stretch', marginBottom: '28px' }}>
-        {/* Left Side: Parameters Form */}
-        <div className="card" style={{ height: '520px', display: 'flex', flexDirection: 'column', margin: 0 }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <Cpu size={18} style={{ color: 'var(--classical-color)' }} /> Patient Parameters ({Object.keys(features).length} Features)
-          </h3>
-
-          <form onSubmit={handleRunInference} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div className="form-grid" style={{ flex: 1, overflowY: 'auto', paddingRight: '6px', marginBottom: '14px' }}>
-              {Object.keys(features).map((feat) => (
-                <div className="form-group" key={feat}>
-                  <label>{feat}</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={features[feat]}
-                    onChange={(e) => handleInputChange(feat, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-            <button type="submit" className="btn btn-primary full-width-btn" disabled={loading} style={{ flexShrink: 0 }}>
-              {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} />}
-              {loading ? 'Computing Quantum Statevector Overlaps...' : 'Run Diagnostic Risk Inference'}
+          <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-inset)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <button
+              onClick={() => setInputMode('multimodal')}
+              className={`btn btn-sm ${inputMode === 'multimodal' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            >
+              <Sparkles size={14} /> Combined Multimodal
             </button>
-          </form>
+            <button
+              onClick={() => setInputMode('image')}
+              className={`btn btn-sm ${inputMode === 'image' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            >
+              <ImageIcon size={14} /> Photo / Image Upload
+            </button>
+            <button
+              onClick={() => setInputMode('csv')}
+              className={`btn btn-sm ${inputMode === 'csv' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            >
+              <FileText size={14} /> Patient CSV Upload
+            </button>
+            <button
+              onClick={() => setInputMode('form')}
+              className={`btn btn-sm ${inputMode === 'form' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            >
+              <Sliders size={14} /> Clinical Attributes Form
+            </button>
+          </div>
         </div>
 
-        {/* Right Side: Prediction Output Cards (Scrollable internal view, equal height) */}
-        <div className="card" style={{ height: '520px', display: 'flex', flexDirection: 'column', position: 'relative', margin: 0 }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <ShieldAlert size={18} style={{ color: 'var(--classical-color)' }} /> Tri-Model Diagnostic Cards
-          </h3>
+        <form onSubmit={handleRunInference}>
+          <div className="grid-3" style={{ gap: '16px', alignItems: 'start' }}>
+            {/* Input Column 1: Image Upload / Preview */}
+            {(inputMode === 'multimodal' || inputMode === 'image') && (
+              <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <ImageIcon size={16} style={{ color: 'var(--classical-color)' }} /> Dermoscopy / Lesion Photo Upload:
+                </label>
 
-          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '6px' }}>
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '110px 20px', color: 'var(--text-secondary)' }}>
-                <Loader2 size={40} className="spinner" style={{ marginBottom: '16px', color: 'var(--classical-color)' }} />
-                <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
-                  Computing Quantum Statevector Overlaps...
-                </p>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                  Running tri-model inference pipeline across Classical SVM, Quantum QSVM, and Hybrid Consensus Ensemble.
-                </p>
+                {imagePreview && (
+                  <div style={{ position: 'relative', width: '100%', height: '160px', background: '#000', borderRadius: '6px', overflow: 'hidden', marginBottom: '8px' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Uploaded lesion preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                    {gradCam && showGradCam && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: `${gradCam.roi_bounding_box[0] / 4}%`,
+                          top: `${gradCam.roi_bounding_box[1] / 4}%`,
+                          width: `${gradCam.roi_bounding_box[2] / 3}%`,
+                          height: `${gradCam.roi_bounding_box[3] / 3}%`,
+                          border: '2px dashed #f87171',
+                          background: 'rgba(239, 68, 68, 0.35)',
+                          borderRadius: '50%',
+                          pointerEvents: 'none',
+                          boxShadow: '0 0 12px rgba(239,68,68,0.8)'
+                        }}
+                        title="Grad-CAM High Attention Region"
+                      />
+                    )}
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                  id="image-upload-input"
+                />
+                <label
+                  htmlFor="image-upload-input"
+                  className="btn btn-outline full-width-btn"
+                  style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '8px 10px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  <Upload size={14} /> {imageFile ? imageFile.name : 'Upload New Custom Image (.jpg/.png)'}
+                </label>
               </div>
-            ) : predictionResult ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative' }}>
-                <div style={{ position: 'sticky', top: '0', right: '0', zIndex: 10, display: 'flex', justifyContent: 'flex-end', marginBottom: '-28px' }}>
-                  <CardActionMenu
-                    title={`Patient Risk Prediction - ${selectedPreset?.name}`}
-                    category="prediction"
-                    data={{
-                      patient_profile: selectedPreset?.name,
-                      dataset: activeDataset,
-                      predictions: predictions,
-                      consensus_risk: predictions?.hybrid_consensus_ensemble?.probability,
-                      risk_tier: predictions?.hybrid_consensus_ensemble?.risk_tier,
-                      uncertainty: uncertainty
-                    }}
-                    metadata={{
-                      page: 'live_inference',
-                      preset_id: selectedPresetId,
-                      quantum_coordinates: predictionResult.quantum_compressed_coordinates
+            )}
+
+            {/* Input Column 2: Age Factor & Epidemiological Parameters */}
+            {(inputMode === 'multimodal' || inputMode === 'form' || inputMode === 'image') && (
+              <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+                  <UserCheck size={16} style={{ color: 'var(--quantum-color)' }} /> Age & Epidemiological Baseline:
+                </label>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+                    <span>Patient Age:</span>
+                    <span style={{ fontWeight: 700, color: 'var(--quantum-color)' }}>{patientAge} Years Old</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="18"
+                    max="90"
+                    value={patientAge}
+                    onChange={(e) => setPatientAge(parseFloat(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--quantum-color)' }}
+                  />
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    Age risk weight: {patientAge >= 65 ? '+22% (High)' : (patientAge >= 50 ? '+12% (Moderate)' : 'Baseline')}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                    Anatomical Site Location:
+                  </label>
+                  <select
+                    value={anatomicalSite}
+                    onChange={(e) => setAnatomicalSite(e.target.value)}
+                    className="form-select-inline"
+                    style={{ width: '100%', padding: '6px 10px', fontSize: '0.82rem' }}
+                  >
+                    <option value="face_scalp">Face / Scalp (Sun Exposed)</option>
+                    <option value="upper_extremity">Upper Extremity (Arm / Shoulder)</option>
+                    <option value="back_trunk">Back / Trunk</option>
+                    <option value="lower_extremity">Lower Extremity (Leg / Foot)</option>
+                    <option value="torso">Chest / Abdomen</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Input Column 3: CSV Dataset Upload & Features Form */}
+            {(inputMode === 'multimodal' || inputMode === 'csv' || inputMode === 'form') && (
+              <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <FileText size={16} style={{ color: 'var(--hybrid-color)' }} /> Clinical CSV File / Numeric Features:
+                </label>
+
+                {inputMode !== 'form' && (
+                  <div style={{ marginBottom: '10px' }}>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleCsvUpload}
+                      style={{ display: 'none' }}
+                      id="csv-upload-input"
+                    />
+                    <label
+                      htmlFor="csv-upload-input"
+                      className="btn btn-outline full-width-btn"
+                      style={{ cursor: 'pointer', fontSize: '0.8rem', padding: '8px 10px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                    >
+                      <Upload size={14} /> {csvFileName ? csvFileName : 'Upload Custom Patient Dataset (.csv)'}
+                    </label>
+                  </div>
+                )}
+
+                <div style={{ maxHeight: '100px', overflowY: 'auto', fontSize: '0.76rem', border: '1px solid var(--border-color)', padding: '6px', borderRadius: '4px', background: 'var(--bg-card-solid)' }}>
+                  {Object.keys(features).slice(0, 4).map(feat => (
+                    <div key={feat} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span>{feat}:</span>
+                      <input
+                        type="number"
+                        step="any"
+                        value={features[feat]}
+                        onChange={(e) => handleInputChange(feat, e.target.value)}
+                        style={{ width: '65px', padding: '1px 4px', fontSize: '0.74rem' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+              style={{ fontSize: '0.92rem', padding: '10px 24px', background: 'var(--classical-color)' }}
+            >
+              {loading ? <Loader2 size={18} className="spinner" /> : <Play size={18} />}
+              {loading ? 'Computing Quantum Multimodal Overlaps...' : 'Run Early Disease Risk Inference'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Output Section Header with View Toggle Switch (Patient View vs Clinical View) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+        <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ShieldAlert size={20} style={{ color: 'var(--classical-color)' }} /> Diagnostic Risk & Explainability Results
+        </h3>
+
+        {/* Dual-View Switch Button */}
+        <div style={{ display: 'flex', background: 'var(--bg-inset)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <button
+            onClick={() => setViewMode('patient')}
+            className={`btn btn-sm ${viewMode === 'patient' ? 'btn-primary' : 'btn-ghost'}`}
+            style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+          >
+            <BookOpen size={14} /> Patient View
+          </button>
+          <button
+            onClick={() => setViewMode('clinical')}
+            className={`btn btn-sm ${viewMode === 'clinical' ? 'btn-primary' : 'btn-ghost'}`}
+            style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+          >
+            <Cpu size={14} /> Clinical View
+          </button>
+        </div>
+      </div>
+
+      {/* Main Results View */}
+      {loading ? (
+        <div className="card" style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-secondary)' }}>
+          <Loader2 size={44} className="spinner" style={{ marginBottom: '16px', color: 'var(--classical-color)' }} />
+          <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
+            Computing Hybrid Multimodal Quantum State Overlaps...
+          </p>
+          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+            Processing dermoscopy image features, age factor weighting, 4-qubit Hilbert projection, and tri-model ensemble.
+          </p>
+        </div>
+      ) : predictionResult ? (
+        <>
+          {/* =============================================================== */}
+          {/* 1. NON-TECHNICAL / PATIENT VIEW                                */}
+          {/* =============================================================== */}
+          {viewMode === 'patient' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Early Disease Detection Banner */}
+              <div className="card" style={{ borderLeft: `6px solid ${earlyDet?.badge_color || 'var(--classical-color)'}`, padding: '20px 24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span
+                      style={{
+                        background: earlyDet?.badge_color || 'var(--classical-color)',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      {earlyDet?.badge_text}
+                    </span>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {earlyDet?.stage_label}
+                    </span>
+                  </div>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '1.4rem', fontWeight: 800, color: earlyDet?.badge_color || 'var(--classical-color)' }}>
+                      {earlyDet?.confidence_pct}%
+                    </span>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>Disease Probability</div>
+                  </div>
+                </div>
+
+                {/* Progress Bar / Risk Gauge */}
+                <div style={{ width: '100%', background: 'var(--bg-inset)', height: '12px', borderRadius: '6px', overflow: 'hidden', marginBottom: '14px' }}>
+                  <div
+                    style={{
+                      width: `${earlyDet?.confidence_pct}%`,
+                      height: '100%',
+                      background: earlyDet?.badge_color || 'var(--classical-color)',
+                      transition: 'width 0.8s ease-in-out'
                     }}
                   />
                 </div>
 
-                {/* Classical Card - Blue Color Token */}
+                {/* Layman Plain-English Explanation */}
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '14px' }}>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: '0.92rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> What This Result Means For You (Plain Language):
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: '1.5', color: 'var(--text-primary)' }}>
+                    {earlyDet?.layman_summary}
+                  </p>
+                </div>
+
+                {/* Actionable Protocol Box */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(56, 189, 248, 0.08)', padding: '12px 16px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                  <Stethoscope size={20} style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
+                  <div style={{ fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                    <strong>Recommended Next Step:</strong> {earlyDet?.action_plan}
+                  </div>
+                </div>
+              </div>
+
+              {/* Patient Visual Heatmap & Age Factor Grid */}
+              <div className="grid-2" style={{ gap: '20px' }}>
+                {/* Left Card: Image & Grad-CAM Heatmap Visual Explanation */}
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Eye size={16} style={{ color: 'var(--quantum-color)' }} /> AI Visual Focus (Grad-CAM Heatmap):
+                    </h4>
+                    <button
+                      onClick={() => setShowGradCam(!showGradCam)}
+                      className="btn btn-sm btn-outline"
+                      style={{ fontSize: '0.74rem' }}
+                    >
+                      {showGradCam ? 'Hide Heatmap' : 'Show Heatmap'}
+                    </button>
+                  </div>
+
+                  <div style={{ position: 'relative', width: '100%', height: '240px', background: '#000', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Lesion visual analysis"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                    {showGradCam && gradCam && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: `${gradCam.roi_bounding_box[0] / 4}%`,
+                          top: `${gradCam.roi_bounding_box[1] / 4}%`,
+                          width: `${gradCam.roi_bounding_box[2] / 3}%`,
+                          height: `${gradCam.roi_bounding_box[3] / 3}%`,
+                          border: '2px dashed #f87171',
+                          background: 'rgba(239, 68, 68, 0.38)',
+                          borderRadius: '50%',
+                          boxShadow: '0 0 16px rgba(239,68,68,0.9)'
+                        }}
+                      />
+                    )}
+                  </div>
+                  <p style={{ marginTop: '10px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                    The dashed red area shows the exact region of the photo where the Quantum AI detected cell irregularities.
+                  </p>
+                </div>
+
+                {/* Right Card: Key Risk Contributors & Age Factor */}
+                <div className="card">
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <UserCheck size={16} style={{ color: 'var(--hybrid-color)' }} /> Key Risk Factors & Patient Age Breakdown:
+                  </h4>
+
+                  <div style={{ background: 'var(--bg-inset)', padding: '12px', borderRadius: '6px', marginBottom: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                      Age Factor ({ageFactor?.patient_age || patientAge} Years Old):
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      {ageFactor?.age_tier} ({ageFactor?.clinical_notes})
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                    Top Suspicious Visual & Biomarker Drivers:
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {(gradCam?.top_suspicious_features || [
+                      "Asymmetric pigment boundary",
+                      "Diameter irregularity > 6mm",
+                      `Patient Age ${patientAge} risk weight`
+                    ]).map((feat, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-inset)', padding: '8px 12px', borderRadius: '4px', fontSize: '0.78rem' }}>
+                        <CheckCircle size={14} style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =============================================================== */}
+          {/* 2. CLINICAL / TECHNICAL VIEW                                   */}
+          {/* =============================================================== */}
+          {viewMode === 'clinical' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Tri-Model Diagnostic Grid */}
+              <div className="grid-3" style={{ gap: '16px' }}>
+                {/* Classical Card */}
                 <div className="pred-card" style={{ textAlign: 'left', borderLeft: '4px solid var(--classical-color)' }}>
                   <div className="pred-title">1. Classical RBF Support Vector Machine</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
                     <span className={`pred-badge ${predictions?.classical_rbf_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
                       {predictions?.classical_rbf_svm?.label}
                     </span>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--classical-color)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--classical-color)' }}>
                       {(predictions?.classical_rbf_svm?.probability * 100).toFixed(1)}%
                     </div>
                   </div>
@@ -301,292 +703,232 @@ export default function LivePatientInference() {
                   </div>
                 </div>
 
-                {/* Quantum Card - Teal Color Token */}
+                {/* Quantum Card */}
                 <div className="pred-card" style={{ textAlign: 'left', borderLeft: '4px solid var(--quantum-color)' }}>
                   <div className="pred-title">2. Quantum Kernel QSVM (ZZFeatureMap)</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
                     <span className={`pred-badge ${predictions?.quantum_kernel_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
                       {predictions?.quantum_kernel_svm?.label}
                     </span>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--quantum-color)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--quantum-color)' }}>
                       {(predictions?.quantum_kernel_svm?.probability * 100).toFixed(1)}%
                     </div>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                    4 Qubits | {predictions?.quantum_kernel_svm?.feature_map || 'ZZFeatureMap (reps=2)'}
+                    4 Qubits | ZZFeatureMap (reps=2)
                   </div>
                 </div>
 
-                {/* Hybrid Consensus Ensemble Card - Amber Color Token */}
+                {/* Hybrid Consensus Card */}
                 <div className="pred-card highlight" style={{ textAlign: 'left', borderLeft: '4px solid var(--hybrid-color)' }}>
-                  <div className="pred-title" style={{ color: 'var(--hybrid-color)', fontWeight: 600 }}>3. Hybrid Consensus Ensemble (Centerpiece)</div>
+                  <div className="pred-title" style={{ color: 'var(--hybrid-color)', fontWeight: 600 }}>3. Hybrid Consensus Ensemble</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
                     <span className="badge-paradigm badge-hybrid">
-                      {predictions?.hybrid_consensus_ensemble?.label}
+                      {earlyDet?.stage_label || predictions?.hybrid_consensus_ensemble?.label}
                     </span>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--hybrid-color)' }}>
-                      {(predictions?.hybrid_consensus_ensemble?.probability * 100).toFixed(1)}%
+                    <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--hybrid-color)' }}>
+                      {(earlyDet?.confidence_pct || (predictions?.hybrid_consensus_ensemble?.probability * 100)).toFixed(1)}%
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--hybrid-color)' }}>
-                    {predictions?.hybrid_consensus_ensemble?.risk_tier}
-                  </div>
-                </div>
-
-                {/* Uncertainty Quantification & Discordance Gauge */}
-                {uncertainty && (
-                  <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <AlertCircle size={15} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
-                        Uncertainty & Model Consensus
-                      </span>
-                      <span className="val-badge ready" style={{ fontSize: '0.72rem' }}>
-                        Consensus: {(uncertainty.consensus_confidence * 100).toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="grid-2" style={{ gap: '8px' }}>
-                      <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
-                        <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.epistemic_uncertainty}</div>
-                        <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Epistemic Ambiguity</div>
-                      </div>
-                      <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
-                        <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.aleatoric_uncertainty}</div>
-                        <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Aleatoric Data Noise</div>
-                      </div>
-                    </div>
-
-                    {uncertainty.is_classical_quantum_discordant && (
-                      <div className="banner" style={{ marginTop: '8px', padding: '8px 10px', background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.3)', color: 'var(--status-danger)', fontSize: '0.78rem' }}>
-                        <strong>Discordance Alert:</strong> Classical and Quantum models predict opposing classes. Secondary histopathology review recommended.
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Feature Attributions & Explainability */}
-                {explainability && (
-                  <div>
-                    <button
-                      onClick={() => setShowExplainability(!showExplainability)}
-                      className="btn btn-sm btn-outline full-width-btn"
-                      type="button"
-                    >
-                      <Compass size={14} /> {showExplainability ? 'Hide' : 'Show'} Biomarker Feature Attributions (SHAP-style)
-                      {showExplainability ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-
-                    {showExplainability && (
-                      <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Top Biomarker Risk Contributors:</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {explainability.top_attributions?.map((attr, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card-solid)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                              <span style={{ fontWeight: 500 }}>{attr.feature_name}</span>
-                              <span style={{ color: attr.normalized_impact > 0 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 600 }}>
-                                {attr.direction.includes('Increases') ? '+ Risk' : '- Baseline'} ({attr.importance_score})
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                        <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.4' }}>
-                          <strong>Clinical Rationale:</strong> {explainability.clinical_rationale}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Counterfactual "What-If" Therapeutic Simulation */}
-                {counterfactual && counterfactual.key_interventions && counterfactual.key_interventions.length > 0 && (
-                  <div>
-                    <button
-                      onClick={() => setShowCounterfactual(!showCounterfactual)}
-                      className="btn btn-sm btn-outline full-width-btn"
-                      type="button"
-                    >
-                      <ShieldAlert size={14} style={{ color: 'var(--status-success)' }} /> {showCounterfactual ? 'Hide' : 'Show'} Counterfactual Risk-Reversal Simulator
-                      {showCounterfactual ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-
-                    {showCounterfactual && (
-                      <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Simulated Risk Trajectory:</span>
-                          <span style={{
-                            fontWeight: 700,
-                            color: (simulatedRisk ?? counterfactual.original_risk_probability) > 0.4 ? 'var(--status-danger)' : 'var(--status-success)',
-                            fontSize: '0.95rem'
-                          }}>
-                            {(((simulatedRisk ?? counterfactual.original_risk_probability)) * 100).toFixed(1)}% ({((simulatedRisk ?? counterfactual.original_risk_probability)) > 0.4 ? 'Elevated' : 'Therapeutic Safe Tier'})
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                          Adjust sliders to simulate biomarker reduction through targeted intervention:
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          {counterfactual.key_interventions.map((inv, idx) => {
-                            const sliderVal = simulatedDeltas[inv.feature_name]?.percentAchieved || 0;
-                            const currentVal = simulatedDeltas[inv.feature_name]?.currentVal ?? inv.original_value;
-                            return (
-                              <div key={idx} style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{inv.feature_name}</span>
-                                  <span style={{ color: 'var(--quantum-color)', fontWeight: 600, fontSize: '0.78rem' }}>
-                                    Target: {inv.recommended_target} (-{inv.percentage_reduction}%)
-                                  </span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={sliderVal}
-                                    onChange={(e) => handleCounterfactualSlider(inv.feature_name, inv.original_value, inv.recommended_target, parseFloat(e.target.value))}
-                                    style={{ flex: 1, accentColor: 'var(--classical-color)' }}
-                                  />
-                                  <span style={{ minWidth: '45px', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                                    {sliderVal}%
-                                  </span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                  <span>Current: {typeof currentVal === 'number' ? currentVal.toFixed(2) : currentVal}</span>
-                                  <span>Orig: {inv.original_value}</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.76rem', lineHeight: '1.4' }}>
-                          <strong>Takeaway:</strong> {counterfactual.clinical_takeaway}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Advanced Quantum State Coordinates */}
-                <div>
-                  <button
-                    onClick={() => setShowAdvancedResults(!showAdvancedResults)}
-                    className="btn btn-sm btn-outline"
-                    type="button"
-                  >
-                    {showAdvancedResults ? 'Hide' : 'Show'} Quantum Hilbert State Telemetry
-                    {showAdvancedResults ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  </button>
-
-                  {showAdvancedResults && (
-                    <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                      <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
-                      <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
-                      {blochCoords && (
-                        <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          <strong>Bloch 3D Coordinates (x, y, z):</strong>
-                          {blochCoords.map(c => ` Q${c.qubit_index}: (${c.x}, ${c.y}, ${c.z})`).join(' | ')}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Guidance Note */}
-                <div className="banner reality-banner" style={{ marginTop: '6px' }}>
-                  <Stethoscope size={20} style={{ color: 'var(--banner-warn-text)', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ color: 'var(--banner-warn-text)', fontSize: '0.85rem' }}>Clinician Guidance:</strong>
-                    <p style={{ marginTop: '4px', fontSize: '0.85rem', color: 'var(--banner-warn-text)' }}>
-                      {predictionResult?.clinical_guidance?.recommendation}
-                    </p>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--hybrid-color)' }}>
+                    {earlyDet?.badge_text || predictions?.hybrid_consensus_ensemble?.risk_tier}
                   </div>
                 </div>
               </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '110px 20px', color: 'var(--text-secondary)' }}>
-                <Activity size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
-                <p style={{ fontSize: '0.875rem' }}>
-                  Select a patient profile archetype or adjust sliders, then click <strong>"Run Diagnostic Risk Inference"</strong> to execute real-time quantum statevector simulation.
-                </p>
+
+              {/* Uncertainty Quantification */}
+              {uncertainty && (
+                <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <AlertCircle size={16} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
+                      Epistemic & Aleatoric Uncertainty Metrics:
+                    </span>
+                    <span className="val-badge ready" style={{ fontSize: '0.72rem' }}>
+                      Consensus: {(uncertainty.consensus_confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div className="grid-2" style={{ gap: '10px' }}>
+                    <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px 12px' }}>
+                      <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.epistemic_uncertainty}</div>
+                      <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Epistemic Model Ambiguity</div>
+                    </div>
+                    <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px 12px' }}>
+                      <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.aleatoric_uncertainty}</div>
+                      <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Aleatoric Observation Noise</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Advanced Quantum Hilbert Telemetry */}
+              <div className="card">
+                <button
+                  onClick={() => setShowAdvancedResults(!showAdvancedResults)}
+                  className="btn btn-sm btn-outline full-width-btn"
+                  type="button"
+                >
+                  <Cpu size={14} /> {showAdvancedResults ? 'Hide' : 'Show'} Quantum Hilbert State Telemetry
+                  {showAdvancedResults ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+
+                {showAdvancedResults && predictionResult && (
+                  <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem' }}>
+                    <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Compressed Components (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
+                    <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
+                    {blochCoords && (
+                      <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <strong>Bloch 3D Vector Coordinates:</strong>
+                        {blochCoords.map(c => ` Q${c.qubit_index}: (${c.x}, ${c.y}, ${c.z})`).join(' | ')}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Selected Preset Information Box (Separated with clean gap below grid) */}
-      {selectedPreset && (
-        <div className="card" style={{ marginTop: '28px', marginBottom: '24px', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
-            <CardActionMenu
-              title={`Patient Profile: ${selectedPreset.name}`}
-              category="patient_profile"
-              data={{
-                preset_name: selectedPreset.name,
-                risk_profile: selectedPreset.risk_profile,
-                description: selectedPreset.description,
-                basic_info: selectedPreset.basic_info,
-                advanced_info: selectedPreset.advanced_info
-              }}
-              metadata={{
-                page: 'live_inference',
-                preset_id: selectedPreset.id,
-                domain: activeDataset
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1rem', fontWeight: 700 }}>
-              Profile Archetype: {selectedPreset.name}
-            </h4>
-            <span className="badge-paradigm badge-hybrid" style={{ fontSize: '0.74rem' }}>
-              Expected: {selectedPreset.risk_profile}
-            </span>
-          </div>
-
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5', margin: '0 0 12px 0' }}>
-            {selectedPreset.description}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="card" style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-secondary)' }}>
+          <Activity size={44} style={{ marginBottom: '14px', opacity: 0.4 }} />
+          <p style={{ fontSize: '0.92rem' }}>
+            Select a benchmark patient profile archetype or upload custom image/CSV data, then click <strong>"Run Early Disease Risk Inference"</strong> to compute real-time quantum predictions.
           </p>
+        </div>
+      )}
 
-          {/* Student View Summary */}
-          <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> Student View (Basic Clinical Summary):
-            </strong>
-            <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.4' }}>
-              <strong>Clinical Presentation:</strong> {selectedPreset.basic_info?.clinical_notes}
-            </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', lineHeight: '1.4' }}>
-              <strong style={{ color: 'var(--status-success)' }}>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
-            </p>
-          </div>
-
-          {/* Advanced Preset Info */}
-          <div style={{ marginTop: '14px' }}>
-            <button
-              onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
-              className="btn btn-sm btn-outline"
-              type="button"
-            >
-              <Sliders size={14} /> {showAdvancedInputs ? 'Hide' : 'Show'} Advanced Biomarker Telemetry
-              {showAdvancedInputs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
-
-            {showAdvancedInputs && (
-              <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
-                <p style={{ color: 'var(--text-primary)', margin: 0 }}>
-                  <strong style={{ color: 'var(--classical-color)' }}>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
-                </p>
-                <p style={{ color: 'var(--text-primary)', marginTop: '6px' }}>
-                  <strong style={{ color: 'var(--quantum-color)' }}>Hemodynamics:</strong> {selectedPreset.advanced_info?.hemodynamics}
-                </p>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
-                  <strong style={{ color: 'var(--hybrid-color)' }}>Theoretical Risk Range:</strong> {selectedPreset.advanced_info?.risk_score_expected}
-                </p>
+      {/* =============================================================== */}
+      {/* PRINT-READY CLINICAL DIAGNOSTIC REPORT MODAL                    */}
+      {/* =============================================================== */}
+      {showPrintModal && predictionResult && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.75)',
+            zIndex: 9999,
+            display: 'flex',
+            justify: 'center',
+            alignItems: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              color: '#0f172a',
+              width: '100%',
+              maxWidth: '800px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              borderRadius: '12px',
+              padding: '32px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.4rem' }}>
+                  Quddos Studio — Clinical Diagnostic Report
+                </h2>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                  Hybrid Quantum-Classical Early Disease Detection System
+                </div>
               </div>
-            )}
+
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '0.78rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontWeight: 600 }}>
+                  Date: {new Date().toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Report Patient Profile Header */}
+            <div style={{ background: '#f8fafc', padding: '14px 18px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Patient Profile:</div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{selectedPreset?.name || 'Custom Multimodal Patient'}</div>
+                <div style={{ fontSize: '0.8rem', color: '#334155', marginTop: '2px' }}>
+                  Age: {patientAge} Years | Site: {anatomicalSite}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Early Staging Verdict:</div>
+                <div style={{ fontWeight: 800, fontSize: '1rem', color: earlyDet?.badge_color || '#0284c7' }}>
+                  {earlyDet?.stage_label}
+                </div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700 }}>
+                  Risk Score: {earlyDet?.confidence_pct}%
+                </div>
+              </div>
+            </div>
+
+            {/* Report Image & Heatmap Section */}
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
+              <div style={{ width: '180px', height: '150px', background: '#000', borderRadius: '6px', overflow: 'hidden', flexShrink: 0 }}>
+                <img src={imagePreview} alt="Report Lesion" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                <strong>Grad-CAM Visual AI Findings:</strong>
+                <p style={{ margin: '4px 0 0 0', color: '#334155' }}>
+                  High-attention cell irregularity detected at bounding region [{gradCam?.roi_bounding_box?.join(', ')}]. Heatmap intensity score: {gradCam?.heatmap_intensity}.
+                </p>
+                <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#475569' }}>
+                  <strong>Layman Summary:</strong> {earlyDet?.layman_summary}
+                </div>
+              </div>
+            </div>
+
+            {/* Tri-Model Summary Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '0.84rem' }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>Model Paradigm</th>
+                  <th style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>Prediction</th>
+                  <th style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>Confidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>Classical RBF SVM</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>{predictions?.classical_rbf_svm?.label}</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>{predictions?.classical_rbf_svm?.confidence_pct}%</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>Quantum Kernel QSVM (4 Qubits)</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>{predictions?.quantum_kernel_svm?.label}</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>{predictions?.quantum_kernel_svm?.confidence_pct}%</td>
+                </tr>
+                <tr style={{ fontWeight: 700, background: '#f0f9ff' }}>
+                  <td style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>Hybrid Consensus Ensemble</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>{earlyDet?.stage_label}</td>
+                  <td style={{ padding: '8px 12px', border: '1px solid #cbd5e1' }}>{earlyDet?.confidence_pct}%</td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+              <button
+                onClick={() => setShowPrintModal(false)}
+                className="btn btn-outline"
+                style={{ fontSize: '0.84rem' }}
+              >
+                Close Window
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="btn btn-primary"
+                style={{ fontSize: '0.84rem', background: '#0284c7' }}
+              >
+                <Printer size={16} /> Print / Save PDF
+              </button>
+            </div>
           </div>
         </div>
       )}

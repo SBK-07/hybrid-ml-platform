@@ -34,10 +34,10 @@ function MainLayout() {
 
   const handleTabChange = (tabId) => {
     if (tabId === 'overview') navigate('/overview');
+    else if (tabId === 'inference') navigate('/inference');
     else if (tabId === 'dataset-overview') navigate('/dataset-overview');
     else if (tabId === 'individual') navigate('/individual');
     else if (tabId === 'cumulative') navigate('/cumulative');
-    else if (tabId === 'inference') navigate('/inference');
     else if (tabId === 'real-qc') navigate('/real-qc');
     else if (tabId === 'report') navigate('/report');
     else if (tabId === 'quddos') navigate('/quddos');
@@ -54,10 +54,10 @@ function MainLayout() {
         <Routes>
           <Route path="/" element={<OverviewSection activeDataset="cancer" />} />
           <Route path="/overview" element={<OverviewSection activeDataset="cancer" />} />
+          <Route path="/inference" element={<LivePatientInference />} />
           <Route path="/dataset-overview" element={<DatasetOverview />} />
           <Route path="/individual" element={<IndividualExperiment />} />
           <Route path="/cumulative" element={<CumulativeExperiment />} />
-          <Route path="/inference" element={<LivePatientInference />} />
           <Route path="/real-qc" element={<RealQCExperiment />} />
           <Route path="/report" element={<AdaptiveReport />} />
           <Route path="/quddos" element={<QuddosAI />} />

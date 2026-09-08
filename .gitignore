@@ -68,3 +68,8 @@ backend/results/
 backend/reports/
 *_complete_report.md
 *_fusion_report.md
+BUG_REPORT_*.md
+FULL_APPLICATION_AUDIT_REPORT.md
+local_privacy_report_summary.md
+packages_implementation_plan.md
+.ipynb_checkpoints/
