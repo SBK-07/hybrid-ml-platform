@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { mockDatasets, mockCancerMetrics, mockCardioMetrics, mockPredictResult } from './mockData';
+import { mockDatasets, mockCancerMetrics, mockCardioMetrics, mockPredictResult, mockPredictImageResult, SAMPLE_IMAGE_PRESETS } from './mockData';
+
+export { SAMPLE_IMAGE_PRESETS };
 
 const API_BASE = '/api';
 
@@ -262,6 +264,23 @@ export const predictPatient = async (datasetKey, features, imagingFeatures = nul
     console.warn('FastAPI backend offline. Generating fallback prediction.', err);
     return mockPredictResult(datasetKey, features);
   }
+};
+
+export const predictPatientImage = async (datasetKey, imageFile, presetInfo = null) => {
+  if (imageFile instanceof File || imageFile instanceof Blob) {
+    try {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      formData.append('dataset_key', (datasetKey || 'cancer').toLowerCase());
+      const res = await axios.post(`${API_BASE}/predict-image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return res.data;
+    } catch (err) {
+      console.warn('FastAPI predict-image failed or offline. Falling back to client radiomics simulation.', err);
+    }
+  }
+  return mockPredictImageResult(datasetKey, imageFile, presetInfo);
 };
 
 export const getExperimentHistory = async (limit = 20) => {

@@ -1522,3 +1522,26 @@ h3, h4 {
     border-color: var(--brand-primary);
     box-shadow: 0 0 0 1px var(--brand-primary);
 }
+
+/* ── STAKEHOLDER RISK PRESENTATION & PATIENT SECTION STYLES ── */
+.quddos-patient-card {
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.quddos-patient-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.12), transparent 70%);
+    pointer-events: none;
+}
+
+.clinical-researcher-section {
+    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
