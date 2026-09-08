@@ -58,7 +58,7 @@ export default function OverviewSection({ activeDataset }) {
       </div>
 
       {/* Hero Banner */}
-      <div className="card active-control-card slide-in-up" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, var(--brand-bg), var(--quantum-bg))', borderColor: 'var(--brand-glow)' }}>
+      {/* <div className="card active-control-card slide-in-up" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, var(--brand-bg), var(--quantum-bg))', borderColor: 'var(--brand-glow)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
             <Atom4Orbits size={32} color="var(--brand-primary)" />
@@ -80,7 +80,7 @@ export default function OverviewSection({ activeDataset }) {
             <ArrowRight size={14} />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* 7-Stage Narrative Clinical Pipeline - Vertical Roadmap */}
       <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
