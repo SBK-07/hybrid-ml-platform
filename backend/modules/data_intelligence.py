@@ -15,7 +15,23 @@ import tarfile
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple, Set
-from scipy import stats
+try:
+    from scipy import stats
+except Exception:
+    class StatsFallback:
+        @staticmethod
+        def ks_2samp(d1, d2):
+            d1, d2 = np.sort(d1), np.sort(d2)
+            n1, n2 = max(1, len(d1)), max(1, len(d2))
+            data_all = np.concatenate([d1, d2])
+            cdf1 = np.searchsorted(d1, data_all, side='right') / n1
+            cdf2 = np.searchsorted(d2, data_all, side='right') / n2
+            d_stat = float(np.max(np.abs(cdf1 - cdf2)))
+            en = np.sqrt(n1 * n2 / (n1 + n2))
+            p_val = float(np.clip(2.0 * np.exp(-2.0 * (en * d_stat) ** 2), 0.0, 1.0))
+            return d_stat, p_val
+
+    stats = StatsFallback()
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
@@ -55,13 +71,17 @@ try:
     from modules.imaging_pipeline import (
         extract_texture_features_from_patch,
         extract_mri_radiomics_features,
-        decode_image_bytes_to_array
+        decode_image_bytes_to_array,
+        convert_image_bytes_to_png_bytes,
+        generate_radiomic_diagnostic_explanation
     )
 except ImportError:
     from imaging_pipeline import (
         extract_texture_features_from_patch,
         extract_mri_radiomics_features,
-        decode_image_bytes_to_array
+        decode_image_bytes_to_array,
+        convert_image_bytes_to_png_bytes,
+        generate_radiomic_diagnostic_explanation
     )
 
 
@@ -398,41 +418,102 @@ def ingest_multimodal_archive_or_file(
     filename: str
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
-    Enterprise-grade multimodal dataset ingestion engine.
+    Enterprise-grade multimodal and universal dataset ingestion engine.
     Supports:
-      1. Single CSV files (tabular clinical biomarkers).
-      2. ZIP, TAR, TGZ archives containing CSVs, images (PNG, JPG, TIFF, WebP),
+      1. Single Tabular Files: CSV, TSV, TXT, Excel (.xlsx, .xls), JSON (.json, .jsonl), Parquet (.parquet).
+      2. Multimodal Archives: ZIP, TAR, TGZ containing tabular files, images (PNG, JPG, TIFF, WebP),
          DICOM (.dcm), NIfTI (.nii, .nii.gz), and NumPy arrays.
-      3. Medical MRI and radiomics image archives with automatic class inference.
+      3. Medical MRI / Radiomics image archives with automatic clinical class and biomarker extraction.
       4. Single medical image uploads.
-    Extracts 24 high-order MRI radiomics and GLCM texture features, joins modalities,
+    Extracts high-order radiomics and GLCM texture features, joins modalities,
     and returns a unified DataFrame with complete modality provenance.
     """
     fname_lower = filename.lower()
     meta_info: Dict[str, Any] = {
         "source_filename": filename,
-        "format": "csv",
-        "domain": "Biomedical Research",
+        "format": "tabular_csv",
+        "domain": "Biomedical Clinical Research",
         "modalities_detected": ["tabular"],
-        "extracted_images_count": 0
+        "extracted_images_count": 0,
+        "sample_thumbnails": []
     }
 
     # =========================================================================
-    # Case 1: Pure CSV Upload
+    # Case 1: Excel Spreadsheets (.xlsx, .xls)
     # =========================================================================
-    if fname_lower.endswith('.csv'):
+    if fname_lower.endswith('.xlsx') or fname_lower.endswith('.xls'):
         try:
-            df = pd.read_csv(io.BytesIO(file_bytes))
-        except Exception:
-            df = pd.read_csv(io.StringIO(file_bytes.decode('utf-8', errors='ignore')))
-        df = sanitize_dataframe(df)
-        meta_info["format"] = "tabular_csv"
-        _, mods = detect_modality_type(df)
-        meta_info["modalities_detected"] = mods
-        return df, meta_info
+            df = pd.read_excel(io.BytesIO(file_bytes))
+            df = sanitize_dataframe(df)
+            meta_info["format"] = "tabular_excel"
+            meta_info["domain"] = "Clinical Spreadsheets & Lab Profiles"
+            _, mods = detect_modality_type(df)
+            meta_info["modalities_detected"] = mods
+            return df, meta_info
+        except Exception as e:
+            print(f"[Warning] Excel read failed, attempting fallback: {e}")
 
     # =========================================================================
-    # Case 2: Archive Ingestion (ZIP, TAR, TGZ, TAR.GZ, TAR.BZ2)
+    # Case 2: JSON / JSON Lines (.json, .jsonl)
+    # =========================================================================
+    if fname_lower.endswith('.json') or fname_lower.endswith('.jsonl'):
+        try:
+            try:
+                df = pd.read_json(io.BytesIO(file_bytes))
+            except Exception:
+                df = pd.read_json(io.BytesIO(file_bytes), lines=True)
+            df = sanitize_dataframe(df)
+            meta_info["format"] = "tabular_json"
+            meta_info["domain"] = "Electronic Health Records (JSON)"
+            _, mods = detect_modality_type(df)
+            meta_info["modalities_detected"] = mods
+            return df, meta_info
+        except Exception as e:
+            print(f"[Warning] JSON read failed, attempting fallback: {e}")
+
+    # =========================================================================
+    # Case 3: Parquet Files (.parquet, .pq)
+    # =========================================================================
+    if fname_lower.endswith('.parquet') or fname_lower.endswith('.pq'):
+        try:
+            df = pd.read_parquet(io.BytesIO(file_bytes))
+            df = sanitize_dataframe(df)
+            meta_info["format"] = "tabular_parquet"
+            meta_info["domain"] = "High-Throughput Clinical Biomarkers"
+            _, mods = detect_modality_type(df)
+            meta_info["modalities_detected"] = mods
+            return df, meta_info
+        except Exception as e:
+            print(f"[Warning] Parquet read failed, attempting fallback: {e}")
+
+    # =========================================================================
+    # Case 4: Delimited Tabular Files (CSV, TSV, TXT, DAT)
+    # =========================================================================
+    if fname_lower.endswith(('.csv', '.tsv', '.txt', '.dat')) or (not any(fname_lower.endswith(ext) for ext in ['.zip', '.tar', '.tgz', '.gz', '.bz2', '.png', '.jpg', '.jpeg', '.dcm', '.nii'])):
+        try:
+            # First try standard CSV
+            if fname_lower.endswith('.tsv'):
+                df = pd.read_csv(io.BytesIO(file_bytes), sep='\t')
+            else:
+                try:
+                    df = pd.read_csv(io.BytesIO(file_bytes))
+                except Exception:
+                    df = pd.read_csv(io.BytesIO(file_bytes), sep=None, engine='python')
+        except Exception:
+            try:
+                df = pd.read_csv(io.StringIO(file_bytes.decode('utf-8', errors='ignore')), sep=None, engine='python')
+            except Exception as e:
+                df = pd.DataFrame()
+
+        if not df.empty:
+            df = sanitize_dataframe(df)
+            meta_info["format"] = "tabular_csv" if fname_lower.endswith('.csv') else "tabular_delimited"
+            _, mods = detect_modality_type(df)
+            meta_info["modalities_detected"] = mods
+            return df, meta_info
+
+    # =========================================================================
+    # Case 5: Archive Ingestion (ZIP, TAR, TGZ, TAR.GZ, TAR.BZ2)
     # =========================================================================
     is_zip = fname_lower.endswith('.zip') or file_bytes.startswith(b'PK\x03\x04')
     is_tar = any(fname_lower.endswith(ext) for ext in ['.tar', '.tar.gz', '.tgz', '.tar.bz2', '.tar.xz'])
@@ -548,19 +629,37 @@ def ingest_multimodal_archive_or_file(
                         image_records.append(rec)
             else:
                 # STANDARD / MODALITY / CLASS-CENTRIC GROUPING
+                raw_images_to_save = []
                 for img_name, img_bytes in selected_entries:
                     try:
                         radiomic_feats = extract_mri_radiomics_features(img_bytes)
                         assigned_label = infer_clinical_label_from_path(img_name, parent_folders)
+                        png_bytes = convert_image_bytes_to_png_bytes(img_bytes, img_name)
+                        clean_name = os.path.basename(img_name).replace(" ", "_")
+                        explanation = generate_radiomic_diagnostic_explanation(
+                            radiomics=radiomic_feats,
+                            label=assigned_label,
+                            domain=meta_info.get("domain", "Medical Imaging"),
+                            sample_name=clean_name
+                        )
 
                         rec = {
-                            "image_id": os.path.basename(img_name),
+                            "image_id": clean_name,
                             "diagnosis": assigned_label,
                             **radiomic_feats
                         }
                         image_records.append(rec)
+                        raw_images_to_save.append({
+                            "filename": clean_name,
+                            "bytes": png_bytes,
+                            "label": assigned_label,
+                            "metrics": radiomic_feats,
+                            "explanation": explanation
+                        })
                     except Exception as img_err:
                         print(f"[Warning] Failed parsing image {img_name}: {img_err}")
+
+                meta_info["raw_images_to_save"] = raw_images_to_save
 
             meta_info["extracted_images_count"] = len(image_records)
 
@@ -573,6 +672,17 @@ def ingest_multimodal_archive_or_file(
                 # If all inferred to single class, split on tissue heterogeneity / contrast median
                 split_val = df_images["mri_spatial_contrast"].median()
                 df_images["diagnosis"] = (df_images["mri_spatial_contrast"] >= split_val).astype(int)
+                # Update saved images labels
+                if "raw_images_to_save" in meta_info:
+                    for img_item in meta_info["raw_images_to_save"]:
+                        is_p = int(img_item["metrics"].get("mri_spatial_contrast", 0.0) >= split_val)
+                        img_item["label"] = is_p
+                        img_item["explanation"] = generate_radiomic_diagnostic_explanation(
+                            radiomics=img_item["metrics"],
+                            label=is_p,
+                            domain=meta_info.get("domain", "Medical Imaging"),
+                            sample_name=img_item["filename"]
+                        )
 
             meta_info["modalities_detected"] = ["imaging"]
             if df_tabular is not None:
@@ -603,6 +713,22 @@ def ingest_multimodal_archive_or_file(
         meta_info["modalities_detected"] = ["imaging"]
 
         radiomic_feats = extract_mri_radiomics_features(file_bytes)
+        png_bytes = convert_image_bytes_to_png_bytes(file_bytes, filename)
+        clean_name = os.path.basename(filename).replace(" ", "_")
+        single_exp = generate_radiomic_diagnostic_explanation(
+            radiomics=radiomic_feats,
+            label=1,
+            domain="Single Medical Image",
+            sample_name=clean_name
+        )
+
+        meta_info["raw_images_to_save"] = [{
+            "filename": clean_name,
+            "bytes": png_bytes,
+            "label": 1,
+            "metrics": radiomic_feats,
+            "explanation": single_exp
+        }]
 
         # Generate a balanced cohort of 40 perturbed radiomic profiles from this MRI scan
         records = []
@@ -613,7 +739,7 @@ def ingest_multimodal_archive_or_file(
             for k, v in radiomic_feats.items():
                 pert = np.random.normal(0, noise_scale * (abs(v) + 0.1))
                 val = float(v + pert)
-                if is_pathology and 'contrast' in k or 'heterogeneity' in k or 'entropy' in k or 'laplacian' in k:
+                if is_pathology and ('contrast' in k or 'heterogeneity' in k or 'entropy' in k or 'laplacian' in k):
                     val *= 1.25  # Elevated heterogeneity in pathology
                 rec[k] = round(max(0.0, val), 4)
 

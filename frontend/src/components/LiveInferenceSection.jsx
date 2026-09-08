@@ -130,7 +130,7 @@ export default function LiveInferenceSection({ activeDataset }) {
 
           {predictionResult ? (
             <div className="pred-results-container">
-              {/* Classical Card */}
+              {/* 1. Classical SVM Card */}
               <div className="pred-card">
                 <div className="pred-card-header">
                   <div className="pred-title">1. Classical RBF SVM</div>
@@ -142,10 +142,22 @@ export default function LiveInferenceSection({ activeDataset }) {
                 <div style={{ fontSize: '0.85rem', color: '#718096' }}>Confidence: {predictions?.classical_rbf_svm?.confidence_pct}%</div>
               </div>
 
-              {/* Quantum Card */}
+              {/* 2. Classical MLP Card */}
               <div className="pred-card">
                 <div className="pred-card-header">
-                  <div className="pred-title">2. Quantum Kernel QSVM</div>
+                  <div className="pred-title">2. Classical MLP Neural Net</div>
+                  <span className={`risk-badge`} style={{ background: predictions?.classical_mlp?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
+                    {predictions?.classical_mlp?.label || (predictions?.classical_mlp?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
+                  </span>
+                </div>
+                <div>Risk Probability: <strong>{(predictions?.classical_mlp?.probability * 100).toFixed(1)}%</strong></div>
+                <div style={{ fontSize: '0.85rem', color: '#718096' }}>Architecture: (64, 32 ReLU) | Confidence: {predictions?.classical_mlp?.confidence_pct}%</div>
+              </div>
+
+              {/* 3. Quantum Kernel QSVM Card */}
+              <div className="pred-card">
+                <div className="pred-card-header">
+                  <div className="pred-title">3. Quantum Kernel QSVM</div>
                   <span className={`risk-badge`} style={{ background: predictions?.quantum_kernel_svm?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
                     {predictions?.quantum_kernel_svm?.label}
                   </span>
@@ -156,10 +168,38 @@ export default function LiveInferenceSection({ activeDataset }) {
                 </div>
               </div>
 
-              {/* Hybrid Card */}
+              {/* 4. Quantum QNN Card */}
+              <div className="pred-card">
+                <div className="pred-card-header">
+                  <div className="pred-title">4. Quantum Neural Network (QNN)</div>
+                  <span className={`risk-badge`} style={{ background: predictions?.quantum_qnn?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
+                    {predictions?.quantum_qnn?.label || (predictions?.quantum_qnn?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
+                  </span>
+                </div>
+                <div>Risk Probability: <strong>{(predictions?.quantum_qnn?.probability * 100).toFixed(1)}%</strong></div>
+                <div style={{ fontSize: '0.85rem', color: '#718096' }}>
+                  4 Qubits | RealAmplitudes Ansatz (16 angles)
+                </div>
+              </div>
+
+              {/* 5. Quantum QVC Card */}
+              <div className="pred-card">
+                <div className="pred-card-header">
+                  <div className="pred-title">5. Quantum Variational Classifier (QVC)</div>
+                  <span className={`risk-badge`} style={{ background: predictions?.quantum_qvc?.prediction === 1 ? '#E74C3C' : '#27AE60' }}>
+                    {predictions?.quantum_qvc?.label || (predictions?.quantum_qvc?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
+                  </span>
+                </div>
+                <div>Risk Probability: <strong>{(predictions?.quantum_qvc?.probability * 100).toFixed(1)}%</strong></div>
+                <div style={{ fontSize: '0.85rem', color: '#718096' }}>
+                  4 Qubits | EfficientSU2 Circuit (24 angles)
+                </div>
+              </div>
+
+              {/* 6. Hybrid Ensemble Card */}
               <div className="pred-card highlight">
                 <div className="pred-card-header">
-                  <div className="pred-title">3. Hybrid Consensus Ensemble</div>
+                  <div className="pred-title">6. Hybrid Consensus Ensemble</div>
                   <span className={`risk-badge`} style={{ background: predictions?.hybrid_consensus_ensemble?.risk_color || '#E74C3C' }}>
                     {predictions?.hybrid_consensus_ensemble?.label}
                   </span>

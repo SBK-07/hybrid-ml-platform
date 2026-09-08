@@ -1,0 +1,160 @@
+{
+    "images": [
+        {
+            "filename": "ct_scan_01_solitary_nodule.png",
+            "label": 1,
+            "label_name": "Pathological (Solitary Nodule)",
+            "metrics": {
+                "Intensity Mean": 0.249,
+                "Spatial Contrast": 0.1638,
+                "Attenuation Gradient": 0.447,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Solitary Nodule (diameter ~38mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_02_ground-glass_infiltrate.png",
+            "label": 1,
+            "label_name": "Pathological (Ground-Glass Infiltrate)",
+            "metrics": {
+                "Intensity Mean": 0.247,
+                "Spatial Contrast": 0.1598,
+                "Attenuation Gradient": 0.441,
+                "Edge Density": 0.039,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Ground-Glass Infiltrate (diameter ~34mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_03_peripheral_mass.png",
+            "label": 1,
+            "label_name": "Pathological (Peripheral Mass)",
+            "metrics": {
+                "Intensity Mean": 0.243,
+                "Spatial Contrast": 0.1567,
+                "Attenuation Gradient": 0.437,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Peripheral Mass (diameter ~28mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_04_pleural_thickening.png",
+            "label": 1,
+            "label_name": "Pathological (Pleural Thickening)",
+            "metrics": {
+                "Intensity Mean": 0.247,
+                "Spatial Contrast": 0.1611,
+                "Attenuation Gradient": 0.443,
+                "Edge Density": 0.039,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Pleural Thickening (diameter ~36mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_05_cavitary_lesion.png",
+            "label": 1,
+            "label_name": "Pathological (Cavitary Lesion)",
+            "metrics": {
+                "Intensity Mean": 0.242,
+                "Spatial Contrast": 0.1556,
+                "Attenuation Gradient": 0.436,
+                "Edge Density": 0.037,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Cavitary Lesion (diameter ~28mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_06_consolidation.png",
+            "label": 1,
+            "label_name": "Pathological (Consolidation)",
+            "metrics": {
+                "Intensity Mean": 0.243,
+                "Spatial Contrast": 0.1563,
+                "Attenuation Gradient": 0.437,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Consolidation (diameter ~28mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_07_solitary_nodule.png",
+            "label": 1,
+            "label_name": "Pathological (Solitary Nodule)",
+            "metrics": {
+                "Intensity Mean": 0.243,
+                "Spatial Contrast": 0.1569,
+                "Attenuation Gradient": 0.437,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.42
+            },
+            "explanation": "Axial chest CT demonstrates a hyperdense Solitary Nodule (diameter ~30mm) in the mid-lung field. Spiculated margins, elevated local attenuation gradient, and focal radiomic contrast (0.051) strongly indicate neoplastic pathology."
+        },
+        {
+            "filename": "ct_scan_08_clear_lung_field.png",
+            "label": 0,
+            "label_name": "Normal Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.07,
+                "Attenuation Gradient": 0.423,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.12
+            },
+            "explanation": "Axial chest CT confirms clear bilateral pulmonary parenchyma without consolidation, solitary nodules, or ground-glass opacities. Normal vascular arborization and symmetric pleural boundaries."
+        },
+        {
+            "filename": "ct_scan_09_clear_lung_field.png",
+            "label": 0,
+            "label_name": "Normal Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.0702,
+                "Attenuation Gradient": 0.424,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.12
+            },
+            "explanation": "Axial chest CT confirms clear bilateral pulmonary parenchyma without consolidation, solitary nodules, or ground-glass opacities. Normal vascular arborization and symmetric pleural boundaries."
+        },
+        {
+            "filename": "ct_scan_10_clear_lung_field.png",
+            "label": 0,
+            "label_name": "Normal Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.0699,
+                "Attenuation Gradient": 0.423,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.12
+            },
+            "explanation": "Axial chest CT confirms clear bilateral pulmonary parenchyma without consolidation, solitary nodules, or ground-glass opacities. Normal vascular arborization and symmetric pleural boundaries."
+        },
+        {
+            "filename": "ct_scan_11_clear_lung_field.png",
+            "label": 0,
+            "label_name": "Normal Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.07,
+                "Attenuation Gradient": 0.423,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.12
+            },
+            "explanation": "Axial chest CT confirms clear bilateral pulmonary parenchyma without consolidation, solitary nodules, or ground-glass opacities. Normal vascular arborization and symmetric pleural boundaries."
+        },
+        {
+            "filename": "ct_scan_12_clear_lung_field.png",
+            "label": 0,
+            "label_name": "Normal Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.07,
+                "Attenuation Gradient": 0.423,
+                "Edge Density": 0.038,
+                "Cavity Ratio": 0.12
+            },
+            "explanation": "Axial chest CT confirms clear bilateral pulmonary parenchyma without consolidation, solitary nodules, or ground-glass opacities. Normal vascular arborization and symmetric pleural boundaries."
+        }
+    ]
+}

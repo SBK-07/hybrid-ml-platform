@@ -1,0 +1,160 @@
+{
+    "images": [
+        {
+            "filename": "fna_smear_01_invasive_ductal_carcinoma.png",
+            "label": 1,
+            "label_name": "Malignant (Invasive Ductal Carcinoma)",
+            "metrics": {
+                "Nuclear Radius Mean": 18.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Invasive Ductal Carcinoma. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_02_lobular_carcinoma.png",
+            "label": 1,
+            "label_name": "Malignant (Lobular Carcinoma)",
+            "metrics": {
+                "Nuclear Radius Mean": 19.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Lobular Carcinoma. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_03_atypical_hyperplasia.png",
+            "label": 1,
+            "label_name": "Malignant (Atypical Hyperplasia)",
+            "metrics": {
+                "Nuclear Radius Mean": 20.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Atypical Hyperplasia. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_04_medullary_carcinoma.png",
+            "label": 1,
+            "label_name": "Malignant (Medullary Carcinoma)",
+            "metrics": {
+                "Nuclear Radius Mean": 21.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Medullary Carcinoma. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_05_high-grade_carcinoma.png",
+            "label": 1,
+            "label_name": "Malignant (High-Grade Carcinoma)",
+            "metrics": {
+                "Nuclear Radius Mean": 18.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of High-Grade Carcinoma. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_06_invasive_papillary.png",
+            "label": 1,
+            "label_name": "Malignant (Invasive Papillary)",
+            "metrics": {
+                "Nuclear Radius Mean": 19.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Invasive Papillary. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_07_invasive_ductal_carcinoma.png",
+            "label": 1,
+            "label_name": "Malignant (Invasive Ductal Carcinoma)",
+            "metrics": {
+                "Nuclear Radius Mean": 20.5,
+                "Contour Irregularity": 0.28,
+                "Chromatin Texture": 23.4,
+                "Nuclear Concavity": 0.21,
+                "Cellular Pleomorphism": 0.85
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates high-grade nuclear atypia characteristic of Invasive Ductal Carcinoma. Markedly enlarged, hyperchromatic, overlapping nuclei with jagged contours, prominent nucleoli, and elevated nuclear-to-cytoplasmic ratio."
+        },
+        {
+            "filename": "fna_smear_08_benign_fibroadenoma.png",
+            "label": 0,
+            "label_name": "Benign Control",
+            "metrics": {
+                "Nuclear Radius Mean": 13.2,
+                "Contour Irregularity": 0.05,
+                "Chromatin Texture": 14.8,
+                "Nuclear Concavity": 0.03,
+                "Cellular Pleomorphism": 0.15
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates cohesive, flat honeycomb sheets of monomorphic benign epithelial cells. Uniform small round nuclei, regular chromatin distribution, and distinct cell boundaries without mitotic atypia."
+        },
+        {
+            "filename": "fna_smear_09_benign_fibroadenoma.png",
+            "label": 0,
+            "label_name": "Benign Control",
+            "metrics": {
+                "Nuclear Radius Mean": 12.2,
+                "Contour Irregularity": 0.05,
+                "Chromatin Texture": 14.8,
+                "Nuclear Concavity": 0.03,
+                "Cellular Pleomorphism": 0.15
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates cohesive, flat honeycomb sheets of monomorphic benign epithelial cells. Uniform small round nuclei, regular chromatin distribution, and distinct cell boundaries without mitotic atypia."
+        },
+        {
+            "filename": "fna_smear_10_benign_fibroadenoma.png",
+            "label": 0,
+            "label_name": "Benign Control",
+            "metrics": {
+                "Nuclear Radius Mean": 13.2,
+                "Contour Irregularity": 0.05,
+                "Chromatin Texture": 14.8,
+                "Nuclear Concavity": 0.03,
+                "Cellular Pleomorphism": 0.15
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates cohesive, flat honeycomb sheets of monomorphic benign epithelial cells. Uniform small round nuclei, regular chromatin distribution, and distinct cell boundaries without mitotic atypia."
+        },
+        {
+            "filename": "fna_smear_11_benign_fibroadenoma.png",
+            "label": 0,
+            "label_name": "Benign Control",
+            "metrics": {
+                "Nuclear Radius Mean": 12.2,
+                "Contour Irregularity": 0.05,
+                "Chromatin Texture": 14.8,
+                "Nuclear Concavity": 0.03,
+                "Cellular Pleomorphism": 0.15
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates cohesive, flat honeycomb sheets of monomorphic benign epithelial cells. Uniform small round nuclei, regular chromatin distribution, and distinct cell boundaries without mitotic atypia."
+        },
+        {
+            "filename": "fna_smear_12_benign_fibroadenoma.png",
+            "label": 0,
+            "label_name": "Benign Control",
+            "metrics": {
+                "Nuclear Radius Mean": 13.2,
+                "Contour Irregularity": 0.05,
+                "Chromatin Texture": 14.8,
+                "Nuclear Concavity": 0.03,
+                "Cellular Pleomorphism": 0.15
+            },
+            "explanation": "Fine Needle Aspirate (FNA) smear demonstrates cohesive, flat honeycomb sheets of monomorphic benign epithelial cells. Uniform small round nuclei, regular chromatin distribution, and distinct cell boundaries without mitotic atypia."
+        }
+    ]
+}

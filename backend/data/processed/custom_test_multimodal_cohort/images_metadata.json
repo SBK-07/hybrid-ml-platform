@@ -1,0 +1,68 @@
+{
+    "images": [
+        {
+            "filename": "pat_001_scan.png",
+            "label": 0,
+            "label_name": "Healthy / Control (Class 0)",
+            "metrics": {
+                "mri_intensity_mean": 0.5003,
+                "mri_intensity_std": 0.289,
+                "mri_intensity_variance": 0.0835,
+                "mri_intensity_skewness": -0.0221,
+                "mri_intensity_kurtosis": -1.1768,
+                "mri_intensity_entropy": 4.9943,
+                "mri_intensity_energy": 0.3339,
+                "mri_intensity_rms": 0.5778,
+                "mri_intensity_p10": 0.0965,
+                "mri_intensity_p90": 0.9016,
+                "mri_dynamic_range": 0.8051,
+                "mri_edge_density": 1.2687,
+                "mri_laplacian_sharpness": 1.6816,
+                "mri_foreground_ratio": 0.9131,
+                "mri_spatial_contrast": 0.1666,
+                "mri_spatial_homogeneity": 0.878,
+                "mri_spatial_dissimilarity": 0.3329,
+                "mri_spatial_correlation": 0.0028,
+                "mri_glcm_energy": 0.7862,
+                "mri_hemispheric_symmetry": 0.3168,
+                "mri_high_freq_fourier_ratio": 0.7929,
+                "mri_compactness": 50.0,
+                "mri_contrast_to_noise": 20.0,
+                "mri_tissue_heterogeneity": 0.3337
+            },
+            "explanation": "Scan [pat_001_scan.png]: Normal physiological scan confirmed. Uniform tissue texture (mean intensity 0.500), low local spatial contrast (0.1666), preserved bilateral symmetry (0.32), and baseline physiological edge gradients (1.269) with zero focal space-occupying lesions."
+        },
+        {
+            "filename": "pat_002_scan.png",
+            "label": 1,
+            "label_name": "Disease Positive (Class 1)",
+            "metrics": {
+                "mri_intensity_mean": 0.5038,
+                "mri_intensity_std": 0.2906,
+                "mri_intensity_variance": 0.0844,
+                "mri_intensity_skewness": -0.0118,
+                "mri_intensity_kurtosis": -1.1872,
+                "mri_intensity_entropy": 4.9954,
+                "mri_intensity_energy": 0.3382,
+                "mri_intensity_rms": 0.5815,
+                "mri_intensity_p10": 0.0984,
+                "mri_intensity_p90": 0.9055,
+                "mri_dynamic_range": 0.8071,
+                "mri_edge_density": 1.265,
+                "mri_laplacian_sharpness": 1.6831,
+                "mri_foreground_ratio": 0.9189,
+                "mri_spatial_contrast": 0.1732,
+                "mri_spatial_homogeneity": 0.8734,
+                "mri_spatial_dissimilarity": 0.3418,
+                "mri_spatial_correlation": -0.026,
+                "mri_glcm_energy": 0.7784,
+                "mri_hemispheric_symmetry": 0.3432,
+                "mri_high_freq_fourier_ratio": 0.7833,
+                "mri_compactness": 50.0,
+                "mri_contrast_to_noise": 20.0,
+                "mri_tissue_heterogeneity": 0.3421
+            },
+            "explanation": "Scan [pat_002_scan.png]: Pathological tissue profile identified. Key findings: elevated GLCM spatial contrast (0.1732) and high tissue heterogeneity (0.342) indicating hyperintense lesion tissue with active neo-vascularization; disrupted anatomical symmetry (0.34 vs control >0.90) due to focal mass expansion; pronounced peritumoral edge gradient (1.265) indicating invasive tissue boundaries. 4-Qubit quantum feature mapping projects these non-linear texture anomalies into high-dimensional Hilbert space, enabling robust classification by QSVM and classical SVM."
+        }
+    ]
+}

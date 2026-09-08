@@ -30,5 +30,37 @@
         "can_delete": true,
         "uploaded_at": "2026-09-04T19:22:33.159691",
         "filename": "mri_scans.zip"
+    },
+    "custom_ct_scans": {
+        "key": "custom_ct_scans",
+        "name": "Custom: ct_scans.zip",
+        "domain": "Custom Clinical Upload",
+        "samples": 200,
+        "features_count": 329,
+        "quantum_qubits": 4,
+        "disease_positive_label": "Disease Positive (Class 1)",
+        "disease_negative_label": "Healthy / Control (Class 0)",
+        "description": "329 features, 200 samples from uploaded 'ct_scans.zip'.",
+        "modality": "Custom (tabular + imaging)",
+        "built_in": false,
+        "can_delete": true,
+        "uploaded_at": "2026-09-08T00:54:59.981440",
+        "filename": "ct_scans.zip"
+    },
+    "custom_test_multimodal_cohort": {
+        "key": "custom_test_multimodal_cohort",
+        "name": "Custom: test_multimodal_cohort.zip",
+        "domain": "Custom Clinical Upload",
+        "samples": 20,
+        "features_count": 25,
+        "quantum_qubits": 4,
+        "disease_positive_label": "Disease Positive (Class 1)",
+        "disease_negative_label": "Healthy / Control (Class 0)",
+        "description": "25 features, 20 samples from uploaded 'test_multimodal_cohort.zip'.",
+        "modality": "Custom (tabular + imaging)",
+        "built_in": false,
+        "can_delete": true,
+        "uploaded_at": "2026-09-08T09:00:07.422579",
+        "filename": "test_multimodal_cohort.zip"
     }
 }

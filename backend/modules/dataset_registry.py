@@ -202,6 +202,34 @@ def register_custom_dataset(
     with open(os.path.join(custom_class_dir, "metadata.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=4)
 
+    # 5. Save Raw Images and images_metadata.json if available
+    raw_images_list = meta_info.get("raw_images_to_save", [])
+    if raw_images_list:
+        raw_images_dir = os.path.join(custom_dir, "raw_images")
+        os.makedirs(raw_images_dir, exist_ok=True)
+        img_meta_entries = []
+        for img_item in raw_images_list:
+            fname = os.path.basename(img_item["filename"]).replace(" ", "_")
+            if not fname.lower().endswith(('.png', '.jpg', '.jpeg')):
+                fname = f"{os.path.splitext(fname)[0]}.png"
+            fpath = os.path.join(raw_images_dir, fname)
+            try:
+                with open(fpath, "wb") as f_img:
+                    f_img.write(img_item["bytes"])
+            except Exception as e:
+                print(f"[Warning] Failed writing image {fpath}: {e}")
+
+            img_meta_entries.append({
+                "filename": fname,
+                "label": img_item["label"],
+                "label_name": meta["disease_positive_label"] if img_item["label"] == 1 else meta["disease_negative_label"],
+                "metrics": img_item.get("metrics", {}),
+                "explanation": img_item.get("explanation", "")
+            })
+
+        with open(os.path.join(custom_dir, "images_metadata.json"), "w", encoding="utf-8") as f_meta:
+            json.dump({"images": img_meta_entries}, f_meta, indent=4)
+
     # 5. Add to persistent registry
     modality_str = " + ".join(meta["modalities_detected"]) if meta["modalities_detected"] else "tabular"
     display_name = f"Custom: {filename}"

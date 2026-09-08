@@ -6,17 +6,13 @@ credential management via QiskitRuntimeService, backend discovery and queue
 monitoring, and predefined medical quantum circuit experiments with Qiskit 1.x / 2.x.
 """
 
-import os
 import time
 import math
-import numpy as np
 from typing import Dict, Any, List, Optional, Tuple
 
 import qiskit
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import ZZFeatureMap, RealAmplitudes, EfficientSU2
 from qiskit.primitives import StatevectorSampler
-from qiskit.quantum_info import Statevector
 
 # Try importing Qiskit IBM Runtime
 try:
@@ -117,7 +113,7 @@ def get_qc_credential_status() -> Dict[str, Any]:
     if HAS_IBM_RUNTIME and QiskitRuntimeService:
         try:
             saved = QiskitRuntimeService.saved_accounts()
-        except Exception as e:
+        except Exception:
             saved = {}
 
     accounts_list = []
@@ -191,10 +187,9 @@ def save_qc_credentials(
         "token": token,
         "channel": channel,
         "overwrite": overwrite,
-        "set_as_default": set_as_default
+        "set_as_default": set_as_default,
+        "instance": instance.strip() if instance and instance.strip() else "auto"
     }
-    if instance and instance.strip():
-        kwargs["instance"] = instance.strip()
     if name and name.strip():
         kwargs["name"] = name.strip()
 
@@ -207,7 +202,7 @@ def save_qc_credentials(
     verification_msg = "Credentials saved locally."
     active_backends = []
     try:
-        service = QiskitRuntimeService(channel=channel, token=token, instance=instance)
+        service = QiskitRuntimeService(channel=channel, token=token, instance=kwargs["instance"])
         backends = service.backends()
         active_backends = [b.name for b in backends]
         verification_msg = f"Connected successfully! {len(active_backends)} hardware backends discovered."
@@ -219,7 +214,7 @@ def save_qc_credentials(
         "message": verification_msg,
         "active_backends": active_backends,
         "channel": channel,
-        "instance": instance
+        "instance": kwargs["instance"]
     }
 
 
@@ -249,7 +244,7 @@ def list_hardware_backends(channel: Optional[str] = None) -> List[Dict[str, Any]
     live_backends = []
     if HAS_IBM_RUNTIME and QiskitRuntimeService:
         try:
-            service = QiskitRuntimeService(channel=channel) if channel else QiskitRuntimeService()
+            service = QiskitRuntimeService(channel=channel, instance="auto") if channel else QiskitRuntimeService(instance="auto")
             backends = service.backends()
             for b in backends:
                 status = b.status()
@@ -332,7 +327,7 @@ def build_experiment_circuit(
     """
     params = params or {}
 
-    if experiment_id == "quantum_kernel_overlap":
+    if experiment_id in ("quantum_kernel_overlap", "kernel_overlap"):
         # 2-qubit feature map state overlap circuit
         x_a = params.get("x_a", [1.2, 0.8])
         x_b = params.get("x_b", [1.4, 0.9])
@@ -364,7 +359,7 @@ def build_experiment_circuit(
         }
         return qc, meta
 
-    elif experiment_id == "vqc_ansatz":
+    elif experiment_id in ("vqc_ansatz", "vqc_ansatz_execution"):
         # 4-qubit RealAmplitudes style variational ansatz
         thetas = params.get("thetas", [0.45, 1.12, 0.78, 1.54, 0.32, 0.95, 1.28, 0.64])
         qc = QuantumCircuit(4)
@@ -392,7 +387,7 @@ def build_experiment_circuit(
         }
         return qc, meta
 
-    elif experiment_id == "ghz_entanglement":
+    elif experiment_id in ("ghz_entanglement", "ghz_entanglement_fidelity"):
         # 4-qubit GHZ state
         qc = QuantumCircuit(4)
         qc.h(0)
@@ -479,7 +474,7 @@ def run_quantum_hardware_experiment(
     # Attempt Real Hardware Execution via Qiskit Runtime Service if not forced simulation
     if not force_simulation and HAS_IBM_RUNTIME and QiskitRuntimeService:
         try:
-            service = QiskitRuntimeService(channel=channel) if channel else QiskitRuntimeService()
+            service = QiskitRuntimeService(channel=channel, instance="auto") if channel else QiskitRuntimeService(instance="auto")
             backend = service.backend(backend_name)
 
             # Transpile circuit for target backend architecture
@@ -513,11 +508,11 @@ def run_quantum_hardware_experiment(
             counts_dict = result[0].data.meas.get_counts()
             counts = {str(k): int(v) for k, v in counts_dict.items()}
             qpu_time_seconds = round(time.time() - start_time, 3)
-        except Exception as sim_err:
+        except Exception:
             # Synthetic distribution in worst case
-            if experiment_id == "ghz_entanglement":
+            if experiment_id in ("ghz_entanglement", "ghz_entanglement_fidelity"):
                 counts = {"0000": int(shots * 0.48), "1111": int(shots * 0.47), "0001": int(shots * 0.03), "1110": int(shots * 0.02)}
-            elif experiment_id == "quantum_kernel_overlap":
+            elif experiment_id in ("quantum_kernel_overlap", "kernel_overlap"):
                 counts = {"00": int(shots * 0.82), "01": int(shots * 0.08), "10": int(shots * 0.07), "11": int(shots * 0.03)}
             else:
                 counts = {f"{i:04b}": int(shots / 16) for i in range(16)}
@@ -527,28 +522,32 @@ def run_quantum_hardware_experiment(
     total_shots = sum(counts.values()) or shots
     probabilities = {bitstring: round(count / total_shots, 4) for bitstring, count in sorted(counts.items())}
 
+    # Dominant state & shannon entropy
+    top_state = max(probabilities.items(), key=lambda x: x[1])[0] if probabilities else "0" * num_qubits
+    top_prob = probabilities.get(top_state, 0.0)
+    shannon_entropy = -sum(p * math.log2(p) for p in probabilities.values() if p > 0)
+
     # Derive fidelity / clinical coherence metrics
-    if experiment_id == "quantum_kernel_overlap":
-        fidelity = probabilities.get("00", 0.0)
+    if experiment_id in ("quantum_kernel_overlap", "kernel_overlap"):
+        fidelity = probabilities.get("00", probabilities.get("0", 0.0))
         clinical_interpretation = (
-            f"Quantum State Overlap Fidelity: {round(fidelity * 100, 2)}%. "
+            f"Quantum State Overlap Fidelity: |⟨ϕ(x_A)|ϕ(x_B)⟩|² = {round(fidelity * 100, 2)}%. "
             f"High transition amplitude confirms patient vector A and vector B lie on proximal clinical manifolds."
         )
-    elif experiment_id == "ghz_entanglement":
-        ghz_coherence = probabilities.get("0000", 0.0) + probabilities.get("1111", 0.0)
+    elif experiment_id in ("ghz_entanglement", "ghz_entanglement_fidelity"):
+        all_zeros = "0" * num_qubits
+        all_ones = "1" * num_qubits
+        ghz_coherence = probabilities.get(all_zeros, 0.0) + probabilities.get(all_ones, 0.0)
         clinical_interpretation = (
-            f"Entanglement Parity Coherence: {round(ghz_coherence * 100, 2)}%. "
+            f"GHZ Macroscopic Entanglement Parity: {round(ghz_coherence * 100, 2)}% (|{all_zeros}⟩ + |{all_ones}⟩). "
             f"{'Zero-noise simulation baseline verified.' if not real_hardware_executed else 'Physical superconducting transmon qubits maintained high-fidelity macroscopic superposition.'}"
         )
-    elif experiment_id == "vqc_ansatz":
-        entropy = -sum(p * math.log2(p) for p in probabilities.values() if p > 0)
+    elif experiment_id in ("vqc_ansatz", "vqc_ansatz_execution"):
         clinical_interpretation = (
-            f"VQC Output Shannon Entropy: {round(entropy, 3)} bits across 16 basis states. "
+            f"VQC Output Shannon Entropy: {round(shannon_entropy, 3)} bits across {len(probabilities)} basis states. "
             f"Variational rotation layers successfully partitioned quantum amplitude distribution for multi-biomarker classification."
         )
     else:
-        top_state = max(probabilities.items(), key=lambda x: x[1])[0]
-        top_prob = probabilities[top_state]
         clinical_interpretation = (
             f"Dominant Quantum State: |{top_state}> with P = {round(top_prob * 100, 2)}%. "
             f"Biomarker angles mapped into Hilbert space demonstrate distinct phase polarization suitable for QNN evaluation."
@@ -556,23 +555,36 @@ def run_quantum_hardware_experiment(
 
     # Retrieve backend metadata for display
     backend_info = next((b for b in HARDWARE_BACKENDS_REGISTRY if b["name"] == backend_name), HARDWARE_BACKENDS_REGISTRY[0])
+    mode_str = "REAL_IBM_HARDWARE" if real_hardware_executed else "LOCAL_HIGH_PRECISION_SIMULATION"
 
     return {
+        "status": "SUCCESS",
         "experiment_id": experiment_id,
         "experiment_name": meta.get("title", experiment_id),
-        "execution_mode": "REAL_IBM_HARDWARE" if real_hardware_executed else "LOCAL_HIGH_PRECISION_SIMULATION",
+        "execution_mode": mode_str,
+        "mode": mode_str,
         "is_real_hardware": real_hardware_executed,
+        "backend": backend_name,
         "backend_name": backend_name,
         "backend_processor": backend_info.get("processor_type"),
         "backend_num_qubits": backend_info.get("num_qubits"),
         "job_id": job_id,
         "shots": shots,
         "elapsed_time_seconds": qpu_time_seconds,
+        "top_state": top_state,
+        "num_qubits": num_qubits,
+        "circuit_depth": circuit_depth,
+        "gate_counts": gate_counts,
         "circuit_metrics": {
             "num_qubits": num_qubits,
             "circuit_depth": circuit_depth,
             "total_gates": sum(gate_counts.values()),
             "gate_breakdown": gate_counts
+        },
+        "quantum_diagnostics": {
+            "shannon_entropy_bits": round(shannon_entropy, 3),
+            "dominant_state_probability": round(top_prob, 4),
+            "total_basis_states": len(probabilities)
         },
         "circuit_ascii": circuit_ascii,
         "counts": counts,

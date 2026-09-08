@@ -294,6 +294,26 @@ export const sendQuddosChat = async (query, artifacts = [], conversationHistory 
   }
 };
 
+export const getRandomDatasetImages = async (datasetKey, count = 3) => {
+  try {
+    const res = await axios.get(`${API_BASE}/dataset-overview/${datasetKey}/random-images?count=${count}`);
+    return res.data;
+  } catch (err) {
+    console.warn(`Failed fetching random images for ${datasetKey}:`, err);
+    return { dataset_key: datasetKey, has_images: false, count: 0, samples: [] };
+  }
+};
+
+export const getDatasetPipelineStages = async (datasetKey) => {
+  try {
+    const res = await axios.get(`${API_BASE}/dataset-overview/${datasetKey}/pipeline-stages`);
+    return res.data;
+  } catch (err) {
+    console.warn(`Failed fetching pipeline stages for ${datasetKey}:`, err);
+    return null;
+  }
+};
+
 export const uploadCustomDataset = async (file) => {
   const formData = new FormData();
   formData.append('file', file);

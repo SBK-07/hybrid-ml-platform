@@ -298,3 +298,8 @@ class UncertaintyReport(BaseModel):
     hybrid_probability: float
     risk_tier: str  # "Low Risk", "Moderate / Borderline", "High Risk"
     triage_recommendation: str
+    inter_model_std: Optional[float] = None
+    inter_model_variance: Optional[float] = None
+    boundary_entropy: Optional[float] = None
+    discordance_delta: Optional[float] = None
+    individual_probabilities: Optional[Dict[str, float]] = None
