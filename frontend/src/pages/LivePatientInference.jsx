@@ -12,6 +12,68 @@ import {
 } from 'lucide-react';
 import { predictPatient, predictPatientImage, getPatientPresets, SAMPLE_IMAGE_PRESETS } from '../services/api';
 import CardActionMenu from '../components/CardActionMenu';
+import Atom4Orbits from '../components/Atom4Orbits';
+
+/* ── Minimalist Design Tokens ──────────────────────────────── */
+const T = {
+  eyebrow: {
+    fontSize: '0.68rem',
+    fontWeight: 600,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    color: 'var(--text-tertiary)'
+  },
+  body: {
+    fontSize: '0.9rem',
+    lineHeight: 1.7,
+    color: 'var(--text-secondary)'
+  },
+  card: {
+    background: 'var(--bg-card)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-lg)',
+    boxShadow: 'var(--shadow-card)'
+  },
+  terminal: {
+    background: '#0B1020',
+    border: '1px solid rgba(99, 102, 241, 0.2)',
+    borderRadius: 'var(--radius-md)',
+    fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+    fontSize: '0.78rem',
+    lineHeight: 1.7,
+    color: '#CBD5E1'
+  }
+};
+
+function SectionHeader({ index, icon: Icon, title, subtitle, actions }) {
+  return (
+    <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap' }}>
+      <div style={{ minWidth: '260px', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <span style={T.eyebrow}>{index}</span>
+          <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+          {Icon && <Icon size={14} style={{ color: 'var(--text-tertiary)' }} />}
+        </div>
+        <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+          {title}
+        </h2>
+        {subtitle && <p style={{ margin: '8px 0 0', ...T.body, maxWidth: '680px' }}>{subtitle}</p>}
+      </div>
+      {actions}
+    </div>
+  );
+}
+
+function HairlineDivider({ label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '64px 0 48px' }}>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+      <span style={T.eyebrow}>{label}</span>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+    </div>
+  );
+}
 
 const DEFAULT_PRESETS = [
   {
@@ -191,40 +253,28 @@ export default function LivePatientInference() {
   const [predictionResult, setPredictionResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Input Modality: 'tabular' (default) vs 'image' (MRI, CT, report photo)
   const [inputMode, setInputMode] = useState('tabular');
   const [selectedImagePresetId, setSelectedImagePresetId] = useState(SAMPLE_IMAGE_PRESETS[0]?.id || 'mri_gbm');
   const [uploadedImageFile, setUploadedImageFile] = useState(null);
   const [uploadedImagePreview, setUploadedImagePreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Stakeholder presentation view: 'patient' vs 'clinical' vs 'dual'
   const [stakeholderView, setStakeholderView] = useState('dual');
 
-  // Accordion toggles
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
   const [showAdvancedResults, setShowAdvancedResults] = useState(false);
   const [showExplainability, setShowExplainability] = useState(true);
   const [showCounterfactual, setShowCounterfactual] = useState(true);
 
-  // Counterfactual interactive simulation state
   const [simulatedDeltas, setSimulatedDeltas] = useState({});
   const [simulatedRisk, setSimulatedRisk] = useState(null);
 
-  // Validation tabs & Decision Question Accordions state
   const [activeValidationTab, setActiveValidationTab] = useState('discordance');
   const [inferenceTier, setInferenceTier] = useState('basic');
-  const [expandedQuestions, setExpandedQuestions] = useState({
-    q1: true,
-    q2: true,
-    q3: true
-  });
+  const [expandedQuestions, setExpandedQuestions] = useState({ q1: true, q2: true, q3: true });
 
   const toggleQuestion = (qKey) => {
-    setExpandedQuestions(prev => ({
-      ...prev,
-      [qKey]: !prev[qKey]
-    }));
+    setExpandedQuestions(prev => ({ ...prev, [qKey]: !prev[qKey] }));
   };
 
   const getQuddosPatientMetrics = () => {
@@ -258,35 +308,19 @@ export default function LivePatientInference() {
     if (riskPct >= 80) {
       riskTier = 'Critical Malignancy';
       clinicalGrade = 'Level V: Critical Malignancy';
-      gradeBadgeStyle = {
-        background: 'rgba(239, 68, 68, 0.18)',
-        border: '1px solid rgba(239, 68, 68, 0.45)',
-        color: '#FCA5A5'
-      };
+      gradeBadgeStyle = { background: 'rgba(239, 68, 68, 0.18)', border: '1px solid rgba(239, 68, 68, 0.45)', color: '#FCA5A5' };
     } else if (riskPct >= 60) {
       riskTier = 'Elevated Risk';
       clinicalGrade = 'Level IV: Elevated Risk Alert';
-      gradeBadgeStyle = {
-        background: 'rgba(245, 158, 11, 0.18)',
-        border: '1px solid rgba(245, 158, 11, 0.45)',
-        color: '#FCD34D'
-      };
+      gradeBadgeStyle = { background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', color: '#FCD34D' };
     } else if (riskPct >= 40) {
       riskTier = 'Borderline Ambiguity';
       clinicalGrade = 'Level III: Borderline Watchlist';
-      gradeBadgeStyle = {
-        background: 'rgba(251, 191, 36, 0.18)',
-        border: '1px solid rgba(251, 191, 36, 0.45)',
-        color: '#FDE68A'
-      };
+      gradeBadgeStyle = { background: 'rgba(251, 191, 36, 0.18)', border: '1px solid rgba(251, 191, 36, 0.45)', color: '#FDE68A' };
     } else if (riskPct >= 20) {
       riskTier = 'Guarded Baseline';
       clinicalGrade = 'Level II: Low-Risk Guarded';
-      gradeBadgeStyle = {
-        background: 'rgba(52, 211, 153, 0.15)',
-        border: '1px solid rgba(52, 211, 153, 0.4)',
-        color: '#A7F3D0'
-      };
+      gradeBadgeStyle = { background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.4)', color: '#A7F3D0' };
     }
 
     const epistemic = u?.epistemic_uncertainty !== undefined ? u.epistemic_uncertainty : 0.04;
@@ -300,10 +334,7 @@ export default function LivePatientInference() {
     const perturbationStability = Math.min(99.5, Math.max(91.0, (100 - (aleatoric * 120)))).toFixed(1);
 
     return {
-      riskPct,
-      riskTier,
-      clinicalGrade,
-      gradeBadgeStyle,
+      riskPct, riskTier, clinicalGrade, gradeBadgeStyle,
       svmProb: (svmProb * 100).toFixed(1),
       mlpProb: (mlpProb * 100).toFixed(1),
       qsvmProb: (qsvmProb * 100).toFixed(1),
@@ -312,21 +343,14 @@ export default function LivePatientInference() {
       classProb: (classProb * 100).toFixed(1),
       quantProb: (quantProb * 100).toFixed(1),
       hybridProb: (hybridProb * 100).toFixed(1),
-      consensusConfidence,
-      epistemic: (epistemic * 100).toFixed(1),
+      consensusConfidence, epistemic: (epistemic * 100).toFixed(1),
       aleatoric: (aleatoric * 100).toFixed(1),
-      isDiscordant,
-      hilbertFidelity,
-      perturbationStability,
-      pValue: '0.00038',
-      cohenD: '1.34',
-      latencyMs: 14
+      isDiscordant, hilbertFidelity, perturbationStability,
+      pValue: '0.00038', cohenD: '1.34', latencyMs: 14
     };
   };
 
-  useEffect(() => {
-    fetchPresets();
-  }, []);
+  useEffect(() => { fetchPresets(); }, []);
 
   const fetchPresets = async () => {
     try {
@@ -337,9 +361,7 @@ export default function LivePatientInference() {
         setSelectedPresetId(defaultPreset.id);
         loadPresetFeatures(defaultPreset, activeDataset);
       }
-    } catch (err) {
-      console.warn('Using local default patient presets.', err);
-    }
+    } catch (err) { console.warn('Using local default patient presets.', err); }
   };
 
   const loadPresetFeatures = (preset, ds = activeDataset) => {
@@ -362,16 +384,11 @@ export default function LivePatientInference() {
     const presetId = e.target.value;
     setSelectedPresetId(presetId);
     const preset = presets.find(p => p.id === presetId);
-    if (preset) {
-      loadPresetFeatures(preset, activeDataset);
-    }
+    if (preset) loadPresetFeatures(preset, activeDataset);
   };
 
   const handleInputChange = (featureName, value) => {
-    setFeatures(prev => ({
-      ...prev,
-      [featureName]: parseFloat(value) || 0
-    }));
+    setFeatures(prev => ({ ...prev, [featureName]: parseFloat(value) || 0 }));
   };
 
   const handleRunInference = async (e) => {
@@ -381,25 +398,19 @@ export default function LivePatientInference() {
     try {
       const res = await predictPatient(activeDataset, features);
       setPredictionResult(res);
-      // Initialize simulated risk from prediction
       if (res?.predictions?.hybrid_consensus_ensemble?.probability !== undefined) {
         setSimulatedRisk(res.predictions.hybrid_consensus_ensemble.probability);
         setSimulatedDeltas({});
       }
-    } catch (err) {
-      console.error('Inference error:', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error('Inference error:', err); }
+    finally { setLoading(false); }
   };
 
   const handleImageFileUpload = (file) => {
     if (!file) return;
     setUploadedImageFile(file);
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setUploadedImagePreview(e.target.result);
-    };
+    reader.onload = (e) => { setUploadedImagePreview(e.target.result); };
     reader.readAsDataURL(file);
   };
 
@@ -409,11 +420,8 @@ export default function LivePatientInference() {
     setUploadedImagePreview(null);
     const preset = SAMPLE_IMAGE_PRESETS.find(p => p.id === presetId);
     if (preset) {
-      if (preset.id === 'echo_stress') {
-        setActiveDataset('cardiovascular');
-      } else {
-        setActiveDataset('cancer');
-      }
+      if (preset.id === 'echo_stress') setActiveDataset('cardiovascular');
+      else setActiveDataset('cancer');
     }
   };
 
@@ -434,17 +442,13 @@ export default function LivePatientInference() {
         setSimulatedRisk(res.predictions.hybrid_consensus_ensemble.probability);
         setSimulatedDeltas({});
       }
-    } catch (err) {
-      console.error('Image inference error:', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error('Image inference error:', err); }
+    finally { setLoading(false); }
   };
 
   const getPatientPlainSummary = (riskPct, isImage = false, imageAnalysis = null) => {
     let riskLevel = "Low Risk / Expected Healthy Range";
     let riskColor = "#10B981";
-    let meterColor = "#10B981";
     let plainMeaning = "";
     let findingsSummary = "";
     let nextSteps = [];
@@ -453,62 +457,58 @@ export default function LivePatientInference() {
     if (riskPct >= 80) {
       riskLevel = "High Risk / Prompt Medical Review Needed";
       riskColor = "#EF4444";
-      meterColor = "#EF4444";
       plainMeaning = `Out of 100 people with test or scan readings similar to yours, approximately ${Math.round(riskPct)} had confirmed pathological conditions, while ${100 - Math.round(riskPct)} did not. This indicates significant abnormal markers that warrant immediate professional clinical evaluation.`;
       findingsSummary = isImage
-        ? `The AI scan analyzer detected pronounced tissue irregularity, high spatial contrast, and density gradients in the examined scan area. These visual signatures are characteristic of active lesions or pathological tissue expansion.`
-        : `Multiple clinical biomarkers and cell contour metrics are significantly higher than standard healthy baseline values, placing this profile into the high-risk category.`;
+        ? `The AI scan analyzer detected pronounced tissue irregularity, high spatial contrast, and density gradients in the examined scan area.`
+        : `Multiple clinical biomarkers and cell contour metrics are significantly higher than standard healthy baseline values.`;
       nextSteps = [
-        "Schedule an urgent clinical consultation with your primary doctor or an oncology/cardiology specialist.",
-        "Bring this digital report and your original scan files along to your consultation for doctor review.",
-        "Proceed promptly with any recommended confirmatory examinations (such as a tissue biopsy or targeted contrast scan).",
-        "Please remember: AI risk scores provide early triage guidance to assist doctors, not a final medical verdict."
+        "Schedule an urgent clinical consultation with your primary doctor or a specialist.",
+        "Bring this digital report and your original scan files along to your consultation.",
+        "Proceed promptly with any recommended confirmatory examinations.",
+        "AI risk scores provide early triage guidance, not a final medical verdict."
       ];
       doctorQuestions = [
-        `"My AI-assisted risk score showed ${riskPct}%. What confirmatory diagnostic tests (such as a biopsy or repeat scan) do you recommend first?"`,
-        `"Are there immediate therapeutic steps, medication options, or specialist referrals we should set up?"`,
+        `"My AI-assisted risk score showed ${riskPct}%. What confirmatory tests do you recommend first?"`,
+        `"Are there immediate therapeutic steps or specialist referrals we should set up?"`,
         `"What specific physical symptoms should I monitor closely until our next appointment?"`
       ];
     } else if (riskPct >= 60) {
       riskLevel = "Elevated Risk / Further Clinical Checkup Advised";
       riskColor = "#F59E0B";
-      meterColor = "#F59E0B";
-      plainMeaning = `Out of 100 people with similar readings, approximately ${Math.round(riskPct)} showed confirmed conditions. This is above the standard healthy baseline and suggests abnormal markers that should be investigated further.`;
+      plainMeaning = `Out of 100 people with similar readings, approximately ${Math.round(riskPct)} showed confirmed conditions. This is above the standard healthy baseline.`;
       findingsSummary = isImage
         ? `The scan exhibits noticeable tissue heterogeneity and localized texture disruptions compared to typical physiological scans.`
-        : `Several biomarker values are in an elevated risk zone compared to typical healthy adults of similar profile.`;
+        : `Several biomarker values are in an elevated risk zone compared to typical healthy adults.`;
       nextSteps = [
         "Consult your healthcare provider within the next 1 to 2 weeks.",
-        "Share this summary to help your physician determine if follow-up imaging or laboratory tests are warranted.",
-        "Continue your daily activities normally and avoid unverified online medical treatments."
+        "Share this summary to help your physician determine if follow-up tests are warranted.",
+        "Continue your daily activities normally and avoid unverified online treatments."
       ];
       doctorQuestions = [
-        `"What does this ${riskPct}% score indicate when evaluated against my individual health and family history?"`,
-        `"Do you advise a repeat scan or follow-up laboratory work to confirm these findings?"`,
-        `"What preventive lifestyle habits or treatments could help lower this risk trajectory?"`
+        `"What does this ${riskPct}% score indicate against my individual health and family history?"`,
+        `"Do you advise a repeat scan or follow-up laboratory work?"`,
+        `"What preventive lifestyle habits could help lower this risk trajectory?"`
       ];
     } else if (riskPct >= 40) {
       riskLevel = "Moderate / Borderline Watchlist";
       riskColor = "#EAB308";
-      meterColor = "#EAB308";
-      plainMeaning = `Out of 100 people with readings like yours, roughly ${Math.round(riskPct)} had findings of concern, while ${100 - Math.round(riskPct)} were benign or healthy. The results sit on the borderline between normal and elevated.`;
+      plainMeaning = `Out of 100 people with readings like yours, roughly ${Math.round(riskPct)} had findings of concern, while ${100 - Math.round(riskPct)} were benign or healthy.`;
       findingsSummary = isImage
-        ? `The scan shows mild localized texture variations or subtle border asymmetry. While not definitively pathological, it warrants careful periodic monitoring.`
+        ? `The scan shows mild localized texture variations or subtle border asymmetry.`
         : `Your clinical measurements sit right at the boundary between normal baseline and mild elevation.`;
       nextSteps = [
         "Discuss these borderline markers with your doctor at your next scheduled appointment.",
-        "A follow-up monitoring scan in 3 to 6 months may be recommended to track any potential progression over time.",
+        "A follow-up monitoring scan in 3 to 6 months may be recommended.",
         "Focus on heart-healthy habits, proper stress management, and balanced nutrition."
       ];
       doctorQuestions = [
-        `"Since my score is in the borderline category (${riskPct}%), should we repeat this scan in 3 to 6 months to monitor any changes?"`,
-        `"Are there non-invasive diagnostic options or lifestyle adjustments that can clarify this borderline reading?"`,
-        `"What warning signs or symptoms should prompt me to seek clinical review sooner?"`
+        `"Since my score is in the borderline category (${riskPct}%), should we repeat this scan in 3 to 6 months?"`,
+        `"Are there non-invasive diagnostic options or lifestyle adjustments that can clarify this reading?"`,
+        `"What warning signs should prompt me to seek clinical review sooner?"`
       ];
     } else if (riskPct >= 20) {
       riskLevel = "Guarded / Low Clinical Concern";
       riskColor = "#10B981";
-      meterColor = "#10B981";
       plainMeaning = `Out of 100 people with similar markers, about ${Math.round(riskPct)} had minor concerns, while ${100 - Math.round(riskPct)} were healthy. Your indicators are largely reassuring.`;
       findingsSummary = isImage
         ? `The scan demonstrates predominantly normal tissue architecture with minimal localized variance.`
@@ -526,10 +526,9 @@ export default function LivePatientInference() {
     } else {
       riskLevel = "Minimal Risk / Healthy Baseline";
       riskColor = "#059669";
-      meterColor = "#059669";
       plainMeaning = `Out of 100 people with readings like yours, approximately ${Math.round(riskPct)} had minor findings, and ${100 - Math.round(riskPct)} were completely healthy. Your results strongly align with healthy baseline reference cohorts.`;
       findingsSummary = isImage
-        ? `The scan shows clean, uniform tissue margins, preserved bilateral symmetry, and zero signs of focal space-occupying lesions.`
+        ? `The scan shows clean, uniform tissue margins, preserved bilateral symmetry, and zero signs of focal lesions.`
         : `All vitals, nuclear morphology, and hemodynamic values are well within ideal healthy reference boundaries.`;
       nextSteps = [
         "Routine clearance confirmed. Continue with standard annual preventive checkups.",
@@ -543,35 +542,26 @@ export default function LivePatientInference() {
       ];
     }
 
-    return { riskLevel, riskColor, meterColor, plainMeaning, findingsSummary, nextSteps, doctorQuestions };
+    return { riskLevel, riskColor, plainMeaning, findingsSummary, nextSteps, doctorQuestions };
   };
 
-  // Real-time counterfactual "What-If" slider adjustment
   const handleCounterfactualSlider = (featureName, originalVal, recommendedVal, sliderPercent) => {
-    // sliderPercent in [0, 100], 0 means original value, 100 means recommended therapeutic target
     const currentDeltaPct = (sliderPercent / 100);
     const currentVal = originalVal + (recommendedVal - originalVal) * currentDeltaPct;
 
     setSimulatedDeltas(prev => ({
       ...prev,
-      [featureName]: {
-        percentAchieved: sliderPercent,
-        currentVal: currentVal
-      }
+      [featureName]: { percentAchieved: sliderPercent, currentVal: currentVal }
     }));
 
-    // Recalculate dynamic simulated risk
     if (predictionResult?.predictions?.hybrid_consensus_ensemble) {
       const origRisk = predictionResult.predictions.hybrid_consensus_ensemble.probability;
       const targetRisk = predictionResult.explainability?.counterfactual?.target_risk_probability || (origRisk * 0.3);
       const totalDrivers = predictionResult.explainability?.counterfactual?.key_interventions?.length || 1;
 
-      // Calculate aggregate progress across all counterfactual sliders
       const currentDeltas = { ...simulatedDeltas, [featureName]: { percentAchieved: sliderPercent } };
       let sumPct = 0;
-      Object.values(currentDeltas).forEach(d => {
-        sumPct += (d.percentAchieved || 0);
-      });
+      Object.values(currentDeltas).forEach(d => { sumPct += (d.percentAchieved || 0); });
       const avgProgress = sumPct / (totalDrivers * 100);
       const newSimRisk = origRisk - (origRisk - targetRisk) * Math.min(1.0, Math.max(0.0, avgProgress));
       setSimulatedRisk(parseFloat(newSimRisk.toFixed(4)));
@@ -581,7 +571,6 @@ export default function LivePatientInference() {
   const handleConsultQuddos = () => {
     if (!predictionResult) return;
 
-    // Package patient telemetry into Quddos AI artifacts
     const artifact = {
       title: `Patient Case Study (${selectedPreset?.name || 'Custom'})`,
       category: 'Patient Inference & XAI',
@@ -618,30 +607,59 @@ export default function LivePatientInference() {
   const counterfactual = explainability?.counterfactual;
 
   return (
-    <div className="inference-page">
-      {/* Page Header */}
-      <div className="inference-header">
-        <div className="inference-header-left">
-          <div className="inference-header-icon">
-            <Activity size={24} />
+    <div className="inference-page" style={{ maxWidth: '1320px', margin: '0 auto', padding: '24px 32px 96px' }}>
+
+      {/* ── Editorial Hero ─────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '48px', flexWrap: 'wrap', padding: '56px 0 48px' }}>
+        <div style={{ flex: 1, minWidth: '320px', maxWidth: '760px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '6px 14px', marginBottom: '24px',
+            border: '1px solid var(--border-color)', borderRadius: '999px',
+            background: 'var(--bg-card)'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-primary)', boxShadow: '0 0 8px var(--brand-glow)' }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+              Real-Time Clinical Diagnostic Simulator
+            </span>
           </div>
-          <div>
-            <h1>Live Patient Risk Predictor</h1>
-            <p className="subtitle">Real-time clinical diagnostic simulator with quantum-classical hybrid inference and explainable AI</p>
-          </div>
+
+          <h1 style={{
+            margin: '0 0 18px',
+            fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+            fontWeight: 700,
+            letterSpacing: '-0.035em',
+            lineHeight: 1.1,
+            color: 'var(--text-primary)'
+          }}>
+            Live patient risk prediction with{' '}
+            <span style={{ color: 'var(--brand-primary)' }}>quantum-classical consensus</span>.
+          </h1>
+
+          <p style={{ margin: 0, ...T.body, maxWidth: '600px' }}>
+            Real-time clinical diagnostic simulator with quantum-classical hybrid inference,
+            explainable AI, and counterfactual therapeutic trajectories.
+          </p>
         </div>
 
-        {predictionResult && (
-          <button onClick={handleConsultQuddos} className="btn btn-primary">
-            <Bot size={16} /> Consult Quddos AI <ArrowRight size={14} />
-          </button>
-        )}
+        <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ position: 'absolute', inset: 0, border: '1px solid var(--border-color)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', inset: '22px', border: '1px dashed var(--border-color)', borderRadius: '50%', opacity: 0.55 }} />
+          <Atom4Orbits size={104} color="var(--brand-primary)" />
+        </div>
       </div>
 
-      {/* Disease Domain Selector */}
-      <div className="domain-selector">
-        <span className="domain-selector-label">Clinical Disease Modality</span>
-        <div className="domain-grid">
+      {/* ── 01 · Disease Modality Selector ─────────────────── */}
+      <section style={{ marginBottom: '48px' }}>
+        <SectionHeader
+          index="01"
+          icon={Stethoscope}
+          title="Clinical Disease Modality"
+          subtitle="Select the diagnostic domain and input modality for the patient case study."
+        />
+
+        {/* Modality Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '20px' }}>
           {[
             { key: 'cancer', label: 'Breast Oncology', sub: 'WDBC', icon: Microscope, isActive: activeDataset === 'cancer' && inputMode !== 'image', onClick: () => handleDatasetChange('cancer') },
             { key: 'cardio', label: 'Cardiovascular', sub: 'UCI Heart', icon: Activity, isActive: activeDataset === 'cardiovascular' && inputMode !== 'image', onClick: () => handleDatasetChange('cardiovascular') },
@@ -652,195 +670,264 @@ export default function LivePatientInference() {
               key={key}
               type="button"
               onClick={onClick}
-              className={`domain-card ${isActive ? 'active' : ''}`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '14px',
+                padding: '18px 20px', background: 'var(--bg-card)',
+                backdropFilter: 'blur(16px)',
+                border: isActive ? '1px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                transition: 'all 0.2s ease', boxShadow: isActive ? 'var(--shadow-card)' : 'none',
+                textAlign: 'left'
+              }}
+              onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-inset)'; }}
+              onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-card)'; }}
             >
-              <div className="domain-card-icon">
-                <Icon size={18} />
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
+                background: isActive ? 'var(--brand-bg)' : 'var(--bg-inset)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s ease'
+              }}>
+                <Icon size={17} style={{ color: isActive ? 'var(--brand-primary)' : 'var(--text-tertiary)' }} />
               </div>
               <div>
-                <div className="domain-card-title">{label}</div>
-                <div className="domain-card-sub">{sub}</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: isActive ? 'var(--brand-primary)' : 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                  {label}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '2px', fontWeight: 500 }}>
+                  {sub}
+                </div>
               </div>
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Input Mode Selector */}
-      <div className="input-mode-bar">
-        <div className="input-mode-info">
-          <div className="input-mode-icon">
-            {inputMode === 'image' ? <ImageIcon size={20} /> : <Sliders size={20} />}
-          </div>
-          <div>
-            <div className="input-mode-title">Diagnostic Input Source</div>
-            <div className="input-mode-desc">Choose numerical laboratory data or upload a medical scan</div>
-          </div>
+        {/* Input Mode Segmented Control */}
+        <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+          {[
+            { mode: 'tabular', label: 'Tabular Laboratory Data', icon: Sliders },
+            { mode: 'image', label: 'Medical Scan (DICOM / PNG)', icon: ImageIcon }
+          ].map(({ mode, label, icon: Icon }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setInputMode(mode)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '9px 18px', fontSize: '0.82rem', fontWeight: 600,
+                borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none',
+                cursor: 'pointer', transition: 'all 0.2s ease',
+                background: inputMode === mode ? 'var(--bg-card-solid)' : 'transparent',
+                color: inputMode === mode ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                boxShadow: inputMode === mode ? 'var(--shadow-card)' : 'none'
+              }}
+            >
+              <Icon size={14} /> {label}
+            </button>
+          ))}
         </div>
+      </section>
 
-        <div className="quddos-tier-toggle">
-          <button
-            type="button"
-            onClick={() => setInputMode('tabular')}
-            className={`quddos-tier-btn ${inputMode === 'tabular' ? 'active' : ''}`}
-          >
-            <Sliders size={14} />
-            <span>Tabular Data</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setInputMode('image')}
-            className={`quddos-tier-btn ${inputMode === 'image' ? 'active' : ''}`}
-          >
-            <ImageIcon size={14} />
-            <span>Medical Image</span>
-          </button>
-        </div>
-      </div>
+      {/* ── 02 · Patient Profile / Scan Input ──────────────── */}
+      <section style={{ marginBottom: '48px' }}>
+        <SectionHeader
+          index="02"
+          icon={inputMode === 'image' ? FileImage : UserCheck}
+          title={inputMode === 'image' ? 'Biomedical Scan Analysis' : 'Patient Profile Archetype'}
+          subtitle={inputMode === 'image'
+            ? 'Select a curated scan preset or upload a custom DICOM / PNG / JPG for radiomic extraction.'
+            : 'Select a clinical case archetype with calibrated biomarker vectors for hybrid inference.'}
+          actions={
+            inputMode === 'image' && (
+              <button
+                type="button"
+                onClick={handleRunImageInference}
+                disabled={loading}
+                style={{
+                  height: '42px', padding: '0 22px', borderRadius: 'var(--radius-md)',
+                  border: 'none', background: loading ? 'var(--brand-hover)' : 'var(--brand-primary)',
+                  color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  boxShadow: '0 2px 8px var(--brand-glow)', transition: 'all 0.2s ease'
+                }}
+              >
+                {loading ? <Loader2 size={15} className="spinner" /> : <Play size={15} fill="currentColor" />}
+                {loading ? 'Analyzing...' : 'Analyze Scan & Predict Risk'}
+              </button>
+            )
+          }
+        />
 
-      {/* Conditional Input Section: Tabular Archetype Selector OR Medical Image Upload & Preset Selector */}
-      {inputMode === 'tabular' ? (
-        <div className="preset-card">
-          <div className="preset-card-header">
-            <label className="preset-card-label">
-              <UserCheck size={18} /> Patient Profile Archetype
-            </label>
+        {inputMode === 'tabular' ? (
+          <div style={{ ...T.card, padding: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ ...T.eyebrow }}>Patient Archetype</div>
+              <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+              {selectedPreset && (
+                <span style={{
+                  fontSize: '0.65rem', padding: '3px 10px', borderRadius: '5px',
+                  background: 'var(--classical-bg)', color: 'var(--classical-color)',
+                  border: '1px solid var(--classical-glow)', fontWeight: 700,
+                  letterSpacing: '0.08em', textTransform: 'uppercase'
+                }}>
+                  {selectedPreset.category}
+                </span>
+              )}
+            </div>
+
+            <select
+              value={selectedPresetId}
+              onChange={handlePresetChange}
+              style={{
+                width: '100%', padding: '14px 16px', background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)',
+                color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 500,
+                cursor: 'pointer', outline: 'none', transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--brand-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--brand-glow)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
+            >
+              {presets.map(p => (
+                <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
+              ))}
+            </select>
+
             {selectedPreset && (
-              <span className="badge-paradigm badge-classical">
-                {selectedPreset.category}
-              </span>
+              <div style={{
+                marginTop: '16px', padding: '14px 18px',
+                background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                borderLeft: '2px solid var(--brand-primary)', fontSize: '0.85rem',
+                color: 'var(--text-secondary)', lineHeight: 1.65
+              }}>
+                {selectedPreset.description}
+              </div>
             )}
           </div>
-          <select
-            value={selectedPresetId}
-            onChange={handlePresetChange}
-            className="form-select-inline"
-            style={{ width: '100%' }}
-          >
-            {presets.map(p => (
-              <option key={p.id} value={p.id}>{p.name} — [{p.risk_profile}]</option>
-            ))}
-          </select>
-          {selectedPreset && (
-            <div className="preset-card-desc">
-              {selectedPreset.description}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="image-upload-section">
-          <div className="image-upload-header">
-            <div className="image-upload-title-group">
-              <div className="image-upload-icon">
-                <FileImage size={22} />
+        ) : (
+          <div style={{ ...T.card, padding: '24px' }}>
+            {/* Scan Presets Grid */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ ...T.eyebrow, marginBottom: '12px' }}>Curated Scan Presets</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                {SAMPLE_IMAGE_PRESETS.map((preset) => {
+                  const isSelected = !uploadedImageFile && selectedImagePresetId === preset.id;
+                  return (
+                    <div
+                      key={preset.id}
+                      onClick={() => handleSelectImagePreset(preset.id)}
+                      style={{
+                        padding: '16px 18px', cursor: 'pointer',
+                        background: isSelected ? 'var(--bg-inset)' : 'transparent',
+                        border: isSelected ? '1px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-md)', transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                      onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                          {preset.modality}
+                        </span>
+                        <span style={{
+                          fontSize: '0.62rem', fontWeight: 700, padding: '2px 8px',
+                          borderRadius: '4px', letterSpacing: '0.08em',
+                          background: preset.isPathological ? 'var(--status-danger-bg)' : 'var(--status-success-bg)',
+                          color: preset.isPathological ? 'var(--status-danger)' : 'var(--status-success)',
+                          border: `1px solid ${preset.isPathological ? 'rgba(220, 38, 38, 0.25)' : 'rgba(22, 163, 74, 0.25)'}`
+                        }}>
+                          {preset.expectedRisk}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                        {preset.name}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div>
-                <div className="image-upload-badge">
-                  Radiomics Engine
+            </div>
+
+            {/* Upload Dropzone + Preview */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleImageFileUpload(e.dataTransfer.files[0]);
+                  }
+                }}
+                style={{
+                  padding: '28px',
+                  border: isDragOver ? '1.5px dashed var(--brand-primary)' : '1px dashed var(--border-color)',
+                  borderRadius: 'var(--radius-md)', background: isDragOver ? 'var(--brand-bg)' : 'var(--bg-inset)',
+                  textAlign: 'center', transition: 'all 0.25s ease',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'
+                }}
+              >
+                <UploadCloud size={24} style={{ color: 'var(--brand-primary)', marginBottom: '4px' }} />
+                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                  Drop medical scan here
                 </div>
-                <h3 className="image-upload-title">Biomedical Scan Analysis</h3>
-                <span className="image-upload-formats">DICOM · NIfTI · PNG · JPG</span>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                  PNG · JPG · DICOM · NIfTI · WebP
+                </div>
+                <label style={{
+                  marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '7px 14px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--brand-primary)', background: 'transparent',
+                  color: 'var(--brand-primary)', fontSize: '0.78rem', fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.2s ease'
+                }}>
+                  Browse File
+                  <input
+                    type="file"
+                    accept="image/*,.dcm,.dicom,.nii,.nii.gz"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) handleImageFileUpload(e.target.files[0]);
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                </label>
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleRunImageInference}
-              disabled={loading}
-              className="btn btn-primary"
-            >
-              {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} />}
-              {loading ? 'Analyzing...' : 'Analyze Scan & Predict Risk'}
-            </button>
-          </div>
+              {/* Scan Preview */}
+              {(() => {
+                const activePreset = SAMPLE_IMAGE_PRESETS.find(p => p.id === selectedImagePresetId) || SAMPLE_IMAGE_PRESETS[0];
+                const previewSrc = uploadedImagePreview || (activePreset.svg ? `data:image/svg+xml;utf8,${encodeURIComponent(activePreset.svg)}` : null);
+                const displayName = uploadedImageFile ? uploadedImageFile.name : activePreset.name;
 
-          {/* Sample Scan Presets */}
-          <div>
-            <label className="image-presets-label">Curated Scan Presets</label>
-            <div className="image-presets-grid">
-              {SAMPLE_IMAGE_PRESETS.map((preset) => {
-                const isSelected = !uploadedImageFile && selectedImagePresetId === preset.id;
                 return (
-                  <div
-                    key={preset.id}
-                    onClick={() => handleSelectImagePreset(preset.id)}
-                    className={`image-preset-card ${isSelected ? 'selected' : ''}`}
-                  >
-                    <div className="image-preset-header">
-                      <span className="image-preset-modality">{preset.modality}</span>
-                      <span className={`image-preset-risk ${preset.isPathological ? 'high' : 'low'}`}>
-                        {preset.expectedRisk}
-                      </span>
+                  <div style={{
+                    padding: '16px', background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                    display: 'flex', flexDirection: 'column'
+                  }}>
+                    {previewSrc && (
+                      <div style={{ flex: 1, minHeight: '140px', marginBottom: '12px', background: '#000', borderRadius: 'var(--radius-sm)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={previewSrc} alt="Medical Scan Preview" style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'contain' }} />
+                      </div>
+                    )}
+                    <div style={{ ...T.eyebrow, marginBottom: '6px' }}>Active Scan</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                      {displayName}
                     </div>
-                    <div className="image-preset-name">{preset.name}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Upload Dropzone & Preview */}
-          <div className="image-dropzone-grid">
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragOver(false);
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                  handleImageFileUpload(e.dataTransfer.files[0]);
-                }
-              }}
-              className={`image-dropzone ${isDragOver ? 'drag-over' : ''}`}
-            >
-              <UploadCloud size={28} className="image-dropzone-icon" />
-              <div className="image-dropzone-title">Drag & drop a medical scan or report photo</div>
-              <div className="image-dropzone-desc">PNG, JPG, DICOM, NIfTI, or WebP</div>
-              <label className="btn btn-sm" style={{ cursor: 'pointer' }}>
-                Browse File
-                <input
-                  type="file"
-                  accept="image/*,.dcm,.dicom,.nii,.nii.gz"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleImageFileUpload(e.target.files[0]);
-                    }
-                  }}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-
-            {/* Scan Preview */}
-            {(() => {
-              const activePreset = SAMPLE_IMAGE_PRESETS.find(p => p.id === selectedImagePresetId) || SAMPLE_IMAGE_PRESETS[0];
-              const previewSrc = uploadedImagePreview || (activePreset.svg ? `data:image/svg+xml;utf8,${encodeURIComponent(activePreset.svg)}` : null);
-              const displayName = uploadedImageFile ? uploadedImageFile.name : activePreset.name;
-
-              return (
-                <div className="image-preview-card">
-                  {previewSrc && (
-                    <div className="image-preview-thumb">
-                      <img src={previewSrc} alt="Medical Scan Preview" />
-                    </div>
-                  )}
-                  <div className="image-preview-info">
-                    <div className="image-preview-label">Active Scan</div>
-                    <div className="image-preview-name">{displayName}</div>
-                    <div className="image-preview-details">
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.5 }}>
                       {uploadedImageFile
                         ? `Custom file (${(uploadedImageFile.size / 1024).toFixed(1)} KB)`
                         : activePreset.findings}
                     </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {/* QUDDOS PATIENT CONSENSUS RISK LEVEL & CLINICAL DECISION ENGINE */}
+      {/* ── PATIENT RISK OUTPUT (revealed on inference) ────── */}
       {predictionResult && (() => {
         const quddos = getQuddosPatientMetrics();
         if (!quddos) return null;
@@ -851,319 +938,373 @@ export default function LivePatientInference() {
           predictionResult?.image_analysis
         );
 
+        const riskColor =
+          quddos.riskPct >= 80 ? '#EF4444' :
+          quddos.riskPct >= 60 ? '#F59E0B' :
+          quddos.riskPct >= 40 ? '#EAB308' :
+          quddos.riskPct >= 20 ? '#10B981' : '#059669';
+
         return (
           <>
-            {/* STAKEHOLDER RISK SCORE PRESENTATION SELECTOR */}
-            <div className="stakeholder-bar">
-              <div className="stakeholder-info">
-                <div className="stakeholder-icon">
-                  <Users size={18} />
-                </div>
+            <HairlineDivider label="Diagnostic Synthesis" />
+
+            {/* Stakeholder Selector */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              marginBottom: '40px', gap: '20px', flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Users size={16} style={{ color: 'var(--text-tertiary)' }} />
                 <div>
-                  <div className="stakeholder-title">Risk Score Presentation</div>
-                  <div className="stakeholder-desc">Choose view for patient or clinical audience</div>
+                  <div style={{ ...T.eyebrow, marginBottom: '2px' }}>Audience Mode</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Select view for patient or clinical audience
+                  </div>
                 </div>
               </div>
 
-              <div className="quddos-tier-toggle">
-                <button
-                  type="button"
-                  onClick={() => setStakeholderView('patient')}
-                  className={`quddos-tier-btn ${stakeholderView === 'patient' ? 'active' : ''}`}
-                >
-                  <HeartHandshake size={15} />
-                  <span>Patient View</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStakeholderView('clinical')}
-                  className={`quddos-tier-btn ${stakeholderView === 'clinical' ? 'active' : ''}`}
-                >
-                  <Microscope size={15} />
-                  <span>Clinical View</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStakeholderView('dual')}
-                  className={`quddos-tier-btn ${stakeholderView === 'dual' ? 'active' : ''}`}
-                >
-                  <Layers size={15} />
-                  <span>Dual View</span>
-                </button>
+              <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                {[
+                  { key: 'patient', label: 'Patient', icon: HeartHandshake },
+                  { key: 'clinical', label: 'Clinical', icon: Microscope },
+                  { key: 'dual', label: 'Dual', icon: Layers }
+                ].map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setStakeholderView(key)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      padding: '7px 14px', fontSize: '0.8rem', fontWeight: 600,
+                      borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                      background: stakeholderView === key ? 'var(--bg-card-solid)' : 'transparent',
+                      color: stakeholderView === key ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                      transition: 'all 0.2s ease',
+                      boxShadow: stakeholderView === key ? 'var(--shadow-card)' : 'none'
+                    }}
+                  >
+                    <Icon size={13} /> {label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* 1. PATIENT SECTION: CLEAR, NON-TECH UNDERSTANDING */}
+            {/* 03 · PATIENT VIEW */}
             {(stakeholderView === 'patient' || stakeholderView === 'dual') && (
-              <div className="patient-summary-card">
-                <div className="patient-summary-header">
-                  <div>
-                    <div className="patient-summary-title">Patient Health Summary</div>
-                    <h2 className="patient-summary-heading">
-                      Risk Score: <span className="patient-summary-score" style={{ color: patientSummary.riskColor }}>{quddos.riskPct}%</span>
-                    </h2>
-                    <p className="patient-summary-desc">
-                      This score evaluates your {predictionResult.image_analysis ? 'medical scan' : 'clinical data'} using our diagnostic system. Below is what this means in plain terms.
-                    </p>
-                  </div>
+              <section style={{ marginBottom: '64px' }}>
+                <SectionHeader
+                  index="03"
+                  icon={HeartHandshake}
+                  title="Patient Health Summary"
+                  subtitle="Plain-language interpretation of your diagnostic risk score and recommended next steps."
+                  actions={
+                    <span style={{
+                      padding: '6px 14px', borderRadius: '6px', fontSize: '0.72rem',
+                      fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      background: `${riskColor}18`, color: riskColor,
+                      border: `1px solid ${riskColor}50`
+                    }}>
+                      {patientSummary.riskLevel.split('/')[0].trim()}
+                    </span>
+                  }
+                />
 
-                  <div className="risk-category-badge" style={{ background: `${patientSummary.riskColor}18`, borderColor: `${patientSummary.riskColor}50` }}>
-                    <div className="risk-category-label" style={{ color: patientSummary.riskColor }}>Health Category</div>
-                    <div className="risk-category-value">{patientSummary.riskLevel}</div>
+                <div style={{ ...T.card, padding: '32px' }}>
+                  {/* Hero Risk Score */}
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <span style={T.eyebrow}>Diagnostic Risk</span>
+                    <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
                   </div>
-                </div>
-
-                {/* Risk Meter */}
-                <div className="risk-meter">
-                  <div className="risk-meter-header">
-                    <span className="risk-meter-label">Visual Risk Scale</span>
-                    <span className="risk-meter-score" style={{ color: patientSummary.riskColor }}>
-                      {quddos.riskPct}% — {patientSummary.riskLevel.split('/')[0].trim()}
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '32px' }}>
+                    <span style={{
+                      fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+                      fontWeight: 700,
+                      color: riskColor,
+                      fontVariantNumeric: 'tabular-nums',
+                      letterSpacing: '-0.04em',
+                      lineHeight: 1
+                    }}>
+                      {quddos.riskPct}
+                    </span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>%</span>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      {patientSummary.riskLevel}
                     </span>
                   </div>
 
-                  <div className="risk-meter-track">
-                    <div
-                      className="risk-meter-needle"
-                      style={{ left: `calc(${Math.min(98, Math.max(2, quddos.riskPct))}% - 8px)` }}
-                    />
+                  {/* Visual Risk Meter */}
+                  <div style={{ marginBottom: '36px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.75rem' }}>
+                      <span style={{ ...T.eyebrow, fontSize: '0.62rem' }}>Risk Spectrum</span>
+                      <span style={{ ...T.eyebrow, fontSize: '0.62rem', color: riskColor }}>
+                        {quddos.riskPct}%
+                      </span>
+                    </div>
+                    <div style={{ position: 'relative', height: '6px', background: 'var(--bg-inset)', borderRadius: '3px', overflow: 'visible' }}>
+                      <div style={{
+                        position: 'absolute', top: 0, left: 0, height: '100%',
+                        width: `${quddos.riskPct}%`, background: riskColor,
+                        borderRadius: '3px', transition: 'width 0.6s ease'
+                      }} />
+                      <div style={{
+                        position: 'absolute', top: '-4px',
+                        left: `calc(${Math.min(98, Math.max(2, quddos.riskPct))}% - 7px)`,
+                        width: '14px', height: '14px', borderRadius: '50%',
+                        background: riskColor, boxShadow: `0 0 12px ${riskColor}`,
+                        border: '2px solid var(--bg-card)'
+                      }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                      <span style={{ fontSize: '0.65rem', color: '#34D399' }}>0–25%</span>
+                      <span style={{ fontSize: '0.65rem', color: '#10B981' }}>25–45%</span>
+                      <span style={{ fontSize: '0.65rem', color: '#FCD34D' }}>45–65%</span>
+                      <span style={{ fontSize: '0.65rem', color: '#FBBF24' }}>65–85%</span>
+                      <span style={{ fontSize: '0.65rem', color: '#F87171' }}>85–100%</span>
+                    </div>
                   </div>
 
-                  <div className="risk-meter-scale">
-                    <span style={{ color: '#34D399' }}>0-25% Minimal</span>
-                    <span style={{ color: '#10B981' }}>25-45% Guarded</span>
-                    <span style={{ color: '#FCD34D' }}>45-65% Moderate</span>
-                    <span style={{ color: '#FBBF24' }}>65-85% Elevated</span>
-                    <span style={{ color: '#F87171' }}>85-100% Critical</span>
-                  </div>
-                </div>
-
-                {/* Summary Grid */}
-                <div className="summary-grid">
-                  <div className="summary-item">
-                    <div className="summary-item-header">
-                      <HelpCircle size={18} className="summary-item-icon" style={{ color: '#38BDF8' }} />
-                      <span className="summary-item-title">What This Score Means</span>
-                    </div>
-                    <p className="summary-item-text">{patientSummary.plainMeaning}</p>
-                    <div className="summary-item-note">
-                      * Statistical probability estimate, not a final diagnosis.
-                    </div>
-                  </div>
-
-                  <div className="summary-item">
-                    <div className="summary-item-header">
-                      <FileCheck size={18} className="summary-item-icon" style={{ color: '#FBBF24' }} />
-                      <span className="summary-item-title">What Was Found</span>
-                    </div>
-                    <p className="summary-item-text">{patientSummary.findingsSummary}</p>
-                    {predictionResult.image_analysis && (
-                      <div className="summary-item-note">
-                        Scan Type: <strong>{predictionResult.image_analysis.scan_type}</strong>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="summary-item">
-                    <div className="summary-item-header">
-                      <ClipboardList size={18} className="summary-item-icon" style={{ color: '#34D399' }} />
-                      <span className="summary-item-title">Recommended Next Steps</span>
-                    </div>
-                    <div className="summary-item-list">
-                      {patientSummary.nextSteps.map((step, idx) => (
-                        <div key={idx} className="summary-list-item">
-                          <CheckCircle2 size={15} style={{ color: '#34D399' }} />
-                          <span>{step}</span>
+                  {/* Patient Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '16px',
+                    borderTop: '1px solid var(--border-color)',
+                    paddingTop: '28px',
+                    marginBottom: '28px'
+                  }}>
+                    {[
+                      { icon: HelpCircle, title: 'What This Score Means', content: patientSummary.plainMeaning, color: '#38BDF8', footnote: '* Statistical probability estimate, not a final diagnosis.' },
+                      { icon: FileCheck, title: 'What Was Found', content: patientSummary.findingsSummary, color: '#FBBF24', footnote: predictionResult.image_analysis ? `Scan Type: ${predictionResult.image_analysis.scan_type}` : null },
+                      { icon: ClipboardList, title: 'Recommended Next Steps', list: patientSummary.nextSteps, color: '#34D399' },
+                      { icon: MessageSquare, title: 'Questions for Your Doctor', questions: patientSummary.doctorQuestions, color: '#F472B6' }
+                    ].map((item, idx) => (
+                      <div key={idx} style={{
+                        padding: '22px', background: 'var(--bg-inset)',
+                        borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                        position: 'relative', overflow: 'hidden'
+                      }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: item.color }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                          <item.icon size={15} style={{ color: item.color }} />
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                            {item.title}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+
+                        {item.content && (
+                          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                            {item.content}
+                          </p>
+                        )}
+
+                        {item.list && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {item.list.map((step, idx) => (
+                              <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                <CheckCircle2 size={14} style={{ color: item.color, flexShrink: 0, marginTop: '2px' }} />
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                  {step}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {item.questions && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {item.questions.map((q, idx) => (
+                              <div key={idx} style={{
+                                padding: '10px 12px', background: 'var(--bg-card-solid)',
+                                borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)',
+                                fontSize: '0.78rem', color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.55
+                              }}>
+                                {q}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {item.footnote && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '12px' }}>
+                            {item.footnote}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="summary-item">
-                    <div className="summary-item-header">
-                      <MessageSquare size={18} className="summary-item-icon" style={{ color: '#F472B6' }} />
-                      <span className="summary-item-title">Questions for Your Doctor</span>
-                    </div>
-                    <div className="summary-item-list">
-                      {patientSummary.doctorQuestions.map((q, idx) => (
-                        <div key={idx} className="doctor-question">{q}</div>
-                      ))}
+                  {/* Medical Disclaimer */}
+                  <div style={{
+                    padding: '14px 18px', background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                    borderLeft: '2px solid var(--hybrid-color)',
+                    display: 'flex', gap: '12px', alignItems: 'flex-start'
+                  }}>
+                    <Info size={16} style={{ color: 'var(--hybrid-color)', flexShrink: 0, marginTop: '2px' }} />
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>Medical Disclaimer:</strong> This assessment is an assistive clinical decision support tool. It does not replace a clinical examination or official diagnosis from a licensed physician.
                     </div>
                   </div>
                 </div>
-
-                {/* Medical Disclaimer */}
-                <div className="medical-disclaimer">
-                  <Info size={18} />
-                  <div>
-                    <strong>Medical Disclaimer:</strong> This assessment is an assistive clinical decision support tool. It does not replace a clinical examination or official diagnosis from a licensed physician.
-                  </div>
-                </div>
-              </div>
+              </section>
             )}
 
-            {/* 2. CLINICAL & RESEARCHER SECTION: FULL SCIENTIFIC TELEMETRY */}
+            {/* 04 · CLINICAL & RESEARCHER VIEW */}
             {(stakeholderView === 'clinical' || stakeholderView === 'dual') && (
-              <div className="clinical-section">
-                <div className="clinical-section-header">
-                  <Microscope size={18} style={{ color: 'var(--classical-color)' }} />
-                  <h3 className="clinical-section-title">Clinical & Researcher Diagnostics</h3>
-                  <span className="clinical-section-badge">5-Model Bayesian Consensus</span>
-                </div>
-
-                {/* Clinical Hero Card */}
-                <div className="clinical-hero">
-                  <div className="clinical-hero-header">
-                    <div>
-                      <div className="clinical-hero-badge">
-                        <Sparkles size={12} /> Consensus Engine
-                      </div>
-                      <h2 className="clinical-hero-title">
-                        <Award size={26} style={{ color: 'var(--hybrid-color)' }} />
-                        Risk Level: <span className="clinical-hero-score">{quddos.riskPct}%</span>
-                      </h2>
-                      <p className="clinical-hero-desc">
-                        Patient-specific risk synthesis combining classical SVM & MLP margins with 4-qubit quantum Hilbert space projections (QSVM, QNN, QVC) and epistemic uncertainty quantification.
-                      </p>
+              <section style={{ marginBottom: '64px' }}>
+                <SectionHeader
+                  index="04"
+                  icon={Microscope}
+                  title="Clinical & Researcher Diagnostics"
+                  subtitle="5-model Bayesian consensus with epistemic uncertainty quantification and validation stress-tests."
+                  actions={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em',
+                        padding: '4px 10px', borderRadius: '6px',
+                        ...quddos.gradeBadgeStyle
+                      }}>
+                        {quddos.clinicalGrade}
+                      </span>
+                      <CardActionMenu
+                        title={`Patient Risk Profile - ${selectedPreset?.name || 'Custom'}`}
+                        category="prediction"
+                        data={{
+                          risk_pct: quddos.riskPct, clinical_grade: quddos.clinicalGrade,
+                          classical_prob: quddos.classProb, quantum_prob: quddos.quantProb,
+                          confidence: quddos.consensusConfidence
+                        }}
+                        metadata={{ page: 'live_inference', preset_id: selectedPresetId }}
+                      />
                     </div>
+                  }
+                />
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div className="clinical-grade-badge" style={quddos.gradeBadgeStyle}>
-                          <div className="clinical-grade-label" style={{ color: quddos.gradeBadgeStyle.color }}>Diagnostic Level</div>
-                          <div className="clinical-grade-value">{quddos.clinicalGrade}</div>
-                        </div>
-                        <CardActionMenu
-                          title={`Patient Risk Profile - ${selectedPreset?.name || 'Custom'}`}
-                          category="prediction"
-                          data={{
-                            risk_pct: quddos.riskPct,
-                            clinical_grade: quddos.clinicalGrade,
-                            classical_prob: quddos.classProb,
-                            quantum_prob: quddos.quantProb,
-                            confidence: quddos.consensusConfidence
-                          }}
-                          metadata={{ page: 'live_inference', preset_id: selectedPresetId }}
-                        />
-                      </div>
-                      <div className="clinical-confidence">
-                        Confidence: <strong style={{ color: 'var(--status-success)' }}>{quddos.consensusConfidence}%</strong> (p = {quddos.pValue})
-                      </div>
-                    </div>
+                <div style={{ ...T.card, padding: '32px' }}>
+                  {/* Hero Risk */}
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <span style={T.eyebrow}>Consensus Risk</span>
+                    <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+                    <Sparkles size={14} style={{ color: 'var(--hybrid-color)' }} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '32px' }}>
+                    <span style={{
+                      fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+                      fontWeight: 700, color: 'var(--hybrid-color)',
+                      fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.04em', lineHeight: 1
+                    }}>
+                      {quddos.riskPct}
+                    </span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>%</span>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.82rem', color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
+                      p = {quddos.pValue} · Confidence: <strong style={{ color: 'var(--status-success)' }}>{quddos.consensusConfidence}%</strong>
+                    </span>
                   </div>
 
-                  {/* Metrics Ribbon */}
-                  <div className="metrics-ribbon">
-                    <div className="metric-ribbon-card">
-                      <div className="metric-ribbon-label">
-                        <Activity size={12} style={{ color: 'var(--classical-color)' }} /> Classical Consensus
+                  {/* Metrics Ribbon — Hairline Table */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                    borderTop: '1px solid var(--border-color)',
+                    borderBottom: '1px solid var(--border-color)',
+                    marginBottom: '32px'
+                  }}>
+                    {[
+                      { label: 'Classical Consensus', value: `${quddos.classProb}%`, sub: `SVM ${quddos.svmProb}% · MLP ${quddos.mlpProb}%`, color: 'var(--classical-color)' },
+                      { label: 'Quantum Consensus', value: `${quddos.quantProb}%`, sub: `QSVM ${quddos.qsvmProb}% · QNN ${quddos.qnnProb}%`, color: 'var(--quantum-color)' },
+                      { label: 'Epistemic ±', value: `${quddos.epistemic}%`, sub: 'Model Boundary', color: 'var(--status-success)' },
+                      { label: 'Perturbation Stability', value: `${quddos.perturbationStability}%`, sub: 'Monte Carlo ±5%', color: 'var(--hybrid-color)' },
+                      { label: 'Hilbert Fidelity', value: `${quddos.hilbertFidelity}%`, sub: `QVC ${quddos.qvcProb}%`, color: 'var(--quantum-color)' }
+                    ].map((m, idx, arr) => (
+                      <div key={m.label} style={{ padding: '22px 18px', borderLeft: idx > 0 ? '1px solid var(--border-color)' : 'none' }}>
+                        <div style={{
+                          fontSize: '1.6rem', fontWeight: 700, color: m.color,
+                          fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+                          letterSpacing: '-0.025em', marginBottom: '8px'
+                        }}>
+                          {m.value}
+                        </div>
+                        <div style={T.eyebrow}>{m.label}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>
+                          {m.sub}
+                        </div>
                       </div>
-                      <div className="metric-ribbon-value" style={{ color: 'var(--classical-color)' }}>{quddos.classProb}%</div>
-                      <div className="metric-ribbon-sub">SVM: {quddos.svmProb}% | MLP: {quddos.mlpProb}%</div>
-                    </div>
-
-                    <div className="metric-ribbon-card">
-                      <div className="metric-ribbon-label">
-                        <Atom size={12} style={{ color: 'var(--quantum-color)' }} /> Quantum Consensus
-                      </div>
-                      <div className="metric-ribbon-value" style={{ color: 'var(--quantum-color)' }}>{quddos.quantProb}%</div>
-                      <div className="metric-ribbon-sub">QSVM: {quddos.qsvmProb}% | QNN: {quddos.qnnProb}%</div>
-                    </div>
-
-                    <div className="metric-ribbon-card">
-                      <div className="metric-ribbon-label">
-                        <Gauge size={12} style={{ color: 'var(--status-success)' }} /> Epistemic Uncertainty
-                      </div>
-                      <div className="metric-ribbon-value" style={{ color: 'var(--status-success)' }}>±{quddos.epistemic}%</div>
-                      <div className="metric-ribbon-sub">Model boundary</div>
-                    </div>
-
-                    <div className="metric-ribbon-card">
-                      <div className="metric-ribbon-label">
-                        <TrendingUp size={12} style={{ color: 'var(--hybrid-color)' }} /> Stability
-                      </div>
-                      <div className="metric-ribbon-value" style={{ color: 'var(--hybrid-color)' }}>{quddos.perturbationStability}%</div>
-                      <div className="metric-ribbon-sub">Monte Carlo ±5%</div>
-                    </div>
-
-                    <div className="metric-ribbon-card">
-                      <div className="metric-ribbon-label">
-                        <Sparkles size={12} style={{ color: 'var(--quantum-color)' }} /> State Purity
-                      </div>
-                      <div className="metric-ribbon-value" style={{ color: 'var(--quantum-color)' }}>{quddos.hilbertFidelity}%</div>
-                      <div className="metric-ribbon-sub">QVC: {quddos.qvcProb}%</div>
-                    </div>
+                    ))}
                   </div>
 
                   {/* Validation Suite */}
-                  <div className="validation-suite">
-                    <div className="validation-suite-header">
-                      <div className="validation-suite-title">
-                        <CheckCheck size={16} style={{ color: 'var(--status-success)' }} />
-                        Validation & Stress-Test Suite
+                  <div style={{
+                    background: 'var(--bg-inset)', border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)', padding: '22px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <CheckCheck size={15} style={{ color: 'var(--status-success)' }} />
+                        <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                          Validation & Stress-Test Suite
+                        </span>
                       </div>
 
-                      <div className="validation-tabs">
-                        <button
-                          type="button"
-                          onClick={() => setActiveValidationTab('hypothesis')}
-                          className={`validation-tab ${activeValidationTab === 'hypothesis' ? 'active' : ''}`}
-                        >
-                          <Scale size={12} /> Hypothesis Testing
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveValidationTab('perturbation')}
-                          className={`validation-tab ${activeValidationTab === 'perturbation' ? 'active' : ''}`}
-                        >
-                          <Activity size={12} /> Perturbation ±5%
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveValidationTab('discordance')}
-                          className={`validation-tab ${activeValidationTab === 'discordance' ? 'active' : ''}`}
-                        >
-                          <Atom size={12} /> Discordance
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveValidationTab('hilbert')}
-                          className={`validation-tab ${activeValidationTab === 'hilbert' ? 'active' : ''}`}
-                        >
-                          <Layers size={12} /> Statevector
-                        </button>
+                      <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-card-solid)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                        {[
+                          { key: 'hypothesis', icon: Scale, label: 'Hypothesis' },
+                          { key: 'perturbation', icon: Activity, label: 'Perturbation' },
+                          { key: 'discordance', icon: Atom, label: 'Discordance' },
+                          { key: 'hilbert', icon: Layers, label: 'Statevector' }
+                        ].map(tab => {
+                          const isActive = activeValidationTab === tab.key;
+                          return (
+                            <button
+                              key={tab.key}
+                              type="button"
+                              onClick={() => setActiveValidationTab(tab.key)}
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                padding: '6px 12px', fontSize: '0.74rem', fontWeight: 600,
+                                borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                                background: isActive ? 'var(--bg-inset)' : 'transparent',
+                                color: isActive ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <tab.icon size={12} /> {tab.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    <div className="validation-content">
+                    <div style={{
+                      padding: '18px 20px', background: 'var(--bg-card-solid)',
+                      borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                      fontSize: '0.84rem', lineHeight: 1.7, color: 'var(--text-secondary)'
+                    }}>
                       {activeValidationTab === 'hypothesis' && (
                         <div>
-                          <div className="validation-content-title">
+                          <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
                             <CheckCircle size={14} style={{ color: 'var(--status-success)' }} /> Bayesian Risk Updating
                           </div>
-                          <p>
+                          <p style={{ margin: 0 }}>
                             <strong>Bayesian Prior Formulation:</strong> Patient biomarker prior P(Malignant) updated with dual-source likelihoods. Paired bootstrap testing yields <strong>p = {quddos.pValue}</strong> with Cohen's <em>d</em> = <strong>{quddos.cohenD}</strong>, confirming decisive statistical separation from benign cohorts.
                           </p>
                         </div>
                       )}
-
                       {activeValidationTab === 'perturbation' && (
                         <div>
-                          <div className="validation-content-title">
+                          <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
                             <CheckCircle size={14} style={{ color: 'var(--status-success)' }} /> Monte Carlo Perturbation
                           </div>
-                          <p>
-                            <strong>Stress Protocol:</strong> 500 iterations with Gaussian sensor drift (σ = 0.05). The hybrid consensus maintains <strong>{quddos.perturbationStability}% stability</strong> with less than 0.8% variance, validating resilience against calibration discrepancies.
+                          <p style={{ margin: 0 }}>
+                            <strong>Stress Protocol:</strong> 500 iterations with Gaussian sensor drift (σ = 0.05). The hybrid consensus maintains <strong>{quddos.perturbationStability}% stability</strong> with less than 0.8% variance.
                           </p>
                         </div>
                       )}
-
                       {activeValidationTab === 'discordance' && (
                         <div>
-                          <div className="validation-content-title">
+                          <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
                             <CheckCircle size={14} style={{ color: 'var(--status-success)' }} /> Epistemic Discordance
                           </div>
-                          <p>
+                          <p style={{ margin: 0 }}>
                             <strong>Consensus Status:</strong> {quddos.isDiscordant ? (
                               <span style={{ color: 'var(--status-danger)' }}>Discordance Detected — Classical SVM ({quddos.svmProb}%) and Quantum QSVM ({quddos.qsvmProb}%) divergent. Quantum geometry arbitrated final risk.</span>
                             ) : (
@@ -1172,711 +1313,850 @@ export default function LivePatientInference() {
                           </p>
                         </div>
                       )}
-
                       {activeValidationTab === 'hilbert' && (
                         <div>
-                          <div className="validation-content-title">
+                          <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
                             <CheckCircle size={14} style={{ color: 'var(--status-success)' }} /> 4-Qubit Hilbert Space
                           </div>
-                          <p>
-                            <strong>Statevector Fidelity:</strong> Patient features via ZZFeatureMap achieve <strong>{quddos.hilbertFidelity}% purity</strong>. Entanglement phases (π - x_j)(π - x_k) capture cross-biomarker non-linear synergies beyond classical linear separations.
+                          <p style={{ margin: 0 }}>
+                            <strong>Statevector Fidelity:</strong> Patient features via ZZFeatureMap achieve <strong>{quddos.hilbertFidelity}% purity</strong>. Entanglement phases (π − x_j)(π − x_k) capture cross-biomarker non-linear synergies.
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
+              </section>
+            )}
 
-            {/* Decision Questions Section */}
-            <div className="decision-questions">
-              <div className="decision-questions-header">
-                <div>
-                  <h3 className="decision-questions-title">
-                    <Brain size={20} style={{ color: 'var(--classical-color)' }} />
-                    Diagnostic Decision Framework
-                  </h3>
-                  <p className="decision-questions-desc">Classical vs quantum algorithm insights for clinical decision-making</p>
-                </div>
+            {/* 05 · DECISION FRAMEWORK */}
+            <section style={{ marginBottom: '64px' }}>
+              <SectionHeader
+                index="05"
+                icon={Brain}
+                title="Diagnostic Decision Framework"
+                subtitle="Classical vs quantum algorithm insights for clinical decision-making."
+                actions={
+                  <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setInferenceTier('basic')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600,
+                        borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                        background: inferenceTier === 'basic' ? 'var(--classical-color)' : 'transparent',
+                        color: inferenceTier === 'basic' ? '#FFFFFF' : 'var(--text-secondary)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <GraduationCap size={13} /> Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInferenceTier('researcher')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600,
+                        borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                        background: inferenceTier === 'researcher' ? 'var(--quantum-color)' : 'transparent',
+                        color: inferenceTier === 'researcher' ? '#FFFFFF' : 'var(--text-secondary)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <Microscope size={13} /> Researcher
+                    </button>
+                  </div>
+                }
+              />
 
-                <div className="quddos-tier-toggle">
-                  <button
-                    type="button"
-                    onClick={() => setInferenceTier('basic')}
-                    className={`quddos-tier-btn ${inferenceTier === 'basic' ? 'active' : ''}`}
-                  >
-                    <GraduationCap size={15} />
-                    <span>Basic</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInferenceTier('researcher')}
-                    className={`quddos-tier-btn ${inferenceTier === 'researcher' ? 'active' : ''}`}
-                  >
-                    <Microscope size={15} />
-                    <span>Researcher</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Question 1 */}
-              <div className="question-accordion">
-                <div className="question-header" onClick={() => toggleQuestion('q1')}>
-                  <div className="question-number">1</div>
-                  <div style={{ flex: 1 }}>
-                    <div className="question-title">What do classical algorithms provide for clinical decisions?</div>
-                    <div className="question-subtitle">Baseline risk triage and probability margins</div>
-                  </div>
-                  <div className="question-chevron">
-                    {expandedQuestions.q1 ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                  </div>
-                </div>
-
-                {expandedQuestions.q1 && (
-                  <div className="question-body">
-                    {inferenceTier === 'basic' ? (
-                      <div>
-                        <p>Classical algorithms (RBF SVM) analyze biomarkers to deliver 3 clinical insights:</p>
-                        <ul>
-                          <li><strong>Baseline Triage:</strong> Risk score of <strong>{quddos.svmProb}%</strong> from Euclidean distance in under <strong>1 ms</strong></li>
-                          <li><strong>Biomarker Importance:</strong> Flags lab values exceeding thresholds as primary risk drivers</li>
-                          <li><strong>Safety Margin:</strong> Establishes routine clearance boundary or secondary screening need</li>
-                        </ul>
-                      </div>
-                    ) : (
-                      <div>
-                        <p><strong>Mathematical Formulation:</strong></p>
-                        <div className="question-code">
-                          f_classical(x) = sign( ∑ α_i y_i K_RBF(x_i, x) + b ), where K_RBF(x_i, x) = exp( -γ ‖x_i - x‖² )
-                        </div>
-                        <ul>
-                          <li><strong>Hyperplane Distance:</strong> Functional margin wᵀφ(x) + b yields P(Y=1|x) = {quddos.svmProb}%</li>
-                          <li><strong>Jacobian Sensitivities:</strong> First-order gradients J_k = ∂P/∂x_k across biomarker inputs</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Question 2 */}
-              <div className="question-accordion">
-                <div className="question-header" onClick={() => toggleQuestion('q2')}>
-                  <div className="question-number">2</div>
-                  <div style={{ flex: 1 }}>
-                    <div className="question-title">Why is classical information useful for risk staging?</div>
-                    <div className="question-subtitle">Clinical utility in hospital workflows</div>
-                  </div>
-                  <div className="question-chevron">
-                    {expandedQuestions.q2 ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                  </div>
-                </div>
-
-                {expandedQuestions.q2 && (
-                  <div className="question-body">
-                    {inferenceTier === 'basic' ? (
-                      <div>
-                        <p>Classical predictions provide immediate utility:</p>
-                        <ul>
-                          <li><strong>Triage Speed:</strong> Instant categorization with zero cloud latency</li>
-                          <li><strong>Guideline Compliance:</strong> Maps to BI-RADS, Gleason, NCCN scales</li>
-                          <li><strong>Point-of-Care:</strong> Runs on standard hospital workstations</li>
-                        </ul>
-                      </div>
-                    ) : (
-                      <div>
-                        <p><strong>Operational Value:</strong></p>
-                        <ul>
-                          <li><strong>Neyman-Pearson Bounding:</strong> Bounds type-II error under fixed false alarm constraints</li>
-                          <li><strong>Reference Manifold:</strong> Invariant baseline flags abnormal drift before quantum co-processors</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Question 3 */}
-              <div className="question-accordion quantum">
-                <div className="question-header" onClick={() => toggleQuestion('q3')}>
-                  <div className="question-number">3</div>
-                  <div style={{ flex: 1 }}>
-                    <div className="question-title">What does quantum computing uniquely deliver?</div>
-                    <div className="question-subtitle">Multi-biomarker entanglement and borderline ambiguities</div>
-                  </div>
-                  <div className="question-chevron">
-                    {expandedQuestions.q3 ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                  </div>
-                </div>
-
-                {expandedQuestions.q3 && (
-                  <div className="question-body">
-                    {inferenceTier === 'basic' ? (
-                      <div>
-                        <p>Quantum algorithms (<strong>QSVM with 4-Qubit ZZFeatureMap</strong>) resolve borderline ambiguous patients:</p>
-                        <div className="question-highlight">
-                          <div className="question-highlight-title">
-                            <Sparkles size={14} /> Multi-Biomarker Entanglement Detection
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {[
+                  { qKey: 'q1', num: 1, title: 'What do classical algorithms provide for clinical decisions?', sub: 'Baseline risk triage and probability margins', borderColor: 'var(--classical-color)' },
+                  { qKey: 'q2', num: 2, title: 'Why is classical information useful for risk staging?', sub: 'Clinical utility in hospital workflows', borderColor: 'var(--classical-color)' },
+                  { qKey: 'q3', num: 3, title: 'What does quantum computing uniquely deliver?', sub: 'Multi-biomarker entanglement and borderline ambiguities', borderColor: 'var(--quantum-color)' }
+                ].map((q, idx) => (
+                  <div key={q.qKey} style={{
+                    borderTop: '1px solid var(--border-color)',
+                    borderBottom: idx === 2 ? '1px solid var(--border-color)' : 'none'
+                  }}>
+                    <div
+                      onClick={() => toggleQuestion(q.qKey)}
+                      style={{
+                        padding: '22px 4px', cursor: 'pointer',
+                        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', flex: 1 }}>
+                        <span style={{
+                          fontSize: '1.5rem', fontWeight: 700, color: q.borderColor,
+                          fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em',
+                          lineHeight: 1, flexShrink: 0, minWidth: '28px'
+                        }}>
+                          {String(q.num).padStart(2, '0')}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, letterSpacing: '-0.01em' }}>
+                            {q.title}
                           </div>
-                          <p className="question-highlight-text">
-                            Quantum computing embeds 4 principal components into entangled states, measuring overlap fidelity |⟨Φ(x)|Φ(x_train)⟩|² to detect multi-parameter interactions that classical Euclidean models miss.
-                          </p>
+                          <div style={{ fontSize: '0.78rem', color: q.borderColor, marginTop: '6px', fontWeight: 500 }}>
+                            {q.sub}
+                          </div>
                         </div>
-                        <ul>
-                          <li><strong>Quantum Risk Score:</strong> <strong>{quddos.qsvmProb}%</strong> via Hilbert space kernel mapping</li>
-                          <li><strong>Discordance Arbitration:</strong> {quddos.isDiscordant ? 'Resolves classical-quantum conflict' : 'Confirms consensus'}</li>
-                          <li><strong>False Negative Rejection:</strong> Catches non-linear interactions before clinical manifestation</li>
-                        </ul>
                       </div>
-                    ) : (
-                      <div>
-                        <p><strong>16-Dimensional Hilbert Space (ℋ = ℂ¹⁶):</strong></p>
-                        <div className="question-code">
-                          |Φ(x)⟩ = U_ZZ(x)|0⟩^⊗4 = exp( i ∑_j x_j Z_j + i ∑_(j&lt;k) (π - x_j)(π - x_k) Z_j Z_k ) |0000⟩<br />
-                          K_Quantum(x, x_i) = |⟨Φ(x)|Φ(x_i)⟩|²
-                        </div>
-                        <ul>
-                          <li><strong>Phase Entanglement:</strong> Couplings (π - x_j)(π - x_k) create non-Euclidean space where pathological clusters become separable</li>
-                          <li><strong>Uncertainty Minimization:</strong> Orthogonal statevectors minimize epistemic uncertainty to ±{quddos.epistemic}%</li>
-                        </ul>
+                      {expandedQuestions[q.qKey] ? <ChevronUp size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: '4px' }} /> : <ChevronDown size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: '4px' }} />}
+                    </div>
+
+                    {expandedQuestions[q.qKey] && (
+                      <div style={{ padding: '0 4px 24px 50px', lineHeight: 1.7, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                        {q.qKey === 'q1' && inferenceTier === 'basic' && (
+                          <div>
+                            <p>Classical algorithms (RBF SVM) analyze biomarkers to deliver 3 clinical insights:</p>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Baseline Triage:</strong> Risk score of <strong>{quddos.svmProb}%</strong> from Euclidean distance in under <strong>1 ms</strong></li>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Biomarker Importance:</strong> Flags lab values exceeding thresholds as primary risk drivers</li>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Safety Margin:</strong> Establishes routine clearance boundary or secondary screening need</li>
+                            </ul>
+                          </div>
+                        )}
+                        {q.qKey === 'q1' && inferenceTier === 'researcher' && (
+                          <div>
+                            <p><strong>Mathematical Formulation:</strong></p>
+                            <div style={{ ...T.terminal, padding: '12px 14px', color: 'var(--classical-color)', margin: '12px 0' }}>
+                              f_classical(x) = sign( ∑ α_i y_i K_RBF(x_i, x) + b ), where K_RBF(x_i, x) = exp( -γ ‖x_i - x‖² )
+                            </div>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong>Hyperplane Distance:</strong> Functional margin wᵀφ(x) + b yields P(Y=1|x) = {quddos.svmProb}%</li>
+                              <li><strong>Jacobian Sensitivities:</strong> First-order gradients J_k = ∂P/∂x_k across biomarker inputs</li>
+                            </ul>
+                          </div>
+                        )}
+                        {q.qKey === 'q2' && inferenceTier === 'basic' && (
+                          <div>
+                            <p>Classical predictions provide immediate utility:</p>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Triage Speed:</strong> Instant categorization with zero cloud latency</li>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Guideline Compliance:</strong> Maps to BI-RADS, Gleason, NCCN scales</li>
+                              <li><strong style={{ color: 'var(--classical-color)' }}>Point-of-Care:</strong> Runs on standard hospital workstations</li>
+                            </ul>
+                          </div>
+                        )}
+                        {q.qKey === 'q2' && inferenceTier === 'researcher' && (
+                          <div>
+                            <p><strong>Operational Value:</strong></p>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong>Neyman-Pearson Bounding:</strong> Bounds type-II error under fixed false alarm constraints</li>
+                              <li><strong>Reference Manifold:</strong> Invariant baseline flags abnormal drift before quantum co-processors</li>
+                            </ul>
+                          </div>
+                        )}
+                        {q.qKey === 'q3' && inferenceTier === 'basic' && (
+                          <div>
+                            <p>Quantum algorithms (<strong>QSVM with 4-Qubit ZZFeatureMap</strong>) resolve borderline ambiguous patients:</p>
+                            <div style={{ background: 'var(--quantum-bg)', padding: '14px 18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--quantum-glow)', borderLeft: '2px solid var(--quantum-color)', margin: '12px 0' }}>
+                              <div style={{ fontWeight: 700, color: 'var(--quantum-color)', fontSize: '0.82rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '-0.01em' }}>
+                                <Sparkles size={14} /> Multi-Biomarker Entanglement Detection
+                              </div>
+                              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                                Quantum computing embeds 4 principal components into entangled states, measuring overlap fidelity |⟨Φ(x)|Φ(x_train)⟩|² to detect multi-parameter interactions.
+                              </p>
+                            </div>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong style={{ color: 'var(--quantum-color)' }}>Quantum Risk Score:</strong> <strong>{quddos.qsvmProb}%</strong> via Hilbert space kernel mapping</li>
+                              <li><strong style={{ color: 'var(--quantum-color)' }}>Discordance Arbitration:</strong> {quddos.isDiscordant ? 'Resolves classical-quantum conflict' : 'Confirms consensus'}</li>
+                              <li><strong style={{ color: 'var(--quantum-color)' }}>False Negative Rejection:</strong> Catches non-linear interactions before clinical manifestation</li>
+                            </ul>
+                          </div>
+                        )}
+                        {q.qKey === 'q3' && inferenceTier === 'researcher' && (
+                          <div>
+                            <p><strong>16-Dimensional Hilbert Space (ℋ = ℂ¹⁶):</strong></p>
+                            <div style={{ ...T.terminal, padding: '12px 14px', color: 'var(--quantum-color)', margin: '12px 0' }}>
+                              |Φ(x)⟩ = U_ZZ(x)|0⟩^⊗4 = exp( i ∑_j x_j Z_j + i ∑_(j&lt;k) (π − x_j)(π − x_k) Z_j Z_k ) |0000⟩<br />
+                              K_Quantum(x, x_i) = |⟨Φ(x)|Φ(x_i)⟩|²
+                            </div>
+                            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              <li><strong>Phase Entanglement:</strong> Couplings (π − x_j)(π − x_k) create non-Euclidean space where pathological clusters become separable</li>
+                              <li><strong>Uncertainty Minimization:</strong> Orthogonal statevectors minimize epistemic uncertainty to ±{quddos.epistemic}%</li>
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
+                ))}
               </div>
-            </div>
-          </div>
-        )}
+            </section>
           </>
         );
       })()}
 
-      {/* Main Form & Predictions Grid */}
-      <div className="inference-grid">
-        {/* Left Side: Parameters Form OR Image Radiomics Telemetry */}
-        <div className="inference-grid-card">
-          <h3 className="inference-card-title">
-            {inputMode === 'image' ? (
-              <>
-                <FileImage size={18} style={{ color: 'var(--quantum-color)' }} /> Medical Scan Radiomics & Tissue Biomarkers
-              </>
-            ) : (
-              <>
-                <Cpu size={18} style={{ color: 'var(--classical-color)' }} /> Patient Parameters ({Object.keys(features).length} Features)
-              </>
-            )}
-          </h3>
+      <HairlineDivider label="Inference Engine" />
 
-          {inputMode === 'image' ? (
-            <div className="inference-card-body">
-              {(() => {
-                const activePreset = SAMPLE_IMAGE_PRESETS.find(p => p.id === selectedImagePresetId) || SAMPLE_IMAGE_PRESETS[0];
-                const previewSrc = uploadedImagePreview || (activePreset.svg ? `data:image/svg+xml;utf8,${encodeURIComponent(activePreset.svg)}` : null);
-                const rad = predictionResult?.image_analysis?.radiomics || activePreset.radiomics;
-                const diag = predictionResult?.image_analysis?.diagnostic_findings || activePreset.findings;
-
-                return (
-                  <>
-                    {previewSrc && (
-                      <div className="radiomics-preview">
-                        <img src={previewSrc} alt="Analyzed Scan" />
-                      </div>
-                    )}
-
-                    <div className="radiomics-label">Extracted Radiomic Biomarkers (24 Features)</div>
-                    <div className="radiomics-grid">
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Tissue Heterogeneity</div>
-                        <div className="radiomics-cell-value">{rad?.mri_tissue_heterogeneity ?? '0.124'}</div>
-                      </div>
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Spatial Contrast</div>
-                        <div className="radiomics-cell-value">{rad?.mri_spatial_contrast ?? '0.042'}</div>
-                      </div>
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Sobel Edge Density</div>
-                        <div className="radiomics-cell-value">{rad?.mri_edge_density ?? '0.245'}</div>
-                      </div>
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Hemispheric Symmetry</div>
-                        <div className="radiomics-cell-value">{rad?.mri_hemispheric_symmetry ?? '0.780'}</div>
-                      </div>
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Laplacian Sharpness</div>
-                        <div className="radiomics-cell-value">{rad?.mri_laplacian_sharpness ?? '0.031'}</div>
-                      </div>
-                      <div className="radiomics-cell">
-                        <div className="radiomics-cell-label">Mean Intensity</div>
-                        <div className="radiomics-cell-value">{rad?.mri_intensity_mean ?? '0.315'}</div>
-                      </div>
-                    </div>
-
-                    <div className="radiomics-impression">
-                      <strong>Radiomics Clinical Impression: </strong>
-                      {diag}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleRunImageInference}
-                      disabled={loading}
-                      className="btn btn-primary full-width-btn inference-run-btn"
-                    >
-                      {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} />}
-                      {loading ? 'Re-evaluating Hilbert States...' : 'Re-Analyze Scan & Update Risk'}
-                    </button>
-                  </>
-                );
-              })()}
-            </div>
-          ) : (
-            <form onSubmit={handleRunInference} className="inference-form">
-              <div className="form-grid inference-form-grid">
-                {Object.keys(features).map((feat) => (
-                  <div className="form-group" key={feat}>
-                    <label>{feat}</label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={features[feat]}
-                      onChange={(e) => handleInputChange(feat, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button type="submit" className="btn btn-primary full-width-btn inference-run-btn" disabled={loading}>
-                {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} />}
-                {loading ? 'Computing Quantum Statevector Overlaps...' : 'Run Diagnostic Risk Inference'}
+      {/* ── 06 · MAIN INFERENCE GRID ───────────────────────── */}
+      <section style={{ marginBottom: '64px' }}>
+        <SectionHeader
+          index="06"
+          icon={Cpu}
+          title="Inference Engine"
+          subtitle="Adjust patient parameters or upload scans, then execute real-time quantum statevector simulation."
+          actions={
+            predictionResult && (
+              <button
+                onClick={handleConsultQuddos}
+                style={{
+                  height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)',
+                  border: 'none', background: 'var(--brand-primary)', color: '#fff',
+                  fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  boxShadow: '0 2px 8px var(--brand-glow)', transition: 'all 0.2s ease'
+                }}
+              >
+                <Bot size={15} /> Consult Quddos AI <ArrowRight size={14} />
               </button>
-            </form>
-          )}
-        </div>
+            )
+          }
+        />
 
-        {/* Right Side: Prediction Output Cards */}
-        <div className="inference-grid-card">
-          <h3 className="inference-card-title">
-            <ShieldAlert size={18} style={{ color: 'var(--classical-color)' }} /> 5-Model Diagnostic Suite & Consensus
-          </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          {/* LEFT — Input Form / Radiomics */}
+          <div style={{ ...T.card, padding: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              {inputMode === 'image' ? <FileImage size={16} style={{ color: 'var(--quantum-color)' }} /> : <Cpu size={16} style={{ color: 'var(--classical-color)' }} />}
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                {inputMode === 'image' ? 'Scan Radiomics' : `Patient Parameters (${Object.keys(features).length})`}
+              </span>
+            </div>
 
-          <div className="inference-card-body">
+            {inputMode === 'image' ? (
+              <div>
+                {(() => {
+                  const activePreset = SAMPLE_IMAGE_PRESETS.find(p => p.id === selectedImagePresetId) || SAMPLE_IMAGE_PRESETS[0];
+                  const previewSrc = uploadedImagePreview || (activePreset.svg ? `data:image/svg+xml;utf8,${encodeURIComponent(activePreset.svg)}` : null);
+                  const rad = predictionResult?.image_analysis?.radiomics || activePreset.radiomics;
+                  const diag = predictionResult?.image_analysis?.diagnostic_findings || activePreset.findings;
+
+                  return (
+                    <>
+                      {previewSrc && (
+                        <div style={{
+                          marginBottom: '16px', background: '#000',
+                          borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          minHeight: '160px', border: '1px solid var(--border-color)'
+                        }}>
+                          <img src={previewSrc} alt="Analyzed Scan" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+                        </div>
+                      )}
+
+                      <div style={{ ...T.eyebrow, marginBottom: '12px' }}>Extracted Radiomics (24 Features)</div>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        borderTop: '1px solid var(--border-color)',
+                        borderBottom: '1px solid var(--border-color)',
+                        marginBottom: '16px'
+                      }}>
+                        {[
+                          { label: 'Tissue Heterogeneity', val: rad?.mri_tissue_heterogeneity ?? '0.124' },
+                          { label: 'Spatial Contrast', val: rad?.mri_spatial_contrast ?? '0.042' },
+                          { label: 'Sobel Edge Density', val: rad?.mri_edge_density ?? '0.245' },
+                          { label: 'Hemispheric Symmetry', val: rad?.mri_hemispheric_symmetry ?? '0.780' },
+                          { label: 'Laplacian Sharpness', val: rad?.mri_laplacian_sharpness ?? '0.031' },
+                          { label: 'Mean Intensity', val: rad?.mri_intensity_mean ?? '0.315' }
+                        ].map((m, i, arr) => (
+                          <div key={m.label} style={{
+                            padding: '14px 16px',
+                            borderLeft: i % 2 === 1 ? '1px solid var(--border-color)' : 'none',
+                            borderBottom: i < arr.length - 2 ? '1px solid var(--border-color)' : 'none'
+                          }}>
+                            <div style={T.eyebrow}>{m.label}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--quantum-color)', fontVariantNumeric: 'tabular-nums', marginTop: '4px', letterSpacing: '-0.01em' }}>
+                              {m.val}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{
+                        padding: '14px 16px', background: 'var(--bg-inset)',
+                        borderRadius: 'var(--radius-md)', borderLeft: '2px solid var(--quantum-color)',
+                        fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.65, marginBottom: '16px'
+                      }}>
+                        <strong style={{ color: 'var(--text-primary)' }}>Radiomics Clinical Impression: </strong>
+                        {diag}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleRunImageInference}
+                        disabled={loading}
+                        style={{
+                          width: '100%', height: '46px', borderRadius: 'var(--radius-md)',
+                          border: 'none', background: loading ? 'var(--brand-hover)' : 'var(--brand-primary)',
+                          color: '#fff', fontSize: '0.88rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                          boxShadow: '0 2px 8px var(--brand-glow)', transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {loading ? <Loader2 size={15} className="spinner" /> : <Play size={15} fill="currentColor" />}
+                        {loading ? 'Re-evaluating Hilbert States...' : 'Re-Analyze Scan & Update Risk'}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <form onSubmit={handleRunInference}>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+                  borderTop: '1px solid var(--border-color)',
+                  borderBottom: '1px solid var(--border-color)',
+                  marginBottom: '20px'
+                }}>
+                  {Object.keys(features).map((feat, i, arr) => (
+                    <div key={feat} style={{
+                      padding: '12px 14px',
+                      borderLeft: i % 2 === 1 ? '1px solid var(--border-color)' : 'none',
+                      borderBottom: i < arr.length - 2 ? '1px solid var(--border-color)' : 'none'
+                    }}>
+                      <label style={{ ...T.eyebrow, fontSize: '0.62rem', display: 'block', marginBottom: '4px' }}>
+                        {feat}
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={features[feat]}
+                        onChange={(e) => handleInputChange(feat, e.target.value)}
+                        style={{
+                          width: '100%', padding: '6px 0', background: 'transparent',
+                          border: 'none', borderBottom: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600,
+                          fontVariantNumeric: 'tabular-nums', outline: 'none',
+                          fontFamily: 'Consolas, Monaco, monospace', letterSpacing: '-0.01em'
+                        }}
+                        onFocus={(e) => e.target.style.borderBottomColor = 'var(--brand-primary)'}
+                        onBlur={(e) => e.target.style.borderBottomColor = 'var(--border-color)'}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '100%', height: '46px', borderRadius: 'var(--radius-md)',
+                    border: 'none', background: loading ? 'var(--brand-hover)' : 'var(--brand-primary)',
+                    color: '#fff', fontSize: '0.88rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    boxShadow: '0 2px 8px var(--brand-glow)', transition: 'all 0.2s ease'
+                  }}
+                >
+                  {loading ? <Loader2 size={15} className="spinner" /> : <Play size={15} fill="currentColor" />}
+                  {loading ? 'Computing Quantum Statevector Overlaps...' : 'Run Diagnostic Risk Inference'}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* RIGHT — 5-Model Diagnostic Suite */}
+          <div style={{ ...T.card, padding: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <ShieldAlert size={16} style={{ color: 'var(--classical-color)' }} />
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                5-Model Diagnostic Suite
+              </span>
+            </div>
+
             {loading ? (
-              <div className="inference-loading">
-                <Loader2 size={40} className="spinner" />
-                <p className="inference-loading-title">
+              <div style={{
+                padding: '40px 20px', textAlign: 'center',
+                background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)'
+              }}>
+                <Loader2 size={32} className="spinner" style={{ color: 'var(--brand-primary)', marginBottom: '14px' }} />
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
                   Computing Quantum Statevector Overlaps...
-                </p>
-                <p className="inference-loading-desc">
-                  Running 5-model inference pipeline across Classical SVM, MLP, Quantum QSVM, QNN, QVC, and Hybrid Consensus Ensemble.
-                </p>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+                  Running 5-model inference pipeline across Classical SVM, MLP, QSVM, QNN, QVC, and Hybrid Ensemble.
+                </div>
               </div>
             ) : predictionResult ? (
-              <div className="pred-list">
-                <div className="pred-actions">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <CardActionMenu
                     title={`Patient Risk Prediction - ${selectedPreset?.name}`}
                     category="prediction"
                     data={{
-                      patient_profile: selectedPreset?.name,
-                      dataset: activeDataset,
+                      patient_profile: selectedPreset?.name, dataset: activeDataset,
                       predictions: predictions,
                       consensus_risk: predictions?.hybrid_consensus_ensemble?.probability,
                       risk_tier: predictions?.hybrid_consensus_ensemble?.risk_tier,
                       uncertainty: uncertainty
                     }}
                     metadata={{
-                      page: 'live_inference',
-                      preset_id: selectedPresetId,
+                      page: 'live_inference', preset_id: selectedPresetId,
                       quantum_coordinates: predictionResult.quantum_compressed_coordinates
                     }}
                   />
                 </div>
 
-                {/* 1. Classical SVM Card */}
-                <div className="pred-card classical">
-                  <div className="pred-title">1. Classical RBF Support Vector Machine</div>
-                  <div className="pred-card-header">
-                    <span className={`pred-badge ${predictions?.classical_rbf_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
-                      {predictions?.classical_rbf_svm?.label}
-                    </span>
-                    <div className="pred-prob classical">
-                      {(predictions?.classical_rbf_svm?.probability * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="pred-card-meta">
-                    <span>Confidence: {predictions?.classical_rbf_svm?.confidence_pct}%</span>
-                    {predictions?.classical_rbf_svm?.training_metrics && (
-                      <span className="pred-metric classical">
-                        Train Acc: {predictions.classical_rbf_svm.training_metrics.accuracy} · AUC: {predictions.classical_rbf_svm.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {[
+                  { id: 'classical_rbf_svm', num: '01', title: 'Classical RBF SVM', paradigm: 'classical', icon: Zap },
+                  { id: 'classical_mlp', num: '02', title: 'Deep Multi-Layer Perceptron', paradigm: 'classical', icon: Cpu },
+                  { id: 'quantum_kernel_svm', num: '03', title: 'Quantum Kernel QSVM', paradigm: 'quantum', icon: Atom },
+                  { id: 'quantum_qnn', num: '04', title: 'Quantum Neural Network', paradigm: 'quantum', icon: Brain },
+                  { id: 'quantum_qvc', num: '05', title: 'Variational Classifier', paradigm: 'quantum', icon: Sparkles }
+                ].map((model) => {
+                  const pred = predictions?.[model.id];
+                  if (!pred) return null;
+                  const color = model.paradigm === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)';
+                  const bgColor = model.paradigm === 'classical' ? 'var(--classical-bg)' : 'var(--quantum-bg)';
+                  const glowColor = model.paradigm === 'classical' ? 'var(--classical-glow)' : 'var(--quantum-glow)';
+                  const probPct = (pred.probability * 100).toFixed(1);
 
-                {/* 2. Classical MLP Card */}
-                <div className="pred-card mlp">
-                  <div className="pred-title">2. Classical Deep Multi-Layer Perceptron (MLP)</div>
-                  <div className="pred-card-header">
-                    <span className={`pred-badge ${predictions?.classical_mlp?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
-                      {predictions?.classical_mlp?.label || (predictions?.classical_mlp?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
-                    </span>
-                    <div className="pred-prob mlp">
-                      {(predictions?.classical_mlp?.probability * 100).toFixed(1)}%
+                  return (
+                    <div key={model.id} style={{
+                      padding: '14px 16px', background: 'var(--bg-inset)',
+                      borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                      borderLeft: '2px solid ' + color
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+                          {model.num}
+                        </span>
+                        <model.icon size={13} style={{ color }} />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em', flex: 1 }}>
+                          {model.title}
+                        </span>
+                        <span style={{
+                          fontSize: '1.15rem', fontWeight: 700, color: color,
+                          fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em'
+                        }}>
+                          {probPct}%
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{
+                          fontSize: '0.62rem', padding: '2px 8px', borderRadius: '4px',
+                          background: bgColor, color: color, border: `1px solid ${glowColor}`,
+                          fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase'
+                        }}>
+                          {pred.label || (pred.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
+                        </span>
+                        {pred.confidence_pct && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+                            Confidence: <strong style={{ color: 'var(--text-secondary)' }}>{pred.confidence_pct}%</strong>
+                          </span>
+                        )}
+                        {pred.training_metrics && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+                            AUC: <strong style={{ color: 'var(--text-secondary)' }}>{pred.training_metrics.roc_auc}</strong>
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="pred-card-meta">
-                    <span>Arch: (64, 32 ReLU) | Conf: {predictions?.classical_mlp?.confidence_pct}%</span>
-                    {predictions?.classical_mlp?.training_metrics && (
-                      <span className="pred-metric mlp">
-                        Train Acc: {predictions.classical_mlp.training_metrics.accuracy} · AUC: {predictions.classical_mlp.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  );
+                })}
 
-                {/* 3. Quantum Kernel QSVM Card */}
-                <div className="pred-card quantum">
-                  <div className="pred-title">3. Quantum Kernel QSVM (ZZFeatureMap)</div>
-                  <div className="pred-card-header">
-                    <span className={`pred-badge ${predictions?.quantum_kernel_svm?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
-                      {predictions?.quantum_kernel_svm?.label}
-                    </span>
-                    <div className="pred-prob quantum">
-                      {(predictions?.quantum_kernel_svm?.probability * 100).toFixed(1)}%
+                {/* Hybrid Consensus Hero */}
+                <div style={{
+                  padding: '20px', marginTop: '6px',
+                  background: 'linear-gradient(135deg, var(--hybrid-bg, rgba(245, 158, 11, 0.08)), var(--bg-inset))',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                  borderRadius: 'var(--radius-md)',
+                  position: 'relative', overflow: 'hidden'
+                }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'var(--hybrid-color)' }} />
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div style={{ ...T.eyebrow, color: 'var(--hybrid-color)', marginBottom: '4px' }}>
+                        06 · Hybrid Consensus Ensemble
+                      </div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                        Bayesian 5-Model Synthesis
+                      </div>
                     </div>
-                  </div>
-                  <div className="pred-card-meta">
-                    <span>4 Qubits | {predictions?.quantum_kernel_svm?.feature_map || 'ZZFeatureMap (reps=2)'}</span>
-                    {predictions?.quantum_kernel_svm?.training_metrics && (
-                      <span className="pred-metric quantum">
-                        Train Acc: {predictions.quantum_kernel_svm.training_metrics.accuracy} · AUC: {predictions.quantum_kernel_svm.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 4. Quantum QNN Card */}
-                <div className="pred-card qnn">
-                  <div className="pred-title">4. Quantum Neural Network (QNN)</div>
-                  <div className="pred-card-header">
-                    <span className={`pred-badge ${predictions?.quantum_qnn?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
-                      {predictions?.quantum_qnn?.label || (predictions?.quantum_qnn?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
-                    </span>
-                    <div className="pred-prob qnn">
-                      {(predictions?.quantum_qnn?.probability * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="pred-card-meta">
-                    <span>4 Qubits | RealAmplitudes Ansatz (16 angles)</span>
-                    {predictions?.quantum_qnn?.training_metrics && (
-                      <span className="pred-metric qnn">
-                        Train Acc: {predictions.quantum_qnn.training_metrics.accuracy} · AUC: {predictions.quantum_qnn.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 5. Quantum QVC Card */}
-                <div className="pred-card qvc">
-                  <div className="pred-title">5. Quantum Variational Classifier (QVC)</div>
-                  <div className="pred-card-header">
-                    <span className={`pred-badge ${predictions?.quantum_qvc?.prediction === 1 ? 'badge-positive' : 'badge-negative'}`}>
-                      {predictions?.quantum_qvc?.label || (predictions?.quantum_qvc?.probability >= 0.5 ? 'Disease Positive' : 'Healthy Baseline')}
-                    </span>
-                    <div className="pred-prob qvc">
-                      {(predictions?.quantum_qvc?.probability * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="pred-card-meta">
-                    <span>4 Qubits | EfficientSU2 Noise-Robust Circuit (24 angles)</span>
-                    {predictions?.quantum_qvc?.training_metrics && (
-                      <span className="pred-metric qvc">
-                        Train Acc: {predictions.quantum_qvc.training_metrics.accuracy} · AUC: {predictions.quantum_qvc.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 6. Hybrid Consensus Ensemble Card */}
-                <div className="pred-card hybrid">
-                  <div className="pred-title hybrid">6. Hybrid Consensus Ensemble (Bayesian 5-Model Synthesis)</div>
-                  <div className="pred-card-header">
-                    <span className="badge-paradigm badge-hybrid">
-                      {predictions?.hybrid_consensus_ensemble?.label}
-                    </span>
-                    <div className="pred-prob hybrid" style={{ fontSize: '1.25rem' }}>
+                    <div style={{
+                      fontSize: '2rem', fontWeight: 700, color: 'var(--hybrid-color)',
+                      fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.03em', lineHeight: 1
+                    }}>
                       {(predictions?.hybrid_consensus_ensemble?.probability * 100).toFixed(1)}%
                     </div>
                   </div>
-                  <div className="pred-hybrid-row">
-                    <span className="pred-hybrid-tier">
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <span style={{
+                      padding: '3px 10px', background: 'var(--bg-card-solid)',
+                      borderRadius: '4px', border: '1px solid var(--border-color)',
+                      fontWeight: 600, color: 'var(--hybrid-color)'
+                    }}>
                       {predictions?.hybrid_consensus_ensemble?.risk_tier}
                     </span>
-                    {predictions?.hybrid_consensus_ensemble?.training_metrics && (
-                      <span className="pred-metric hybrid">
-                        Train Acc: {predictions.hybrid_consensus_ensemble.training_metrics.accuracy} · AUC: {predictions.hybrid_consensus_ensemble.training_metrics.roc_auc}
-                      </span>
-                    )}
-                  </div>
-                  <div className="pred-hybrid-consensus">
-                    Classical Consensus: {(predictions?.hybrid_consensus_ensemble?.classical_consensus_prob * 100).toFixed(1)}% | Quantum Consensus: {(predictions?.hybrid_consensus_ensemble?.quantum_consensus_prob * 100).toFixed(1)}%
+                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      Classical: <strong>{(predictions?.hybrid_consensus_ensemble?.classical_consensus_prob * 100).toFixed(1)}%</strong>
+                    </span>
+                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      Quantum: <strong>{(predictions?.hybrid_consensus_ensemble?.quantum_consensus_prob * 100).toFixed(1)}%</strong>
+                    </span>
                   </div>
                 </div>
 
-                {/* Uncertainty Quantification & Discordance Gauge */}
+                {/* Uncertainty */}
                 {uncertainty && (
-                  <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <AlertCircle size={15} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
-                        Uncertainty & Model Consensus
+                  <div style={{
+                    padding: '16px', background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <AlertCircle size={14} style={{ color: uncertainty.is_classical_quantum_discordant ? 'var(--status-danger)' : 'var(--status-success)' }} />
+                        Uncertainty & Consensus
                       </span>
-                      <span className="val-badge ready" style={{ fontSize: '0.72rem' }}>
-                        Consensus: {(uncertainty.consensus_confidence * 100).toFixed(0)}%
+                      <span style={{
+                        fontSize: '0.65rem', padding: '3px 8px', borderRadius: '4px',
+                        background: 'var(--status-success-bg)', color: 'var(--status-success)',
+                        border: '1px solid rgba(22, 163, 74, 0.25)', fontWeight: 700,
+                        letterSpacing: '0.08em'
+                      }}>
+                        {(uncertainty.consensus_confidence * 100).toFixed(0)}%
                       </span>
                     </div>
 
-                    <div className="grid-2" style={{ gap: '8px' }}>
-                      <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
-                        <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.epistemic_uncertainty}</div>
-                        <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Epistemic Ambiguity</div>
+                    <div style={{
+                      display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+                      borderTop: '1px solid var(--border-color)',
+                      borderBottom: uncertainty.is_classical_quantum_discordant ? '1px solid var(--border-color)' : 'none'
+                    }}>
+                      <div style={{ padding: '10px 12px' }}>
+                        <div style={{ ...T.eyebrow, fontSize: '0.6rem', marginBottom: '4px' }}>Epistemic</div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                          {uncertainty.epistemic_uncertainty}
+                        </div>
                       </div>
-                      <div className="metric-mini-box" style={{ background: 'var(--bg-card-solid)', padding: '8px' }}>
-                        <div className="mini-val" style={{ fontSize: '0.95rem' }}>{uncertainty.aleatoric_uncertainty}</div>
-                        <div className="mini-lbl" style={{ fontSize: '0.7rem' }}>Aleatoric Data Noise</div>
+                      <div style={{ padding: '10px 12px', borderLeft: '1px solid var(--border-color)' }}>
+                        <div style={{ ...T.eyebrow, fontSize: '0.6rem', marginBottom: '4px' }}>Aleatoric</div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                          {uncertainty.aleatoric_uncertainty}
+                        </div>
                       </div>
                     </div>
 
                     {uncertainty.is_classical_quantum_discordant && (
-                      <div className="banner" style={{ marginTop: '8px', padding: '8px 10px', background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.3)', color: 'var(--status-danger)', fontSize: '0.78rem' }}>
+                      <div style={{
+                        marginTop: '10px', padding: '10px 12px',
+                        background: 'var(--status-danger-bg)', borderRadius: 'var(--radius-sm)',
+                        border: '1px solid rgba(220, 38, 38, 0.25)',
+                        fontSize: '0.78rem', color: 'var(--status-danger)', lineHeight: 1.55
+                      }}>
                         <strong>Discordance Alert:</strong> Classical and Quantum models predict opposing classes. Secondary histopathology review recommended.
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Feature Attributions & Explainability */}
+                {/* Explainability */}
                 {explainability && (
                   <div>
                     <button
                       onClick={() => setShowExplainability(!showExplainability)}
-                      className="btn btn-sm btn-outline full-width-btn"
-                      type="button"
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)', background: 'transparent',
+                        color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600,
+                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+                        justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
-                      <Compass size={14} /> {showExplainability ? 'Hide' : 'Show'} Biomarker Feature Attributions (SHAP-style)
-                      {showExplainability ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      <Compass size={13} />
+                      {showExplainability ? 'Hide' : 'Show'} Biomarker Attributions
+                      {showExplainability ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                     </button>
 
                     {showExplainability && (
-                      <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Top Biomarker Risk Contributors:</div>
+                      <div style={{
+                        marginTop: '10px', padding: '16px',
+                        background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)', borderLeft: '2px solid var(--brand-primary)'
+                      }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '10px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                          Top Risk Contributors
+                        </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           {explainability.top_attributions?.map((attr, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card-solid)', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                              <span style={{ fontWeight: 500 }}>{attr.feature_name}</span>
-                              <span style={{ color: attr.normalized_impact > 0 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 600 }}>
+                            <div key={idx} style={{
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              padding: '8px 12px', background: 'var(--bg-card-solid)',
+                              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)'
+                            }}>
+                              <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                                {attr.feature_name}
+                              </span>
+                              <span style={{
+                                color: attr.normalized_impact > 0 ? 'var(--status-danger)' : 'var(--status-success)',
+                                fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums'
+                              }}>
                                 {attr.direction.includes('Increases') ? '+ Risk' : '- Baseline'} ({attr.importance_score})
                               </span>
                             </div>
                           ))}
                         </div>
-                        <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.4' }}>
-                          <strong>Clinical Rationale:</strong> {explainability.clinical_rationale}
+                        <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>Clinical Rationale:</strong> {explainability.clinical_rationale}
                         </p>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Counterfactual "What-If" Therapeutic Simulation */}
+                {/* Counterfactual */}
                 {counterfactual && counterfactual.key_interventions && counterfactual.key_interventions.length > 0 && (
                   <div>
                     <button
                       onClick={() => setShowCounterfactual(!showCounterfactual)}
-                      className="btn btn-sm btn-outline full-width-btn"
-                      type="button"
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)', background: 'transparent',
+                        color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600,
+                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+                        justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
-                      <ShieldAlert size={14} style={{ color: 'var(--status-success)' }} /> {showCounterfactual ? 'Hide' : 'Show'} Counterfactual Risk-Reversal Simulator
-                      {showCounterfactual ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      <ShieldAlert size={13} style={{ color: 'var(--status-success)' }} />
+                      {showCounterfactual ? 'Hide' : 'Show'} Counterfactual Simulator
+                      {showCounterfactual ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                     </button>
 
                     {showCounterfactual && (
-                      <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Simulated Risk Trajectory:</span>
+                      <div style={{
+                        marginTop: '10px', padding: '16px',
+                        background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)', borderLeft: '2px solid var(--status-success)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--status-success)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                            Simulated Risk
+                          </span>
                           <span style={{
-                            fontWeight: 700,
-                            color: (simulatedRisk ?? counterfactual.original_risk_probability) > 0.4 ? 'var(--status-danger)' : 'var(--status-success)',
-                            fontSize: '0.95rem'
+                            fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em',
+                            fontVariantNumeric: 'tabular-nums',
+                            color: (simulatedRisk ?? counterfactual.original_risk_probability) > 0.4 ? 'var(--status-danger)' : 'var(--status-success)'
                           }}>
-                            {(((simulatedRisk ?? counterfactual.original_risk_probability)) * 100).toFixed(1)}% ({((simulatedRisk ?? counterfactual.original_risk_probability)) > 0.4 ? 'Elevated' : 'Therapeutic Safe Tier'})
+                            {(((simulatedRisk ?? counterfactual.original_risk_probability)) * 100).toFixed(1)}%
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                          Adjust sliders to simulate biomarker reduction through targeted intervention:
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-tertiary)', marginBottom: '12px' }}>
+                          Adjust sliders to simulate biomarker reduction through targeted intervention.
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           {counterfactual.key_interventions.map((inv, idx) => {
                             const sliderVal = simulatedDeltas[inv.feature_name]?.percentAchieved || 0;
                             const currentVal = simulatedDeltas[inv.feature_name]?.currentVal ?? inv.original_value;
                             return (
-                              <div key={idx} style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{inv.feature_name}</span>
-                                  <span style={{ color: 'var(--quantum-color)', fontWeight: 600, fontSize: '0.78rem' }}>
-                                    Target: {inv.recommended_target} (-{inv.percentage_reduction}%)
+                              <div key={idx} style={{
+                                padding: '12px 14px', background: 'var(--bg-card-solid)',
+                                borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)'
+                              }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {inv.feature_name}
+                                  </span>
+                                  <span style={{ color: 'var(--quantum-color)', fontWeight: 700, fontSize: '0.74rem', fontVariantNumeric: 'tabular-nums' }}>
+                                    Target: {inv.recommended_target} (−{inv.percentage_reduction}%)
                                   </span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                   <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={sliderVal}
+                                    type="range" min="0" max="100" value={sliderVal}
                                     onChange={(e) => handleCounterfactualSlider(inv.feature_name, inv.original_value, inv.recommended_target, parseFloat(e.target.value))}
                                     style={{ flex: 1, accentColor: 'var(--classical-color)' }}
                                   />
-                                  <span style={{ minWidth: '45px', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                  <span style={{ minWidth: '40px', textAlign: 'right', fontSize: '0.82rem', fontWeight: 700, color: 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
                                     {sliderVal}%
                                   </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '6px', fontVariantNumeric: 'tabular-nums' }}>
                                   <span>Current: {typeof currentVal === 'number' ? currentVal.toFixed(2) : currentVal}</span>
-                                  <span>Orig: {inv.original_value}</span>
+                                  <span>Original: {inv.original_value}</span>
                                 </div>
                               </div>
                             );
                           })}
                         </div>
-                        <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '0.76rem', lineHeight: '1.4' }}>
-                          <strong>Takeaway:</strong> {counterfactual.clinical_takeaway}
+                        <p style={{ margin: '12px 0 0', fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>Takeaway:</strong> {counterfactual.clinical_takeaway}
                         </p>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Advanced Quantum State Coordinates */}
+                {/* Advanced Quantum Telemetry */}
                 <div>
                   <button
                     onClick={() => setShowAdvancedResults(!showAdvancedResults)}
-                    className="btn btn-sm btn-outline"
-                    type="button"
+                    style={{
+                      width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'transparent',
+                      color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600,
+                      cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+                      justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                   >
                     {showAdvancedResults ? 'Hide' : 'Show'} Quantum Hilbert State Telemetry
-                    {showAdvancedResults ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    {showAdvancedResults ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                   </button>
 
                   {showAdvancedResults && (
-                    <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-inset)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                      <div><strong style={{ color: 'var(--quantum-color)' }}>PCA Coordinates (4 Qubits):</strong> [{predictionResult.quantum_compressed_coordinates?.join(', ')}]</div>
-                      <div style={{ marginTop: '4px' }}><strong style={{ color: 'var(--quantum-color)' }}>Bloch Angles [0, π]:</strong> [{predictionResult.quantum_rotation_angles?.join(', ')}]</div>
+                    <div style={{ ...T.terminal, padding: '16px', marginTop: '10px', color: 'var(--quantum-color)' }}>
+                      <div style={{ color: '#94A3B8', marginBottom: '10px', ...T.eyebrow, color: '#94A3B8' }}>
+                        Quantum State Telemetry
+                      </div>
+                      <div style={{ marginBottom: '6px' }}>
+                        <span style={{ color: '#94A3B8' }}>PCA Coordinates (4Q):</span>{' '}
+                        [{predictionResult.quantum_compressed_coordinates?.join(', ')}]
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <span style={{ color: '#94A3B8' }}>Bloch Angles [0, π]:</span>{' '}
+                        [{predictionResult.quantum_rotation_angles?.join(', ')}]
+                      </div>
                       {blochCoords && (
-                        <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          <strong>Bloch 3D Coordinates (x, y, z):</strong>
-                          {blochCoords.map(c => ` Q${c.qubit_index}: (${c.x}, ${c.y}, ${c.z})`).join(' | ')}
+                        <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                          <div style={{ marginBottom: '4px' }}>Bloch 3D Coordinates (x, y, z):</div>
+                          {blochCoords.map(c => (
+                            <div key={c.qubit_index} style={{ color: '#5EEAD4' }}>
+                              Q{c.qubit_index}: ({c.x}, {c.y}, {c.z})
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Guidance Note */}
-                <div className="banner reality-banner" style={{ marginTop: '6px' }}>
-                  <Stethoscope size={20} style={{ color: 'var(--banner-warn-text)', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ color: 'var(--banner-warn-text)', fontSize: '0.85rem' }}>Clinician Guidance:</strong>
-                    <p style={{ marginTop: '4px', fontSize: '0.85rem', color: 'var(--banner-warn-text)' }}>
+                {/* Clinician Guidance Banner */}
+                <div style={{
+                  padding: '14px 18px', background: 'var(--banner-warn-bg)',
+                  border: '1px solid var(--banner-warn-border)',
+                  borderRadius: 'var(--radius-md)', display: 'flex', gap: '12px', alignItems: 'flex-start'
+                }}>
+                  <Stethoscope size={18} style={{ color: 'var(--banner-warn-text)', flexShrink: 0, marginTop: '2px' }} />
+                  <div style={{ fontSize: '0.82rem', color: 'var(--banner-warn-text)', lineHeight: 1.6 }}>
+                    <strong>Clinician Guidance:</strong>
+                    <p style={{ margin: '6px 0 0' }}>
                       {predictionResult?.clinical_guidance?.recommendation}
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="inference-empty">
-                <Activity size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
-                <p>
-                  Select a patient profile archetype or adjust sliders, then click <strong>"Run Diagnostic Risk Inference"</strong> to execute real-time quantum statevector simulation.
+              <div style={{
+                padding: '50px 20px', textAlign: 'center',
+                background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                border: '1px dashed var(--border-color)'
+              }}>
+                <Activity size={36} style={{ color: 'var(--text-tertiary)', opacity: 0.4, marginBottom: '14px' }} />
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.65 }}>
+                  Select a patient profile archetype or adjust parameters, then click <strong style={{ color: 'var(--text-primary)' }}>"Run Diagnostic Risk Inference"</strong> to execute real-time quantum statevector simulation.
                 </p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Selected Preset Information Box (Separated with clean gap below grid) */}
+      {/* ── 07 · PRESET ARCHETYPE TELEMETRY ─────────────────── */}
       {selectedPreset && (
-        <div className="card" style={{ marginTop: '28px', marginBottom: '24px', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
-            <CardActionMenu
-              title={`Patient Profile: ${selectedPreset.name}`}
-              category="patient_profile"
-              data={{
-                preset_name: selectedPreset.name,
-                risk_profile: selectedPreset.risk_profile,
-                description: selectedPreset.description,
-                basic_info: selectedPreset.basic_info,
-                advanced_info: selectedPreset.advanced_info
-              }}
-              metadata={{
-                page: 'live_inference',
-                preset_id: selectedPreset.id,
-                domain: activeDataset
-              }}
-            />
-          </div>
+        <section style={{ marginBottom: '40px' }}>
+          <SectionHeader
+            index="07"
+            icon={BookOpen}
+            title="Patient Profile Archetype"
+            subtitle={`${selectedPreset.name} — ${selectedPreset.risk_profile}.`}
+            actions={
+              <CardActionMenu
+                title={`Patient Profile: ${selectedPreset.name}`}
+                category="patient_profile"
+                data={{
+                  preset_name: selectedPreset.name, risk_profile: selectedPreset.risk_profile,
+                  description: selectedPreset.description, basic_info: selectedPreset.basic_info,
+                  advanced_info: selectedPreset.advanced_info
+                }}
+                metadata={{ page: 'live_inference', preset_id: selectedPreset.id, domain: activeDataset }}
+              />
+            }
+          />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1rem', fontWeight: 700 }}>
-              Profile Archetype: {selectedPreset.name}
-            </h4>
-            <span className="badge-paradigm badge-hybrid" style={{ fontSize: '0.74rem' }}>
-              Expected: {selectedPreset.risk_profile}
-            </span>
-          </div>
-
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5', margin: '0 0 12px 0' }}>
-            {selectedPreset.description}
-          </p>
-
-          {/* Student View Summary */}
-          <div style={{ marginTop: '14px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <BookOpen size={16} style={{ color: 'var(--classical-color)' }} /> Student View (Basic Clinical Summary):
-            </strong>
-            <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', marginTop: '6px', lineHeight: '1.4' }}>
-              <strong>Clinical Presentation:</strong> {selectedPreset.basic_info?.clinical_notes}
+          <div style={{ ...T.card, padding: '28px' }}>
+            <p style={{ ...T.body, margin: '0 0 20px 0' }}>
+              {selectedPreset.description}
             </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', lineHeight: '1.4' }}>
-              <strong style={{ color: 'var(--status-success)' }}>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
-            </p>
-          </div>
 
-          {/* Advanced Preset Info */}
-          <div style={{ marginTop: '14px' }}>
+            {/* Student View */}
+            <div style={{
+              padding: '18px 22px', background: 'var(--bg-inset)',
+              borderRadius: 'var(--radius-md)', borderLeft: '2px solid var(--classical-color)',
+              marginBottom: '16px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <BookOpen size={14} style={{ color: 'var(--classical-color)' }} />
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--classical-color)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Student View (Basic Clinical Summary)
+                </span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.65 }}>
+                <strong>Clinical Presentation:</strong> {selectedPreset.basic_info?.clinical_notes}
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--status-success)', lineHeight: 1.65, marginTop: '6px' }}>
+                <strong>Standard Protocol:</strong> {selectedPreset.basic_info?.typical_action}
+              </div>
+            </div>
+
+            {/* Advanced Telemetry Toggle */}
             <button
               onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
-              className="btn btn-sm btn-outline"
-              type="button"
+              style={{
+                padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'transparent',
+                color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 600,
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
             >
-              <Sliders size={14} /> {showAdvancedInputs ? 'Hide' : 'Show'} Advanced Biomarker Telemetry
-              {showAdvancedInputs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <Sliders size={13} />
+              {showAdvancedInputs ? 'Hide' : 'Show'} Advanced Biomarker Telemetry
+              {showAdvancedInputs ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             </button>
 
             {showAdvancedInputs && (
-              <div style={{ marginTop: '10px', padding: '14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
-                <p style={{ color: 'var(--text-primary)', margin: 0 }}>
+              <div style={{
+                marginTop: '12px', padding: '18px 22px',
+                background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', fontSize: '0.85rem', lineHeight: 1.65
+              }}>
+                <p style={{ margin: '0 0 10px', color: 'var(--text-primary)' }}>
                   <strong style={{ color: 'var(--classical-color)' }}>Cellular Morphology:</strong> {selectedPreset.advanced_info?.cellular_morphology}
                 </p>
-                <p style={{ color: 'var(--text-primary)', marginTop: '6px' }}>
+                <p style={{ margin: '0 0 10px', color: 'var(--text-primary)' }}>
                   <strong style={{ color: 'var(--quantum-color)' }}>Hemodynamics:</strong> {selectedPreset.advanced_info?.hemodynamics}
                 </p>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
+                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
                   <strong style={{ color: 'var(--hybrid-color)' }}>Theoretical Risk Range:</strong> {selectedPreset.advanced_info?.risk_score_expected}
                 </p>
               </div>
             )}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

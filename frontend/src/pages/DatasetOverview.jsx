@@ -19,11 +19,210 @@ import {
 import CardActionMenu from '../components/CardActionMenu';
 import Atom4Orbits from '../components/Atom4Orbits';
 
+/* ── Design Tokens ─────────────────────────────────────────── */
+const T = {
+  eyebrow: {
+    fontSize: '0.7rem',
+    fontWeight: 600,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    color: 'var(--text-tertiary)'
+  },
+  sectionTitle: {
+    margin: 0,
+    fontSize: '1.35rem',
+    fontWeight: 700,
+    letterSpacing: '-0.02em',
+    color: 'var(--text-primary)'
+  },
+  body: {
+    fontSize: '0.9rem',
+    lineHeight: 1.7,
+    color: 'var(--text-secondary)'
+  },
+  card: {
+    background: 'var(--bg-card)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '28px',
+    boxShadow: 'var(--shadow-card)'
+  }
+};
+
+const PARADIGM = {
+  brand:     { color: 'var(--brand-primary)',  bg: 'var(--brand-bg)',   glow: 'var(--brand-glow)' },
+  classical: { color: 'var(--classical-color)', bg: 'var(--classical-bg)', glow: 'var(--classical-glow)' },
+  quantum:   { color: 'var(--quantum-color)',  bg: 'var(--quantum-bg)', glow: 'var(--quantum-glow)' },
+  hybrid:    { color: 'var(--hybrid-color)',   bg: 'rgba(245, 158, 11, 0.12)', glow: 'rgba(245, 158, 11, 0.25)' }
+};
+
+/* ── Reusable Primitives ───────────────────────────────────── */
+function SectionHeader({ index, icon: Icon, title, subtitle, actions }) {
+  return (
+    <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap' }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <span style={T.eyebrow}>{index}</span>
+          <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+          {Icon && <Icon size={14} style={{ color: 'var(--text-tertiary)' }} />}
+        </div>
+        <h2 style={T.sectionTitle}>{title}</h2>
+        {subtitle && <p style={{ margin: '8px 0 0', ...T.body, maxWidth: '640px' }}>{subtitle}</p>}
+      </div>
+      {actions}
+    </div>
+  );
+}
+
+function HairlineDivider({ label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '32px 0' }}>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+      <span style={T.eyebrow}>{label}</span>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+    </div>
+  );
+}
+
+function PillButton({ children, onClick, active, tone = 'brand', size = 'md', style: extra = {} }) {
+  const t = PARADIGM[tone] || PARADIGM.brand;
+  const isMd = size === 'md';
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        height: isMd ? '40px' : '34px',
+        padding: isMd ? '0 18px' : '0 14px',
+        borderRadius: 'var(--radius-md)',
+        border: active ? `1px solid ${t.color}` : '1px solid var(--border-color)',
+        background: active ? t.bg : 'transparent',
+        color: active ? t.color : 'var(--text-secondary)',
+        fontSize: isMd ? '0.85rem' : '0.78rem',
+        fontWeight: 600,
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        transition: 'all 0.2s ease',
+        letterSpacing: '-0.01em',
+        ...extra
+      }}
+      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
+      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function PrimaryButton({ children, onClick, disabled, icon: Icon, style: extra = {} }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        height: '42px',
+        padding: '0 20px',
+        borderRadius: 'var(--radius-md)',
+        border: 'none',
+        background: disabled ? 'var(--text-tertiary)' : 'var(--brand-primary)',
+        color: '#FFFFFF',
+        fontSize: '0.85rem',
+        fontWeight: 600,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        boxShadow: disabled ? 'none' : '0 2px 8px var(--brand-glow)',
+        transition: 'all 0.2s ease',
+        letterSpacing: '-0.01em',
+        ...extra
+      }}
+      onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = 'var(--brand-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+      onMouseLeave={(e) => { if (!disabled) { e.currentTarget.style.background = 'var(--brand-primary)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
+    >
+      {Icon && <Icon size={14} />}
+      {children}
+    </button>
+  );
+}
+
+function SegmentedTabs({ tabs, active, onChange, tone = 'brand' }) {
+  const t = PARADIGM[tone] || PARADIGM.brand;
+  return (
+    <div style={{
+      display: 'inline-flex',
+      padding: '3px',
+      background: 'var(--bg-inset)',
+      border: '1px solid var(--border-color)',
+      borderRadius: 'var(--radius-md)',
+      gap: '2px'
+    }}>
+      {tabs.map(tab => {
+        const isActive = active === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            style={{
+              height: '34px',
+              padding: '0 16px',
+              borderRadius: 'calc(var(--radius-md) - 2px)',
+              border: 'none',
+              background: isActive ? 'var(--bg-card-solid)' : 'transparent',
+              color: isActive ? t.color : 'var(--text-secondary)',
+              fontSize: '0.8rem',
+              fontWeight: isActive ? 600 : 500,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: isActive ? 'var(--shadow-card)' : 'none'
+            }}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatTile({ value, label, sub, accent = 'brand', icon: Icon, isFirst }) {
+  const t = PARADIGM[accent] || PARADIGM.brand;
+  return (
+    <div style={{ padding: '26px 28px', borderLeft: isFirst ? 'none' : '1px solid var(--border-color)' }}>
+      <div style={{ fontSize: '1.9rem', fontWeight: 700, color: t.color, fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '10px' }}>
+        {value}
+      </div>
+      <div style={T.eyebrow}>{label}</div>
+      {sub && <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '6px' }}>{sub}</div>}
+      {Icon && <Icon size={24} style={{ position: 'absolute', top: '24px', right: '24px', color: t.color, opacity: 0.2 }} />}
+    </div>
+  );
+}
+
+function MinimalCard({ children, accent, style: extra = {} }) {
+  return (
+    <div style={{
+      position: 'relative',
+      ...T.card,
+      borderTop: accent ? `2px solid ${PARADIGM[accent].color}` : 'none',
+      ...extra
+    }}>
+      {children}
+    </div>
+  );
+}
+
+/* ── Main Component ────────────────────────────────────────── */
 export default function DatasetOverview() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Page View state: 'upload' (default) | 'pipeline' (live logger) | 'overview' (deep diagnostic profile)
   const initialView = searchParams.get('view') || 'upload';
   const initialDataset = searchParams.get('dataset') || 'cancer';
 
@@ -32,21 +231,18 @@ export default function DatasetOverview() {
   const [selectedDataset, setSelectedDataset] = useState(initialDataset);
   const [overviewData, setOverviewData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'advanced'
-  const [sampleView, setSampleView] = useState('cases'); // 'cases' | 'table'
+  const [activeTab, setActiveTab] = useState('basic');
+  const [sampleView, setSampleView] = useState('cases');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 3-Random Images state
   const [randomImages, setRandomImages] = useState([]);
   const [refreshingImages, setRefreshingImages] = useState(false);
   const [activeEnlargedImage, setActiveEnlargedImage] = useState(null);
 
-  // Upload state
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState('');
 
-  // Live Pipeline & Stage Logger state
   const [pipelineProgress, setPipelineProgress] = useState(0);
   const [currentStageIdx, setCurrentStageIdx] = useState(0);
   const [pipelineStages, setPipelineStages] = useState([]);
@@ -57,33 +253,21 @@ export default function DatasetOverview() {
   const [showLogsModal, setShowLogsModal] = useState(false);
   const terminalEndRef = useRef(null);
 
-  // Auto-scroll terminal
   useEffect(() => {
-    if (terminalEndRef.current) {
-      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (terminalEndRef.current) terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [terminalLogs]);
 
   const fetchDatasetsList = async () => {
     try {
       const res = await getDatasets();
-      if (res && res.datasets) {
-        setDatasetsList(res.datasets);
-      }
-    } catch (err) {
-      console.warn('Failed to load dataset list:', err);
-    }
+      if (res && res.datasets) setDatasetsList(res.datasets);
+    } catch (err) { console.warn('Failed to load dataset list:', err); }
   };
 
-  useEffect(() => {
-    fetchDatasetsList();
-  }, []);
+  useEffect(() => { fetchDatasetsList(); }, []);
 
-  // Load overview if starting directly in 'overview' view
   useEffect(() => {
-    if (pageView === 'overview' && selectedDataset) {
-      loadDatasetOverview(selectedDataset);
-    }
+    if (pageView === 'overview' && selectedDataset) loadDatasetOverview(selectedDataset);
   }, [selectedDataset, pageView]);
 
   const loadDatasetOverview = async (dKey) => {
@@ -91,9 +275,7 @@ export default function DatasetOverview() {
     try {
       const data = await getDatasetOverview(dKey);
       setOverviewData(data);
-      if (data?.sample_cases && data.sample_cases.length > 0) {
-        setRandomImages(data.sample_cases);
-      }
+      if (data?.sample_cases && data.sample_cases.length > 0) setRandomImages(data.sample_cases);
     } catch (err) {
       console.error(`Failed to load dataset overview for ${dKey}:`, err);
     } finally {
@@ -101,23 +283,16 @@ export default function DatasetOverview() {
     }
   };
 
-  // Handler for Picking 3 New Random Images from disk
   const handlePickRandomImages = async () => {
     if (!selectedDataset) return;
     setRefreshingImages(true);
     try {
       const res = await getRandomDatasetImages(selectedDataset, 3);
-      if (res && res.samples && res.samples.length > 0) {
-        setRandomImages(res.samples);
-      }
-    } catch (err) {
-      console.warn('Failed to sample fresh images:', err);
-    } finally {
-      setTimeout(() => setRefreshingImages(false), 400);
-    }
+      if (res && res.samples && res.samples.length > 0) setRandomImages(res.samples);
+    } catch (err) { console.warn('Failed to sample fresh images:', err); }
+    finally { setTimeout(() => setRefreshingImages(false), 400); }
   };
 
-  // Execution of the 7-Stage Preprocessing Pipeline
   const runPipelineWithLogs = async (sourceType, payload) => {
     setPageView('pipeline');
     setPipelineRunning(true);
@@ -126,7 +301,6 @@ export default function DatasetOverview() {
     setCurrentStageIdx(0);
     setUploadError('');
 
-    // Default 7 standard stages
     const defaultStages = [
       { id: 1, key: 'format_detection', name: 'Format & Container Autodetection', phase: 'INGESTION', status: 'RUNNING', duration_ms: 40, summary: 'Inspecting MIME types, magic bytes, archive structure.' },
       { id: 2, key: 'content_extraction', name: 'Content & Payload Decompression', phase: 'EXTRACTION', status: 'PENDING', duration_ms: 110, summary: 'Extracting raw clinical records and decoding authentic scans.' },
@@ -150,12 +324,10 @@ export default function DatasetOverview() {
       let backendLogs = null;
 
       if (sourceType === 'upload') {
-        // Upload file to server
         setTerminalLogs(prev => [...prev, `[INFO] [00:00.040] [STAGE 1/7] Analyzing file payload '${payload.name}' (${(payload.size / 1024).toFixed(1)} KB)...`]);
         const uploadRes = await uploadCustomDataset(payload);
         finalDatasetKey = uploadRes.dataset_key;
         setSelectedDataset(finalDatasetKey);
-
         if (uploadRes.pipeline_trace) {
           backendStages = uploadRes.pipeline_trace.stages;
           backendLogs = uploadRes.pipeline_trace.terminal_logs;
@@ -163,7 +335,6 @@ export default function DatasetOverview() {
         }
         await fetchDatasetsList();
       } else {
-        // Registered cohort pipeline execution
         finalDatasetKey = payload;
         setSelectedDataset(finalDatasetKey);
         const stageRes = await getDatasetPipelineStages(finalDatasetKey);
@@ -174,7 +345,6 @@ export default function DatasetOverview() {
         }
       }
 
-      // Smooth simulated progression through the 7 stages
       const stagesToPlay = backendStages || defaultStages;
       const logsToPlay = backendLogs || [];
 
@@ -196,52 +366,39 @@ export default function DatasetOverview() {
             `[STAGE ${i + 1}/7] ${stagesToPlay[i].name} completed in ${stagesToPlay[i].duration_ms || 50}ms. ${stagesToPlay[i].summary || ''}`
           ]);
         }
-
         await new Promise(r => setTimeout(r, 180));
       }
 
-      // Mark all completed
       setPipelineStages(stagesToPlay.map(s => ({ ...s, status: 'COMPLETED' })));
       setPipelineProgress(100);
       setPipelineComplete(true);
       setPipelineRunning(false);
 
-      if (logsToPlay.length > 0) {
-        setTerminalLogs(logsToPlay);
-      } else {
+      if (logsToPlay.length > 0) setTerminalLogs(logsToPlay);
+      else {
         setTerminalLogs(prev => [
           ...prev,
           `[SUCCESS] [00:00.485] Preprocessing and EDA pipeline complete. Dataset '${finalDatasetKey}' is ready for model training.`
         ]);
       }
 
-      // Preload overview data
       finalOverview = await getDatasetOverview(finalDatasetKey);
       setOverviewData(finalOverview);
-      if (finalOverview?.sample_cases && finalOverview.sample_cases.length > 0) {
-        setRandomImages(finalOverview.sample_cases);
-      }
+      if (finalOverview?.sample_cases && finalOverview.sample_cases.length > 0) setRandomImages(finalOverview.sample_cases);
 
     } catch (err) {
       console.error('Pipeline processing error:', err);
       setPipelineRunning(false);
       setUploadError(err.response?.data?.detail || err.message || 'Data processing pipeline failed.');
-      setTerminalLogs(prev => [
-        ...prev,
-        `[ERROR] Ingestion failed: ${err.response?.data?.detail || err.message}`
-      ]);
+      setTerminalLogs(prev => [...prev, `[ERROR] Ingestion failed: ${err.response?.data?.detail || err.message}`]);
     }
   };
 
-  // Drag & Drop Handlers
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
   };
 
   const handleDrop = (e) => {
@@ -266,23 +423,17 @@ export default function DatasetOverview() {
   const handleDeleteDataset = async (dKey) => {
     const dsObj = datasetsList.find(d => (d.id || d.key) === dKey);
     const dsName = dsObj ? dsObj.name : dKey;
-    if (!window.confirm(`Are you sure you want to permanently remove dataset "${dsName}"? Preprocessed matrices and raw scans will be deleted.`)) {
-      return;
-    }
+    if (!window.confirm(`Are you sure you want to permanently remove dataset "${dsName}"? Preprocessed matrices and raw scans will be deleted.`)) return;
     try {
       setLoading(true);
       await deleteDataset(dKey);
       await fetchDatasetsList();
       setSelectedDataset('cancer');
       setPageView('upload');
-    } catch (err) {
-      alert(`Failed to delete dataset: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { alert(`Failed to delete dataset: ${err.message}`); }
+    finally { setLoading(false); }
   };
 
-  // Overview data calculations
   const activeDsObj = datasetsList.find(d => (d.id || d.key) === selectedDataset);
   const isCustom = activeDsObj && !activeDsObj.built_in;
 
@@ -307,401 +458,418 @@ export default function DatasetOverview() {
   const sampleType = overviewData?.sample_breakdown_type || 'tabular_generic';
   const isVisualSample = sampleCases.some(s => !!s.image_data_url);
 
-  // Domain-specific icon
   const getDomainIcon = () => {
     const key = (overviewData?.dataset_key || selectedDataset).toLowerCase();
-    if (key.includes('cancer') || sampleType === 'cytology') return <Microscope size={18} style={{ color: 'var(--brand-primary)' }} />;
-    if (key.includes('cardio')) return <Heart size={18} style={{ color: 'var(--status-danger)' }} />;
-    if (key.includes('diabetes')) return <Activity size={18} style={{ color: 'var(--brand-primary)' }} />;
-    if (key.includes('parkinson')) return <Waves size={18} style={{ color: 'var(--quantum-color)' }} />;
-    if (key.includes('mri') || key.includes('neuro')) return <Cpu size={18} style={{ color: 'var(--quantum-color)' }} />;
-    if (key.includes('ct') || key.includes('thorax')) return <Activity size={18} style={{ color: 'var(--hybrid-color)' }} />;
-    return <FileSpreadsheet size={18} style={{ color: 'var(--brand-primary)' }} />;
+    if (key.includes('cancer') || sampleType === 'cytology') return <Microscope size={16} style={{ color: 'var(--brand-primary)' }} />;
+    if (key.includes('cardio')) return <Heart size={16} style={{ color: 'var(--status-danger)' }} />;
+    if (key.includes('diabetes')) return <Activity size={16} style={{ color: 'var(--brand-primary)' }} />;
+    if (key.includes('parkinson')) return <Waves size={16} style={{ color: 'var(--quantum-color)' }} />;
+    if (key.includes('mri') || key.includes('neuro')) return <Cpu size={16} style={{ color: 'var(--quantum-color)' }} />;
+    if (key.includes('ct') || key.includes('thorax')) return <Activity size={16} style={{ color: 'var(--hybrid-color)' }} />;
+    return <FileSpreadsheet size={16} style={{ color: 'var(--brand-primary)' }} />;
   };
 
-  // Pre-configured registered cohorts for quick 1-click execution
   const registeredCohorts = [
-    {
-      key: 'cancer',
-      name: 'Breast Cancer Cytopathology (WDBC)',
-      modality: 'FNA Cytology Smears & Morphology',
-      samples: 569,
-      features: 30,
-      badge: '12 AUTHENTIC SCANS',
-      icon: <Microscope size={22} style={{ color: 'var(--brand-primary)' }} />,
-      desc: 'High-power FNA cytology biopsies distinguishing malignant from benign breast neoplasms.'
-    },
-    {
-      key: 'custom_mri_scans',
-      name: 'Neuroimaging Brain MRI Gallery',
-      modality: 'T1 / T2 / FLAIR Multi-Slice MRI',
-      samples: 12,
-      features: 8,
-      badge: '12 RAW MRI SCANS',
-      icon: <Cpu size={22} style={{ color: 'var(--quantum-color)' }} />,
-      desc: 'Authentic axial brain MRI scans with GLCM spatial contrast, tissue heterogeneity & tumor radiomics.'
-    },
-    {
-      key: 'custom_ct_scans',
-      name: 'Thoracic High-Resolution CT Scans',
-      modality: 'Chest CT Radiomics & Density',
-      samples: 12,
-      features: 8,
-      badge: '12 RAW CT SCANS',
-      icon: <Activity size={22} style={{ color: 'var(--hybrid-color)' }} />,
-      desc: 'Authentic thoracic CT pulmonary scans measuring Hounsfield density, nodule margins, and parenchymal texture.'
-    },
-    {
-      key: 'cardiovascular',
-      name: 'UCI Heart Disease Cohort',
-      modality: 'Hemodynamics, ECG & Fluoroscopy',
-      samples: 303,
-      features: 13,
-      badge: 'CLINICAL VITALS',
-      icon: <Heart size={22} style={{ color: 'var(--status-danger)' }} />,
-      desc: 'Coronary artery disease triage analyzing exercise ST depression, resting blood pressure, and cholesterol.'
-    },
-    {
-      key: 'diabetes',
-      name: 'Pima Indian Diabetes Metabolic Profile',
-      modality: 'Endocrine & Metabolic Labs',
-      samples: 768,
-      features: 8,
-      badge: 'ENDOCRINE LABS',
-      icon: <Activity size={22} style={{ color: 'var(--brand-primary)' }} />,
-      desc: 'Type-2 diabetes risk profiling evaluating fasting plasma glucose, 2-hour serum insulin, and BMI.'
-    },
-    {
-      key: 'parkinsons',
-      name: 'Parkinson’s Disease Telemonitoring',
-      modality: 'Vocal Frequency & Dysphonia',
-      samples: 195,
-      features: 22,
-      badge: 'ACOUSTIC BIOMARKERS',
-      icon: <Waves size={22} style={{ color: 'var(--quantum-color)' }} />,
-      desc: 'Phonatory impairment analysis evaluating fundamental frequency variation, harmonic-to-noise ratio, and dysphonia.'
-    }
+    { key: 'cancer', name: 'Breast Cancer Cytopathology (WDBC)', modality: 'FNA Cytology Smears & Morphology', samples: 569, features: 30, badge: '12 AUTHENTIC SCANS', icon: <Microscope size={20} style={{ color: 'var(--brand-primary)' }} />, desc: 'High-power FNA cytology biopsies distinguishing malignant from benign breast neoplasms.', accent: 'brand' },
+    { key: 'custom_mri_scans', name: 'Neuroimaging Brain MRI Gallery', modality: 'T1 / T2 / FLAIR Multi-Slice MRI', samples: 12, features: 8, badge: '12 RAW MRI SCANS', icon: <Cpu size={20} style={{ color: 'var(--quantum-color)' }} />, desc: 'Authentic axial brain MRI scans with GLCM spatial contrast, tissue heterogeneity & tumor radiomics.', accent: 'quantum' },
+    { key: 'custom_ct_scans', name: 'Thoracic High-Resolution CT Scans', modality: 'Chest CT Radiomics & Density', samples: 12, features: 8, badge: '12 RAW CT SCANS', icon: <Activity size={20} style={{ color: 'var(--hybrid-color)' }} />, desc: 'Authentic thoracic CT pulmonary scans measuring Hounsfield density, nodule margins, and parenchymal texture.', accent: 'hybrid' },
+    { key: 'cardiovascular', name: 'UCI Heart Disease Cohort', modality: 'Hemodynamics, ECG & Fluoroscopy', samples: 303, features: 13, badge: 'CLINICAL VITALS', icon: <Heart size={20} style={{ color: 'var(--status-danger)' }} />, desc: 'Coronary artery disease triage analyzing exercise ST depression, resting blood pressure, and cholesterol.', accent: 'classical' },
+    { key: 'diabetes', name: 'Pima Indian Diabetes Metabolic Profile', modality: 'Endocrine & Metabolic Labs', samples: 768, features: 8, badge: 'ENDOCRINE LABS', icon: <Activity size={20} style={{ color: 'var(--brand-primary)' }} />, desc: 'Type-2 diabetes risk profiling evaluating fasting plasma glucose, 2-hour serum insulin, and BMI.', accent: 'brand' },
+    { key: 'parkinsons', name: "Parkinson's Disease Telemonitoring", modality: 'Vocal Frequency & Dysphonia', samples: 195, features: 22, badge: 'ACOUSTIC BIOMARKERS', icon: <Waves size={20} style={{ color: 'var(--quantum-color)' }} />, desc: 'Phonatory impairment analysis evaluating fundamental frequency variation, harmonic-to-noise ratio, and dysphonia.', accent: 'quantum' }
   ];
 
   return (
-    <div className="hub-section active" style={{ paddingBottom: '50px' }}>
+    <div className="hub-section active" style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 32px 96px' }}>
 
-      {/* ===================================================================== */}
-      {/* VIEW 1: UPLOAD & FILE SELECTION PORTAL (PRIMARY ENTRY POINT)          */}
-      {/* ===================================================================== */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* VIEW 1 — UPLOAD PORTAL                                             */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
       {pageView === 'upload' && (
-        <div className="eda-container">
-          {/* Executive Hero Banner matching OverviewSection */}
-          <div className="overview-hero">
-            <div className="overview-hero-content">
-              <div className="overview-hero-eyebrow">
-                <span className="dot" />
-                Automated Multimodal Ingestion & Quantum EDA
+        <>
+          {/* Editorial Hero */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '56px', flexWrap: 'wrap', padding: '64px 0 72px' }}>
+            <div style={{ flex: 1, minWidth: '320px', maxWidth: '720px' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '6px 14px', marginBottom: '28px',
+                border: '1px solid var(--border-color)', borderRadius: '999px',
+                background: 'var(--bg-card)'
+              }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-primary)', boxShadow: '0 0 8px var(--brand-glow)' }} />
+                <span style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  Automated Multimodal Ingestion & Quantum EDA
+                </span>
               </div>
-              <h1>Dataset Ingestion & Diagnostic Profiler</h1>
-              <p className="overview-hero-desc">
-                Choose or upload any clinical cohort, multimodal archive, or radiological scan. Our analyzer detects format, decodes authentic scans, extracts radiomic biomarkers, and executes leak-free 80/20 quantum preprocessing in real time.
+
+              <h1 style={{
+                margin: '0 0 20px',
+                fontSize: 'clamp(2rem, 4vw, 2.9rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.035em',
+                lineHeight: 1.1,
+                color: 'var(--text-primary)'
+              }}>
+                Dataset ingestion &{' '}
+                <span style={{ color: 'var(--brand-primary)' }}>diagnostic profiler</span>.
+              </h1>
+
+              <p style={{ margin: '0 0 36px', ...T.body, maxWidth: '560px' }}>
+                Choose or upload any clinical cohort, multimodal archive, or radiological scan.
+                The analyzer detects format, decodes authentic scans, extracts radiomic
+                biomarkers, and executes leak-free 80/20 quantum preprocessing in real time.
               </p>
-              <div className="overview-hero-actions">
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <label
                   htmlFor="dataset-upload-input"
-                  className="btn btn-primary"
-                  style={{ cursor: 'pointer', gap: '8px' }}
+                  style={{
+                    height: '46px', padding: '0 22px', borderRadius: 'var(--radius-md)', border: 'none',
+                    background: 'var(--brand-primary)', color: '#FFFFFF', fontSize: '0.88rem', fontWeight: 600,
+                    cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    boxShadow: '0 2px 8px var(--brand-glow)', transition: 'all 0.2s ease', letterSpacing: '-0.01em'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-primary)'; }}
                 >
-                  <Upload size={15} />
-                  Choose File from Computer
+                  <Upload size={15} /> Choose File
                 </label>
+
                 {selectedDataset && (
                   <button
                     onClick={() => setPageView('overview')}
-                    className="btn btn-outline"
-                    style={{ gap: '8px' }}
+                    style={{
+                      height: '46px', padding: '0 22px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'transparent',
+                      color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600,
+                      cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                      transition: 'all 0.2s ease', letterSpacing: '-0.01em'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <Eye size={15} />
-                    Inspect Active Cohort ({selectedDataset})
-                    <ArrowRight size={14} />
+                    <Eye size={15} /> Inspect Cohort <ArrowRight size={14} />
                   </button>
                 )}
               </div>
             </div>
-            <div className="overview-hero-atom">
-              <Atom4Orbits size={160} color="var(--brand-primary)" />
+
+            <div style={{ position: 'relative', width: '230px', height: '230px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ position: 'absolute', inset: 0, border: '1px solid var(--border-color)', borderRadius: '50%' }} />
+              <div style={{ position: 'absolute', inset: '26px', border: '1px dashed var(--border-color)', borderRadius: '50%', opacity: 0.55 }} />
+              <Atom4Orbits size={120} color="var(--brand-primary)" />
             </div>
           </div>
 
-          {/* Quick Stats Row */}
-          <div className="overview-stats-row">
-            <div className="overview-stat-tile" data-accent="brand">
-              <div className="stat-tile-value" style={{ color: 'var(--brand-primary)' }}>
+          {/* Hairline Stats Table */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            borderTop: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border-color)',
+            marginBottom: '80px'
+          }}>
+            <div style={{ padding: '28px', borderLeft: 'none' }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '10px' }}>
                 {datasetsList.length > 0 ? `${datasetsList.length}+` : '6+'}
               </div>
-              <div className="stat-tile-label">Benchmark Cohorts</div>
-              <Database size={28} className="stat-tile-icon" />
+              <div style={T.eyebrow}>Benchmark Cohorts</div>
             </div>
-            <div className="overview-stat-tile" data-accent="classical">
-              <div className="stat-tile-value">80 / 20</div>
-              <div className="stat-tile-label">Stratified Train / Test</div>
-              <Layers size={28} className="stat-tile-icon" />
+            <div style={{ padding: '28px', borderLeft: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: 'var(--classical-color)', fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '10px' }}>80 / 20</div>
+              <div style={T.eyebrow}>Stratified Split</div>
             </div>
-            <div className="overview-stat-tile" data-accent="quantum">
-              <div className="stat-tile-value" style={{ color: 'var(--quantum-color)' }}>4 Qubits</div>
-              <div className="stat-tile-label">Hilbert Space PCA</div>
-              <Cpu size={28} className="stat-tile-icon" />
+            <div style={{ padding: '28px', borderLeft: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: 'var(--quantum-color)', fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '10px' }}>4 Q</div>
+              <div style={T.eyebrow}>Hilbert PCA</div>
             </div>
-            <div className="overview-stat-tile" data-accent="hybrid">
-              <div className="stat-tile-value" style={{ color: 'var(--hybrid-color)' }}>7 Stages</div>
-              <div className="stat-tile-label">Live Preprocessing Telemetry</div>
-              <Sparkles size={28} className="stat-tile-icon" />
+            <div style={{ padding: '28px', borderLeft: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: 'var(--hybrid-color)', fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '10px' }}>7</div>
+              <div style={T.eyebrow}>Live Pipeline Stages</div>
             </div>
           </div>
 
-          {/* Upload Error Banner if any */}
+          {/* Upload Error Banner */}
           {uploadError && (
-            <div className="clinical-callout" style={{ borderLeftColor: 'var(--status-danger)', marginBottom: '24px' }}>
-              <AlertCircle size={20} style={{ color: 'var(--status-danger)' }} />
+            <div style={{
+              display: 'flex', gap: '14px', alignItems: 'flex-start',
+              padding: '18px 22px', marginBottom: '32px',
+              background: 'var(--status-danger-bg)', border: '1px solid rgba(220, 38, 38, 0.25)',
+              borderRadius: 'var(--radius-md)'
+            }}>
+              <AlertCircle size={18} style={{ color: 'var(--status-danger)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <div className="clinical-callout-title" style={{ color: 'var(--status-danger)' }}>Ingestion Error</div>
-                <div className="clinical-callout-text">{uploadError}</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--status-danger)', marginBottom: '4px' }}>Ingestion Error</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--status-danger)', lineHeight: 1.6 }}>{uploadError}</div>
               </div>
             </div>
           )}
 
-          {/* Minimalist Drag & Drop Upload Zone */}
-          <div
-            className={`eda-dropzone ${dragActive ? 'drag-active' : ''}`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              id="dataset-upload-input"
-              style={{ display: 'none' }}
-              onChange={handleFileInputChange}
-              accept=".csv,.tsv,.xlsx,.parquet,.pq,.json,.zip,.tar,.tar.gz,.tgz,.dcm,.dicom,.nii,.nii.gz,.png,.jpg,.jpeg,.webp"
+          {/* Minimalist Drop Zone */}
+          <section style={{ marginBottom: '80px' }}>
+            <SectionHeader index="01" icon={Upload} title="Ingest a Dataset" subtitle="Drop any clinical CSV, multimodal ZIP archive, DICOM, NIfTI, or radiological scan. The live 7-stage telemetry logger activates automatically." />
+
+            <div
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              style={{
+                position: 'relative',
+                padding: '56px 32px',
+                border: dragActive ? '1.5px dashed var(--brand-primary)' : '1px dashed var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                background: dragActive ? 'var(--brand-bg)' : 'var(--bg-inset)',
+                textAlign: 'center',
+                transition: 'all 0.25s ease'
+              }}
+            >
+              <input
+                type="file"
+                id="dataset-upload-input"
+                style={{ display: 'none' }}
+                onChange={handleFileInputChange}
+                accept=".csv,.tsv,.xlsx,.parquet,.pq,.json,.zip,.tar,.tar.gz,.tgz,.dcm,.dicom,.nii,.nii.gz,.png,.jpg,.jpeg,.webp"
+              />
+
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '50%',
+                background: 'var(--brand-bg)', border: '1px solid var(--brand-glow)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px'
+              }}>
+                <FileUp size={22} style={{ color: 'var(--brand-primary)' }} />
+              </div>
+
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px', letterSpacing: '-0.01em' }}>
+                Drag & drop your biomedical dataset
+              </h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0 0 24px', maxWidth: '540px', marginLeft: 'auto', marginRight: 'auto' }}>
+                Supports raw clinical records, multimodal archives, and radiological scans.
+              </p>
+
+              <label
+                htmlFor="dataset-upload-input"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--brand-primary)', background: 'transparent',
+                  color: 'var(--brand-primary)', fontSize: '0.85rem', fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-bg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Upload size={14} /> Browse Files
+              </label>
+
+              {/* Format Pills */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginTop: '28px' }}>
+                {[
+                  { icon: FileSpreadsheet, label: '.CSV / .TSV', tone: 'brand' },
+                  { icon: FolderArchive, label: '.ZIP / .TAR', tone: 'quantum' },
+                  { icon: Database, label: '.PARQUET', tone: 'classical' },
+                  { icon: Microscope, label: 'DICOM / NIfTI', tone: 'hybrid' },
+                  { icon: ImageIcon, label: 'PNG / JPG', tone: 'brand' }
+                ].map((p, i) => {
+                  const t = PARADIGM[p.tone];
+                  return (
+                    <span key={i} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      padding: '4px 10px', borderRadius: '999px',
+                      fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.04em',
+                      background: t.bg, color: t.color, border: `1px solid ${t.glow}`
+                    }}>
+                      <p.icon size={11} /> {p.label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* Registered Cohorts */}
+          <section>
+            <SectionHeader
+              index="02"
+              icon={Layers}
+              title="Clinical Benchmark Cohorts"
+              subtitle="Pre-configured cohorts ready for one-click deep diagnostic profiling."
+              actions={
+                datasetsList.some(d => !d.built_in) && (
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '6px', background: 'var(--quantum-bg)', color: 'var(--quantum-color)', border: '1px solid var(--quantum-glow)' }}>
+                    Custom Cohorts Active
+                  </span>
+                )
+              }
             />
 
-            <div className="eda-dropzone-icon">
-              <FileUp size={28} />
-            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+              {registeredCohorts.map(cohort => {
+                const t = PARADIGM[cohort.accent];
+                return (
+                  <div
+                    key={cohort.key}
+                    onClick={() => runPipelineWithLogs('cohort', cohort.key)}
+                    style={{
+                      position: 'relative', overflow: 'hidden',
+                      background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+                      border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)',
+                      padding: '24px', cursor: 'pointer',
+                      transition: 'all 0.25s ease', boxShadow: 'var(--shadow-card)'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = t.color; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                  >
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: t.color }} />
 
-            <h3 className="eda-dropzone-title">
-              Drag & Drop your Biomedical Dataset or Scan here
-            </h3>
-            <p className="eda-dropzone-desc">
-              Drop any clinical file to trigger the live 7-stage EDA & preprocessing logger. Supports raw clinical records, multimodal ZIP/TAR archives, and radiological scans.
-            </p>
-
-            <label
-              htmlFor="dataset-upload-input"
-              className="btn btn-primary"
-              style={{ cursor: 'pointer', gap: '8px', padding: '10px 22px' }}
-            >
-              <Upload size={16} />
-              <span>Browse Computer Files</span>
-            </label>
-
-            {/* Supported format tags */}
-            <div className="eda-format-pills">
-              <span className="eda-format-pill">
-                <FileSpreadsheet size={13} style={{ color: 'var(--brand-primary)' }} /> .CSV / .TSV / .XLSX
-              </span>
-              <span className="eda-format-pill">
-                <FolderArchive size={13} style={{ color: 'var(--quantum-color)' }} /> .ZIP / .TAR (Images + Metadata)
-              </span>
-              <span className="eda-format-pill">
-                <Database size={13} style={{ color: 'var(--classical-color)' }} /> .PARQUET / .JSON
-              </span>
-              <span className="eda-format-pill">
-                <Microscope size={13} style={{ color: 'var(--hybrid-color)' }} /> DICOM (.dcm) / NIfTI (.nii)
-              </span>
-              <span className="eda-format-pill">
-                <ImageIcon size={13} style={{ color: 'var(--brand-primary)' }} /> PNG / JPG / WebP Scans
-              </span>
-            </div>
-          </div>
-
-          {/* Quick-Select Section: Registered Cohorts */}
-          <div>
-            <div className="pipeline-section-title" style={{ marginBottom: '8px' }}>
-              <Layers size={20} className="pipe-icon" />
-              <span>Clinical Benchmark Cohorts</span>
-              {datasetsList.some(d => !d.built_in) && (
-                <span className="badge-sih" style={{ marginLeft: 'auto', fontSize: '0.68rem', background: 'var(--quantum-bg)', color: 'var(--quantum-color)' }}>
-                  CUSTOM COHORTS ACTIVE
-                </span>
-              )}
-            </div>
-            <p style={{ margin: '0 0 20px 0', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
-              Select any pre-configured clinical cohort to inspect raw image slices, radiomics, and live preprocessing stages.
-            </p>
-
-            <div className="eda-cohort-grid">
-              {registeredCohorts.map(cohort => (
-                <div
-                  key={cohort.key}
-                  className="eda-cohort-card"
-                  onClick={() => runPipelineWithLogs('cohort', cohort.key)}
-                >
-                  <div>
-                    <div className="eda-cohort-header">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div className="eda-cohort-icon-box">
-                          {cohort.icon}
-                        </div>
-                        <div>
-                          <div className="eda-cohort-name">{cohort.name}</div>
-                          <span className="eda-cohort-modality">{cohort.modality}</span>
-                        </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '14px' }}>
+                      <div style={{
+                        width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
+                        background: t.bg, border: `1px solid ${t.glow}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}>
+                        {cohort.icon}
                       </div>
-                      <span className="badge-sih" style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--brand-bg)', color: 'var(--brand-primary)' }}>
+                      <span style={{
+                        fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em',
+                        padding: '3px 8px', borderRadius: '4px',
+                        background: t.bg, color: t.color, border: `1px solid ${t.glow}`
+                      }}>
                         {cohort.badge}
                       </span>
                     </div>
 
-                    <p className="eda-cohort-desc">
+                    <div style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px', letterSpacing: '-0.01em' }}>
+                      {cohort.name}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: t.color, marginBottom: '12px', fontWeight: 500 }}>
+                      {cohort.modality}
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '18px' }}>
                       {cohort.desc}
                     </p>
-                  </div>
 
-                  <div className="eda-cohort-footer">
-                    <span>
-                      <strong style={{ color: 'var(--text-primary)' }}>{cohort.samples}</strong> Cases • <strong style={{ color: 'var(--text-primary)' }}>{cohort.features}</strong> Features
-                    </span>
-
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline"
-                      style={{ gap: '4px', fontSize: '0.78rem', padding: '4px 10px' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        runPipelineWithLogs('cohort', cohort.key);
-                      }}
-                    >
-                      <span>Analyze</span>
-                      <ArrowRight size={13} />
-                    </button>
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      paddingTop: '14px', borderTop: '1px solid var(--border-color)'
+                    }}>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{cohort.samples}</span> cases •
+                        <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', marginLeft: '4px' }}>{cohort.features}</span> features
+                      </div>
+                      <ArrowRight size={14} style={{ color: t.color }} />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          </div>
-        </div>
+          </section>
+        </>
       )}
 
-      {/* ===================================================================== */}
-      {/* VIEW 2: INTERACTIVE LIVE EDA & PREPROCESSING STAGE LOGGER             */}
-      {/* ===================================================================== */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* VIEW 2 — LIVE PIPELINE LOGGER                                      */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
       {pageView === 'pipeline' && (
-        <div className="eda-container">
-          {/* Top Stage Header */}
-          <div className="eda-card" style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', marginBottom: '18px' }}>
+        <>
+          {/* Progress Header */}
+          <MinimalCard accent="brand" style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap', marginBottom: '22px' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span className="badge-sih" style={{
-                    background: pipelineComplete ? 'var(--status-success-bg)' : 'var(--brand-bg)',
-                    color: pipelineComplete ? 'var(--status-success)' : 'var(--brand-primary)',
-                    fontWeight: 700
-                  }}>
-                    {pipelineComplete ? '● PIPELINE COMPLETED' : '● PROCESSING STAGES IN PROGRESS...'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <span style={{ ...T.eyebrow, color: pipelineComplete ? 'var(--status-success)' : 'var(--brand-primary)' }}>
+                    {pipelineComplete ? '● Pipeline Complete' : '● Processing'}
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    Dataset Cohort: <strong style={{ color: 'var(--text-primary)' }}>{selectedDataset}</strong>
+                  <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    Cohort: <strong style={{ color: 'var(--text-primary)' }}>{selectedDataset}</strong>
                   </span>
                 </div>
-                <h2 style={{ fontSize: '1.45rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                  Automated Preprocessing & Telemetry Progression
-                </h2>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+                  Automated Preprocessing Telemetry
+                </h1>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setPageView('upload')}
-                  className="btn btn-sm btn-outline"
-                  style={{ gap: '6px' }}
-                >
-                  <Upload size={14} />
-                  <span>Choose Another File</span>
-                </button>
-
-                {pipelineComplete && (
-                  <button
-                    type="button"
-                    onClick={() => setPageView('overview')}
-                    className="btn btn-sm btn-primary"
-                    style={{ gap: '6px', fontWeight: 700 }}
-                  >
-                    <span>Inspect Deep Diagnostic Profile</span>
-                    <ArrowRight size={15} />
-                  </button>
-                )}
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <PillButton onClick={() => setPageView('upload')} icon={Upload}><Upload size={14} /> Choose Another</PillButton>
+                {pipelineComplete && <PrimaryButton onClick={() => setPageView('overview')} icon={ArrowRight}>Inspect Diagnostic Profile</PrimaryButton>}
               </div>
             </div>
 
-            {/* Overall Progress Bar */}
+            {/* Progress Bar */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Stage {Math.min(currentStageIdx + 1, 7)} of 7: {pipelineStages[currentStageIdx]?.name || 'Initializing'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.78rem' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Stage <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{Math.min(currentStageIdx + 1, 7)}</strong> of <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>7</strong> — {pipelineStages[currentStageIdx]?.name || 'Initializing'}
                 </span>
-                <span style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{pipelineProgress}% Complete</span>
+                <span style={{ fontWeight: 700, color: 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>{pipelineProgress}%</span>
               </div>
-              <div style={{ height: '8px', background: 'var(--bg-inset)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '4px', background: 'var(--bg-inset)', borderRadius: '2px', overflow: 'hidden' }}>
                 <div style={{
-                  width: `${pipelineProgress}%`,
-                  height: '100%',
+                  width: `${pipelineProgress}%`, height: '100%',
                   background: 'linear-gradient(90deg, var(--brand-primary), var(--quantum-color))',
-                  transition: 'width 0.25s ease-out'
+                  transition: 'width 0.3s ease-out'
                 }} />
               </div>
             </div>
-          </div>
+          </MinimalCard>
 
-          {/* Grid: 7 Visual Stages on Left, Terminal Logger on Right */}
-          <div className="eda-pipeline-grid">
-
-            {/* Visual 7-Stage Progression Stepper */}
-            <div className="eda-stepper-container">
-              <div className="pipeline-section-title" style={{ marginBottom: '12px' }}>
-                <Layers size={18} className="pipe-icon" />
-                <span>Sequential Pipeline Stages</span>
+          {/* Two-Column: Stepper + Terminal */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '24px' }}>
+            {/* Stepper */}
+            <MinimalCard>
+              <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Layers size={14} style={{ color: 'var(--text-tertiary)' }} />
+                <span style={T.eyebrow}>Sequential Stages</span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 {pipelineStages.map((st, idx) => {
                   const isDone = st.status === 'COMPLETED';
                   const isCurrent = st.status === 'RUNNING';
+                  const isLast = idx === pipelineStages.length - 1;
 
                   return (
-                    <div
-                      key={st.id}
-                      className={`eda-stage-item ${isCurrent ? 'current' : isDone ? 'completed' : ''}`}
-                    >
-                      {/* Status Icon */}
-                      <div className={`eda-stage-icon-circle ${isDone ? 'done' : isCurrent ? 'active' : 'pending'}`}>
-                        {isDone ? (
-                          <Check size={14} strokeWidth={3} />
-                        ) : isCurrent ? (
-                          <RefreshCw size={13} className="spin" />
-                        ) : (
-                          idx + 1
-                        )}
+                    <div key={st.id} style={{ display: 'flex', gap: '14px', position: 'relative' }}>
+                      {/* Vertical Connector */}
+                      {!isLast && (
+                        <div style={{
+                          position: 'absolute', left: '13px', top: '32px', bottom: '-8px',
+                          width: '1px',
+                          background: isDone ? 'var(--status-success)' : 'var(--border-color)'
+                        }} />
+                      )}
+
+                      {/* Number Circle */}
+                      <div style={{
+                        width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                        border: `1.5px solid ${isDone ? 'var(--status-success)' : isCurrent ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+                        background: isDone ? 'var(--status-success-bg)' : isCurrent ? 'var(--brand-bg)' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.72rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                        color: isDone ? 'var(--status-success)' : isCurrent ? 'var(--brand-primary)' : 'var(--text-tertiary)',
+                        transition: 'all 0.3s ease', zIndex: 1
+                      }}>
+                        {isDone ? <Check size={13} strokeWidth={3} /> : isCurrent ? <RefreshCw size={12} className="spinning" /> : String(idx + 1).padStart(2, '0')}
                       </div>
 
                       {/* Content */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.86rem', color: isCurrent ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
+                      <div style={{ flex: 1, paddingBottom: isLast ? '0' : '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{
+                            fontSize: '0.88rem', fontWeight: 600,
+                            color: isCurrent ? 'var(--brand-primary)' : isDone ? 'var(--text-primary)' : 'var(--text-secondary)',
+                            letterSpacing: '-0.01em'
+                          }}>
                             {st.name}
                           </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
-                            {st.duration_ms ? `${st.duration_ms}ms` : ''}
-                          </span>
+                          {st.duration_ms && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>
+                              {st.duration_ms}ms
+                            </span>
+                          )}
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-tertiary)', lineHeight: 1.55 }}>
                           {st.summary}
                         </p>
                       </div>
@@ -709,49 +877,65 @@ export default function DatasetOverview() {
                   );
                 })}
               </div>
-            </div>
+            </MinimalCard>
 
-            {/* Live Terminal Logger Console */}
-            <div className="eda-terminal-wrapper">
-              {/* Terminal Window Header */}
-              <div className="eda-terminal-topbar">
+            {/* Terminal Logger */}
+            <div style={{
+              background: '#0B1020',
+              border: '1px solid rgba(99, 102, 241, 0.2)',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)'
+            }}>
+              {/* Terminal Header */}
+              <div style={{
+                padding: '12px 16px',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'rgba(255,255,255,0.02)'
+              }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div className="eda-terminal-controls">
-                    <div className="eda-terminal-dot close" />
-                    <div className="eda-terminal-dot min" />
-                    <div className="eda-terminal-dot max" />
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444' }} />
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F59E0B' }} />
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }} />
                   </div>
-                  <span style={{ color: '#94A3B8', fontSize: '0.76rem', fontWeight: 600, fontFamily: 'monospace' }}>
+                  <span style={{ fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.74rem', color: '#94A3B8', letterSpacing: '0.02em' }}>
                     qmed-pipeline-telemetry.log
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '50%',
+                    width: '7px', height: '7px', borderRadius: '50%',
                     background: pipelineRunning ? 'var(--brand-primary)' : '#64748B',
-                    display: 'inline-block',
-                    animation: pipelineRunning ? 'statusPulse 1.5s infinite' : 'none'
+                    boxShadow: pipelineRunning ? '0 0 8px var(--brand-primary)' : 'none',
+                    animation: pipelineRunning ? 'pulse 1.5s infinite' : 'none'
                   }} />
-                  <span style={{ fontSize: '0.72rem', color: pipelineRunning ? 'var(--brand-primary)' : '#94A3B8', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.7rem', color: pipelineRunning ? 'var(--brand-primary)' : '#94A3B8', fontWeight: 700, letterSpacing: '0.1em' }}>
                     {pipelineRunning ? 'STREAMING' : 'IDLE'}
                   </span>
                 </div>
               </div>
 
               {/* Terminal Body */}
-              <div className="eda-terminal-body">
+              <div style={{
+                padding: '20px', flex: 1, minHeight: '420px', maxHeight: '480px', overflowY: 'auto',
+                fontFamily: 'Consolas, Monaco, "Courier New", monospace', fontSize: '0.78rem', lineHeight: 1.7
+              }}>
                 {terminalLogs.map((line, idx) => {
                   let color = '#CBD5E1';
-                  if (line.includes('[SUCCESS]')) color = 'var(--brand-primary)';
-                  if (line.includes('[ERROR]')) color = 'var(--status-danger)';
-                  if (line.includes('[STAGE')) color = 'var(--quantum-color)';
-                  if (line.includes('Quantum PCA')) color = 'var(--hybrid-color)';
+                  if (line.includes('[SUCCESS]')) color = '#10B981';
+                  if (line.includes('[ERROR]')) color = '#EF4444';
+                  if (line.includes('[STAGE')) color = '#0D9488';
+                  if (line.includes('Quantum PCA')) color = '#F59E0B';
+                  if (line.includes('[INFO]')) color = '#94A3B8';
 
                   return (
-                    <div key={idx} style={{ color, marginBottom: '4px', wordBreak: 'break-word' }}>
+                    <div key={idx} style={{ color, marginBottom: '3px', wordBreak: 'break-word' }}>
+                      <span style={{ color: '#475569', marginRight: '8px' }}>›</span>
                       {line}
                     </div>
                   );
@@ -759,930 +943,815 @@ export default function DatasetOverview() {
                 <div ref={terminalEndRef} />
               </div>
 
-              {/* Terminal Footer Actions */}
-              <div className="eda-terminal-footer">
-                <span style={{ fontSize: '0.74rem', color: '#64748B' }}>
-                  Total Stages: 7 • Zero Leakage Verified
+              {/* Terminal Footer */}
+              <div style={{
+                padding: '12px 16px',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'rgba(255,255,255,0.02)'
+              }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748B', fontFamily: 'monospace' }}>
+                  7 stages • zero-leakage verified
                 </span>
-
                 <button
-                  type="button"
                   onClick={() => setPageView('overview')}
-                  className="btn btn-sm btn-primary"
-                  style={{ fontSize: '0.8rem', padding: '6px 14px', fontWeight: 600, gap: '6px' }}
+                  disabled={!pipelineComplete}
+                  style={{
+                    height: '32px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none',
+                    background: pipelineComplete ? 'var(--brand-primary)' : 'rgba(255,255,255,0.08)',
+                    color: pipelineComplete ? '#FFFFFF' : '#64748B',
+                    fontSize: '0.78rem', fontWeight: 600,
+                    cursor: pipelineComplete ? 'pointer' : 'not-allowed',
+                    display: 'inline-flex', alignItems: 'center', gap: '6px'
+                  }}
                 >
-                  <span>Proceed to Overview</span>
-                  <ArrowRight size={14} />
+                  Proceed <ArrowRight size={12} />
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* ===================================================================== */}
-      {/* VIEW 3: FULL DEEP DIAGNOSTIC PROFILE & AUTHENTIC 3-RANDOM IMAGES     */}
-      {/* ===================================================================== */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* VIEW 3 — DEEP DIAGNOSTIC PROFILE                                   */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
       {pageView === 'overview' && (
-        <div className="eda-container">
-          {/* Top Header Card with Navigation, Title, and Dataset Selector */}
-          <div className="eda-card" style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <>
+          {/* Page Header */}
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <PillButton onClick={() => setPageView('upload')}><Upload size={13} /> Ingestion</PillButton>
+              <PillButton onClick={() => setShowLogsModal(true)} tone="quantum"><Terminal size={13} /> Telemetry</PillButton>
+              <span style={{
+                fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                padding: '4px 10px', borderRadius: '6px',
+                background: 'var(--status-success-bg)', color: 'var(--status-success)',
+                border: '1px solid rgba(22, 163, 74, 0.25)'
+              }}>
+                Leak-Free 80/20 Verified
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setPageView('upload')}
-                    className="btn btn-sm btn-outline"
-                    style={{ gap: '5px', padding: '4px 10px', fontSize: '0.76rem', fontWeight: 600 }}
-                  >
-                    <Upload size={13} />
-                    <span>← Ingestion Portal</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowLogsModal(true)}
-                    className="btn btn-sm btn-outline"
-                    style={{ gap: '5px', padding: '4px 10px', fontSize: '0.76rem', fontWeight: 600, color: 'var(--brand-primary)' }}
-                  >
-                    <Terminal size={13} />
-                    <span>View Telemetry Logs</span>
-                  </button>
-
-                  <span className="badge-sih" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success)', borderColor: 'rgba(5, 150, 105, 0.3)' }}>
-                    LEAK-FREE 80/20 SPLIT VERIFIED
-                  </span>
-                </div>
-
-                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-                  {overviewData?.dataset_name || selectedDataset} — Diagnostic Profile
+                <div style={T.eyebrow}>Diagnostic Profile</div>
+                <h1 style={{ margin: '8px 0 0', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
+                  {overviewData?.dataset_name || selectedDataset}
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '0.88rem' }}>
+                <p style={{ margin: '8px 0 0', ...T.body, maxWidth: '640px' }}>
                   Exploratory data analysis, authentic cohort imaging, radiomic biomarkers, and 4-qubit Hilbert projection telemetry.
                 </p>
               </div>
 
-              {/* Dataset switcher dropdown */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-inset)', padding: '6px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                  <Database size={16} style={{ color: 'var(--brand-primary)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 14px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                  <Database size={14} style={{ color: 'var(--brand-primary)' }} />
                   <select
                     value={selectedDataset}
                     onChange={(e) => setSelectedDataset(e.target.value)}
-                    style={{ border: 'none', background: 'transparent', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                    style={{
+                      border: 'none', background: 'transparent', color: 'var(--text-primary)',
+                      fontSize: '0.85rem', fontWeight: 600, outline: 'none', cursor: 'pointer', minWidth: '160px'
+                    }}
                   >
                     {datasetsList.map(ds => {
                       const dKey = ds.id || ds.key;
                       const cleanName = ds.name.replace(/^Custom:\s*/i, '');
-                      return (
-                        <option key={dKey} value={dKey}>
-                          {!ds.built_in ? `[Custom] ${cleanName}` : cleanName}
-                        </option>
-                      );
+                      return <option key={dKey} value={dKey}>{!ds.built_in ? `[Custom] ${cleanName}` : cleanName}</option>;
                     })}
                   </select>
                 </div>
 
                 {isCustom && (
                   <button
-                    type="button"
                     onClick={() => handleDeleteDataset(selectedDataset)}
-                    className="btn btn-sm btn-outline"
-                    style={{ color: 'var(--status-danger)', borderColor: 'rgba(220, 38, 38, 0.4)', padding: '6px 10px', fontSize: '0.78rem' }}
-                    title="Remove custom dataset"
+                    style={{
+                      width: '36px', height: '36px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid rgba(220, 38, 38, 0.3)', background: 'transparent',
+                      color: 'var(--status-danger)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--status-danger-bg)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
                     <Trash2 size={14} />
                   </button>
                 )}
               </div>
             </div>
-
-            {/* Segmented Perspective Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: '12px' }}>
-              <div className="eda-segmented-tabs">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('basic')}
-                  className={`eda-segmented-tab ${activeTab === 'basic' ? 'active brand' : ''}`}
-                >
-                  <Info size={15} />
-                  <span>Basic (Clinician / Student View)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('advanced')}
-                  className={`eda-segmented-tab ${activeTab === 'advanced' ? 'active quantum' : ''}`}
-                >
-                  <Cpu size={15} />
-                  <span>Advanced (Quantum ML / Researcher View)</span>
-                </button>
-              </div>
-
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                Active Layer: <strong style={{ color: 'var(--text-primary)' }}>{activeTab === 'basic' ? 'Clinical Context, Class Balance & Biomarkers' : 'Hilbert Eigenspectrum & Covariate Shift'}</strong>
-              </div>
-            </div>
           </div>
 
-          {/* Top Metric Cards - Matching OverviewSection stat tile system */}
-          <div className="overview-stats-row" style={{ marginBottom: '24px' }}>
-            <div className="overview-stat-tile" data-accent="classical">
-              <div className="stat-tile-value">{overviewData?.total_samples || 0}</div>
-              <div className="stat-tile-label">Total Cohort Records</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                {overviewData?.train_samples || 0} Train (80%) • {overviewData?.test_samples || 0} Test (20%)
-              </div>
-              <Database size={28} className="stat-tile-icon" />
-            </div>
-
-            <div className="overview-stat-tile" data-accent="classical">
-              <div className="stat-tile-value">{overviewData?.total_features || 0}</div>
-              <div className="stat-tile-label">Feature Dimensions</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '4px', textTransform: 'capitalize' }}>
-                Modality: {overviewData?.modality || 'Tabular'}
-              </div>
-              <Layers size={28} className="stat-tile-icon" />
-            </div>
-
-            <div className="overview-stat-tile" data-accent="quantum">
-              <div className="stat-tile-value" style={{ color: 'var(--quantum-color)' }}>
-                {pcaData.cumulative_variance_pct || 79.2}%
-              </div>
-              <div className="stat-tile-label">4-Qubit PCA Variance</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                16D Hilbert Space ({pcaData.n_qubits || 4} Qubits)
-              </div>
-              <Cpu size={28} className="stat-tile-icon" />
-            </div>
-
-            <div className="overview-stat-tile" data-accent="brand">
-              <div className="stat-tile-value" style={{ color: 'var(--brand-primary)' }}>
-                {healthyPct}% / {diseasedPct}%
-              </div>
-              <div className="stat-tile-label">Cohort Balance</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                {overviewData?.negative_label?.split(' ')[0]} vs {overviewData?.positive_label?.split(' ')[0]}
-              </div>
-              <PieChart size={28} className="stat-tile-icon" />
-            </div>
+          {/* Hairline Stats */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            borderTop: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border-color)',
+            marginBottom: '64px'
+          }}>
+            <StatTile
+              value={overviewData?.total_samples || 0}
+              label="Total Records"
+              sub={`${overviewData?.train_samples || 0} train • ${overviewData?.test_samples || 0} test`}
+              accent="classical"
+              isFirst
+            />
+            <StatTile
+              value={overviewData?.total_features || 0}
+              label="Feature Dimensions"
+              sub={overviewData?.modality || 'Tabular'}
+              accent="classical"
+            />
+            <StatTile
+              value={`${pcaData.cumulative_variance_pct || 79.2}%`}
+              label="4-Qubit PCA Variance"
+              sub={`16D Hilbert • ${pcaData.n_qubits || 4} Q`}
+              accent="quantum"
+            />
+            <StatTile
+              value={`${healthyPct} / ${diseasedPct}`}
+              label="Cohort Balance"
+              sub={`${overviewData?.negative_label?.split(' ')[0] || 'Healthy'} vs ${overviewData?.positive_label?.split(' ')[0] || 'Diseased'}`}
+              accent="brand"
+            />
           </div>
 
-          {/* ================================================================= */}
-          {/* SECTION: 3 RANDOM AUTHENTIC IMAGES & CLINICAL EXPLANATIONS        */}
-          {/* ================================================================= */}
-          <div className="eda-card">
-            <div className="eda-card-head">
-              <div>
-                <h3 className="eda-card-title">
-                  {getDomainIcon()}
-                  <span>
-                    {isVisualSample
-                      ? 'Authentic Cohort Scan Gallery (3 Random Samples with Radiomics)'
-                      : 'Clinical Cohort Patient Case Profiles & Biomarkers'}
-                  </span>
-                </h3>
-                <p className="eda-card-subtitle">
-                  {isVisualSample
-                    ? 'Genuine medical scan slices decoded directly from the dataset archive with GLCM texture metrics and diagnostic rationales.'
-                    : `Representative clinical patient profiles with lab biomarkers, phenotypic findings, and risk stratification.`}
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {isVisualSample && (
-                  <button
-                    type="button"
-                    onClick={handlePickRandomImages}
-                    disabled={refreshingImages}
-                    className="btn btn-sm btn-primary"
-                    style={{ gap: '6px', fontSize: '0.8rem', padding: '6px 12px' }}
-                    title="Sample 3 different random images from this dataset"
-                  >
-                    <RefreshCw size={13} className={refreshingImages ? 'spin' : ''} />
-                    <span>Pick 3 New Scans</span>
-                  </button>
-                )}
-
-                <div className="eda-segmented-tabs">
-                  <button
-                    onClick={() => setSampleView('cases')}
-                    className={`eda-segmented-tab ${sampleView === 'cases' ? 'active' : ''}`}
-                    style={{ padding: '4px 10px', fontSize: '0.76rem' }}
-                  >
-                    {isVisualSample ? <ImageIcon size={13} /> : <Stethoscope size={13} />}
-                    <span>{isVisualSample ? `Scans (${sampleCases.length})` : `Cases (${sampleCases.length})`}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setSampleView('table')}
-                    className={`eda-segmented-tab ${sampleView === 'table' ? 'active' : ''}`}
-                    style={{ padding: '4px 10px', fontSize: '0.76rem' }}
-                  >
-                    <Table size={13} />
-                    <span>Table ({sampleRecords.length})</span>
-                  </button>
+          {/* ── 01 · Authentic Cohort Samples ── */}
+          <section style={{ marginBottom: '80px' }}>
+            <SectionHeader
+              index="01"
+              icon={isVisualSample ? ImageIcon : Stethoscope}
+              title={isVisualSample ? 'Authentic Cohort Scan Gallery' : 'Clinical Case Profiles'}
+              subtitle={isVisualSample
+                ? 'Genuine medical scan slices decoded directly from the dataset archive with GLCM texture metrics and diagnostic rationales.'
+                : 'Representative clinical patient profiles with lab biomarkers, phenotypic findings, and risk stratification.'}
+              actions={
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {isVisualSample && (
+                    <PillButton onClick={handlePickRandomImages} disabled={refreshingImages}>
+                      <RefreshCw size={13} className={refreshingImages ? 'spinning' : ''} />
+                      Pick 3 New
+                    </PillButton>
+                  )}
+                  <SegmentedTabs
+                    tabs={[
+                      { id: 'cases', label: `Cases (${sampleCases.length})`, icon: isVisualSample ? <ImageIcon size={12} /> : <Stethoscope size={12} /> },
+                      { id: 'table', label: `Table (${sampleRecords.length})`, icon: <Table size={12} /> }
+                    ]}
+                    active={sampleView}
+                    onChange={setSampleView}
+                  />
+                  <CardActionMenu
+                    title={`${overviewData?.dataset_name || selectedDataset} - Sample Cohort Breakdowns`}
+                    category="sample_cases"
+                    data={{
+                      sample_type: sampleType,
+                      cases_count: sampleCases.length,
+                      samples: sampleCases.map(s => ({
+                        case_id: s.case_id,
+                        sample_id: s.sample_id,
+                        label: s.label,
+                        metrics: s.key_metrics,
+                        finding: s.visual_breakdown
+                      }))
+                    }}
+                    metadata={{ dataset: selectedDataset }}
+                  />
                 </div>
-
-                <CardActionMenu
-                  title={`${overviewData?.dataset_name || selectedDataset} - Sample Cohort Breakdowns`}
-                  category="sample_cases"
-                  data={{
-                    sample_type: sampleType,
-                    cases_count: sampleCases.length,
-                    samples: sampleCases.map(s => ({
-                      case_id: s.case_id,
-                      sample_id: s.sample_id,
-                      label: s.label,
-                      metrics: s.key_metrics,
-                      finding: s.visual_breakdown
-                    }))
-                  }}
-                  metadata={{ dataset: selectedDataset }}
-                />
-              </div>
-            </div>
+              }
+            />
 
             {sampleView === 'cases' ? (
-              <div className="eda-scan-grid">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
                 {sampleCases.map((sample, idx) => (
-                  <div key={idx} className="eda-scan-card">
-                    {/* Header */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div key={idx} style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-lg)', padding: '22px', boxShadow: 'var(--shadow-card)',
+                    position: 'relative', overflow: 'hidden'
+                  }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: sample.is_positive ? 'var(--status-danger)' : 'var(--status-success)' }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div>
-                        <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)', display: 'block' }}>
-                          {sample.sample_id}
-                        </span>
-                        <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
-                          {sample.case_id}
-                        </span>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{sample.sample_id}</div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>{sample.case_id}</div>
                       </div>
-                      <span
-                        className="badge-sih"
-                        style={{
-                          background: sample.is_positive ? 'var(--status-danger-bg)' : 'var(--status-success-bg)',
-                          color: sample.is_positive ? 'var(--status-danger)' : 'var(--status-success)',
-                          fontSize: '0.72rem',
-                          fontWeight: 700
-                        }}
-                      >
+                      <span style={{
+                        fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                        padding: '3px 8px', borderRadius: '4px',
+                        background: sample.is_positive ? 'var(--status-danger-bg)' : 'var(--status-success-bg)',
+                        color: sample.is_positive ? 'var(--status-danger)' : 'var(--status-success)',
+                        border: `1px solid ${sample.is_positive ? 'rgba(220, 38, 38, 0.25)' : 'rgba(22, 163, 74, 0.25)'}`
+                      }}>
                         {sample.label}
                       </span>
                     </div>
 
-                    {/* Visual Image Slice with Zoom & Radiomics */}
                     {sample.image_data_url ? (
-                      <div>
-                        <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '10px' }}>
-                          <div
-                            className="eda-scan-thumb-wrap"
-                            onClick={() => setActiveEnlargedImage(sample)}
-                            title="Click to enlarge scan"
-                          >
-                            <img
-                              src={sample.image_data_url}
-                              alt={sample.sample_id}
-                              className="eda-scan-thumb"
-                            />
-                            <div className="eda-scan-zoom-pill">
-                              <Maximize2 size={12} />
-                            </div>
-                          </div>
-
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
-                                RADIOMICS & GLCM:
-                              </span>
-                              <span className="badge-sih" style={{ fontSize: '0.64rem', background: 'var(--brand-bg)', color: 'var(--brand-primary)' }}>
-                                {sample.modality_badge || 'AUTHENTIC SCAN'}
-                              </span>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                              {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
-                                <div key={mName} className="eda-metric-pill-box">
-                                  <div className="eda-metric-pill-label">{mName}</div>
-                                  <div className="eda-metric-pill-val">
-                                    {typeof mVal === 'number' ? mVal.toFixed(3) : String(mVal)}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                      <>
+                        <div
+                          onClick={() => setActiveEnlargedImage(sample)}
+                          style={{
+                            position: 'relative', cursor: 'zoom-in',
+                            borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                            marginBottom: '14px', border: '1px solid var(--border-color)'
+                          }}
+                        >
+                          <img src={sample.image_data_url} alt={sample.sample_id} style={{ width: '100%', display: 'block' }} />
+                          <div style={{
+                            position: 'absolute', bottom: '10px', right: '10px',
+                            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+                            padding: '4px 8px', borderRadius: '999px',
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            color: '#fff', fontSize: '0.68rem', fontWeight: 600
+                          }}>
+                            <Maximize2 size={10} /> Enlarge
                           </div>
                         </div>
 
-                        {/* In-Depth Diagnostic Explanation */}
-                        <div style={{
-                          fontSize: '0.8rem',
-                          color: 'var(--text-secondary)',
-                          lineHeight: 1.5,
-                          background: 'var(--bg-card-solid)',
-                          padding: '10px 12px',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-color)'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.76rem' }}>
-                            <Sparkles size={13} style={{ color: 'var(--brand-primary)' }} />
-                            <span>Radiomic & Morphological Finding:</span>
-                          </div>
-                          <div>{sample.visual_breakdown}</div>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Tabular biomarker patient case card */
-                      <div>
-                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <Activity size={13} style={{ color: 'var(--brand-primary)' }} />
-                          <span>CLINICAL BIOMARKERS & VITALS:</span>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '6px', marginBottom: '10px' }}>
+                        <div style={T.eyebrow}>Radiomics & GLCM Texture</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '8px', marginBottom: '14px' }}>
                           {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
-                            <div key={mName} className="eda-metric-pill-box">
-                              <div className="eda-metric-pill-label">{mName}</div>
-                              <div className="eda-metric-pill-val">
+                            <div key={mName} style={{ padding: '8px 10px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
+                              <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{mName}</div>
+                              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600, fontVariantNumeric: 'tabular-nums', marginTop: '2px' }}>
+                                {typeof mVal === 'number' ? mVal.toFixed(3) : String(mVal)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ ...T.eyebrow, marginBottom: '8px' }}>Clinical Biomarkers</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '14px' }}>
+                          {Object.entries(sample.key_metrics || {}).map(([mName, mVal]) => (
+                            <div key={mName} style={{ padding: '8px 10px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
+                              <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{mName}</div>
+                              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600, fontVariantNumeric: 'tabular-nums', marginTop: '2px' }}>
                                 {typeof mVal === 'number' ? mVal.toFixed(2) : String(mVal)}
                               </div>
                             </div>
                           ))}
                         </div>
-
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, background: 'var(--bg-card-solid)', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                          <strong style={{ color: 'var(--text-primary)' }}>Diagnostic Finding: </strong>
-                          {sample.visual_breakdown}
-                        </div>
-                      </div>
+                      </>
                     )}
+
+                    <div style={{
+                      padding: '12px 14px', background: 'var(--bg-inset)',
+                      borderRadius: 'var(--radius-md)', borderLeft: '2px solid var(--brand-primary)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                        <Sparkles size={11} style={{ color: 'var(--brand-primary)' }} />
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                          Finding
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        {sample.visual_breakdown}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="eda-table-container">
-                <table className="eda-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '40px' }}>#</th>
-                      {sampleRecords[0] && Object.keys(sampleRecords[0]).slice(0, 10).map((col) => (
-                        <th key={col}>{col}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sampleRecords.map((row, rIdx) => (
-                      <tr key={rIdx}>
-                        <td style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{rIdx + 1}</td>
-                        {Object.keys(sampleRecords[0] || {}).slice(0, 10).map((col) => (
-                          <td key={col} style={{ fontFamily: typeof row[col] === 'number' ? 'monospace' : 'inherit' }}>
-                            {typeof row[col] === 'number' ? Number(row[col]).toFixed(3) : String(row[col])}
-                          </td>
+              <MinimalCard style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ maxHeight: '480px', overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                    <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-inset)', zIndex: 1 }}>
+                      <tr>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid var(--border-color)', width: '40px' }}>#</th>
+                        {sampleRecords[0] && Object.keys(sampleRecords[0]).slice(0, 10).map((col) => (
+                          <th key={col} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid var(--border-color)' }}>{col}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {sampleRecords.map((row, rIdx) => (
+                        <tr key={rIdx} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>{rIdx + 1}</td>
+                          {Object.keys(sampleRecords[0] || {}).slice(0, 10).map((col) => (
+                            <td key={col} style={{ padding: '12px 16px', color: 'var(--text-primary)', fontFamily: typeof row[col] === 'number' ? 'monospace' : 'inherit', fontVariantNumeric: 'tabular-nums' }}>
+                              {typeof row[col] === 'number' ? Number(row[col]).toFixed(3) : String(row[col])}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </MinimalCard>
             )}
+          </section>
+
+          {/* ── Perspective Toggle ── */}
+          <HairlineDivider label="Perspective" />
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '48px' }}>
+            <SegmentedTabs
+              tabs={[
+                { id: 'basic', label: 'Basic — Clinician View', icon: <Info size={13} /> },
+                { id: 'advanced', label: 'Advanced — Quantum ML View', icon: <Cpu size={13} /> }
+              ]}
+              active={activeTab}
+              onChange={setActiveTab}
+              tone={activeTab === 'basic' ? 'classical' : 'quantum'}
+            />
           </div>
 
-          {/* ================================================================= */}
-          {/* PERSPECTIVE PARTITIONS (BASIC VS ADVANCED)                        */}
-          {/* ================================================================= */}
-          {activeTab === 'basic' ? (
-            /* 1. BASIC VIEW (STUDENT / CLINICIAN PERSPECTIVE) */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Concept & Relevance Card */}
-              <div className="eda-card accent-classical">
-                <div className="eda-card-head">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Info size={19} style={{ color: 'var(--classical-color)' }} />
-                    <h3 className="eda-card-title">Clinical Pathology & Diagnostic Overview</h3>
-                  </div>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Clinical Context & Pathology Overview`}
-                    category="clinical_context"
-                    data={{
-                      dataset: selectedDataset,
-                      headline: basic.summary_headline,
-                      relevance: basic.clinical_relevance
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
-                <p style={{ fontSize: '0.92rem', lineHeight: 1.6, color: 'var(--text-primary)', margin: '0 0 12px 0' }}>
-                  {basic.summary_headline}
-                </p>
-                <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', background: 'var(--bg-inset)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', lineHeight: 1.5 }}>
-                  <strong style={{ color: 'var(--text-primary)' }}>Diagnostic Relevance: </strong> {basic.clinical_relevance}
-                </div>
-              </div>
+          {/* ── BASIC VIEW ── */}
+          {activeTab === 'basic' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
 
-              {/* Class Balance Breakdown */}
-              <div className="eda-card">
-                <div className="eda-card-head">
-                  <h3 className="eda-card-title">
-                    <PieChart size={18} style={{ color: 'var(--status-success)' }} />
-                    <span>Cohort Class Balance & Hygiene Verification</span>
-                  </h3>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Cohort Class Balance`}
-                    category="class_balance"
-                    data={{
-                      healthy_cohort: `${overviewData?.negative_label} (${healthyCount} patients, ${healthyPct}%)`,
-                      pathological_cohort: `${overviewData?.positive_label} (${diseasedCount} patients, ${diseasedPct}%)`,
-                      data_hygiene_verdict: basic.data_hygiene_verdict
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.84rem' }}>
-                      <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>{overviewData?.negative_label} ({healthyCount} patients)</span>
-                      <span style={{ color: 'var(--status-danger)', fontWeight: 600 }}>{overviewData?.positive_label} ({diseasedCount} patients)</span>
+              {/* Clinical Overview */}
+              <section>
+                <SectionHeader index="02" icon={Info} title="Clinical Pathology & Diagnostic Context" />
+                <MinimalCard accent="classical">
+                  <p style={{ ...T.body, margin: '0 0 18px', color: 'var(--text-primary)', fontSize: '0.98rem' }}>
+                    {basic.summary_headline}
+                  </p>
+                  <div style={{
+                    padding: '18px 22px', background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)', borderLeft: '2px solid var(--classical-color)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--classical-color)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        Diagnostic Relevance
+                      </span>
                     </div>
-
-                    <div style={{ height: '12px', background: 'var(--bg-inset)', borderRadius: '6px', overflow: 'hidden', display: 'flex' }}>
-                      <div style={{ width: `${healthyPct}%`, background: 'var(--status-success)', transition: 'width 0.4s ease' }} />
-                      <div style={{ width: `${diseasedPct}%`, background: 'var(--status-danger)', transition: 'width 0.4s ease' }} />
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                      <span>{healthyPct}% Control Cohort</span>
-                      <span>{diseasedPct}% Pathological Cohort</span>
+                    <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                      {basic.clinical_relevance}
                     </div>
                   </div>
-
-                  <div style={{ background: 'var(--bg-inset)', padding: '14px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', color: 'var(--status-success)', fontWeight: 700, fontSize: '0.85rem' }}>
-                      <ShieldCheck size={16} />
-                      <span>Data Hygiene & Zero-Leakage Verdict</span>
-                    </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      {basic.data_hygiene_verdict}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Key Biomarkers Explained */}
-              <div className="eda-card">
-                <div className="eda-card-head">
-                  <h3 className="eda-card-title">
-                    <Layers size={18} style={{ color: 'var(--brand-primary)' }} />
-                    <span>Key Diagnostic Biomarkers & Features Explained</span>
-                  </h3>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Key Biomarkers Explained`}
-                    category="biomarkers_explained"
-                    data={{
-                      biomarkers: basic.key_biomarkers_explained || []
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                  {(basic.key_biomarkers_explained || []).map((bm, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        padding: '14px 16px',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'var(--bg-inset)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--brand-primary)', textTransform: 'capitalize' }}>
-                          {bm.feature_name}
-                        </span>
-                        <span className="badge-sih" style={{ fontSize: '0.68rem', background: 'var(--brand-bg)', color: 'var(--brand-primary)' }}>
-                          {bm.importance_tier}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        {bm.clinical_significance}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Student Takeaways */}
-              <div className="eda-card" style={{ background: 'linear-gradient(135deg, var(--brand-bg) 0%, var(--quantum-bg) 100%)' }}>
-                <div className="eda-card-head" style={{ marginBottom: '10px' }}>
-                  <h3 className="eda-card-title">
-                    <Sparkles size={16} style={{ color: 'var(--brand-primary)' }} />
-                    <span>Clinician & Student Takeaways</span>
-                  </h3>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Student & Clinician Takeaways`}
-                    category="takeaways"
-                    data={{
-                      takeaways: basic.student_takeaways || []
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.65 }}>
-                  {(basic.student_takeaways || []).map((t, idx) => (
-                    <li key={idx} style={{ marginBottom: '4px' }}>{t}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ) : (
-            /* 2. ADVANCED VIEW (RESEARCHER & QUANTUM ML PERSPECTIVE) */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* 4-Qubit Quantum PCA Compression Section */}
-              <div className="eda-card accent-quantum">
-                <div className="eda-card-head">
-                  <div>
-                    <h3 className="eda-card-title">
-                      <Cpu size={20} style={{ color: 'var(--quantum-color)' }} />
-                      <span>4-Qubit Quantum Hilbert Space Embedding (Qiskit PCA)</span>
-                    </h3>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span className="badge-sih" style={{ background: 'var(--quantum-bg)', color: 'var(--quantum-color)' }}>
-                      2⁴ = 16 HILBERT STATES
-                    </span>
+                  <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
                     <CardActionMenu
-                      title={`${overviewData?.dataset_name || selectedDataset} - 4-Qubit Quantum PCA Compression`}
-                      category="quantum_pca"
-                      data={{
-                        cumulative_variance: pcaData.cumulative_variance_pct,
-                        barren_plateau_risk: pcaData.barren_plateau_risk,
-                        encoding_formula: pcaData.encoding_formula,
-                        components: pcaData.components
-                      }}
+                      title={`${overviewData?.dataset_name || selectedDataset} - Clinical Context`}
+                      category="clinical_context"
+                      data={{ dataset: selectedDataset, headline: basic.summary_headline, relevance: basic.clinical_relevance }}
                       metadata={{ dataset: selectedDataset }}
                     />
                   </div>
-                </div>
+                </MinimalCard>
+              </section>
 
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.55 }}>
-                  Features are orthogonally projected onto 4 principal components and scaled to rotation angles <code style={{ color: 'var(--quantum-color)', background: 'var(--bg-inset)', padding: '2px 6px', borderRadius: '4px' }}>θ_j = π · (x_pca - min) / (max - min) ∈ [0, π]</code> for <strong>ZZFeatureMap</strong> entanglement.
-                </p>
+              {/* Class Balance */}
+              <section>
+                <SectionHeader index="03" icon={PieChart} title="Cohort Class Balance & Hygiene" />
+                <MinimalCard>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '28px', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.82rem' }}>
+                        <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>
+                          {overviewData?.negative_label} <span style={{ fontVariantNumeric: 'tabular-nums' }}>({healthyCount})</span>
+                        </span>
+                        <span style={{ color: 'var(--status-danger)', fontWeight: 600 }}>
+                          {overviewData?.positive_label} <span style={{ fontVariantNumeric: 'tabular-nums' }}>({diseasedCount})</span>
+                        </span>
+                      </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-                  {(pcaData.components || []).map((comp, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        padding: '14px',
-                        background: 'var(--bg-inset)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--quantum-color)', fontSize: '0.86rem' }}>{comp.qubit_name}</span>
-                        <span style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-primary)' }}>{comp.explained_variance}%</span>
+                      <div style={{ height: '8px', background: 'var(--bg-inset)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ width: `${healthyPct}%`, background: 'var(--status-success)', transition: 'width 0.5s ease' }} />
+                        <div style={{ width: `${diseasedPct}%`, background: 'var(--status-danger)', transition: 'width 0.5s ease' }} />
                       </div>
-                      <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px' }}>
-                        <div style={{ width: `${comp.explained_variance * 2}%`, background: 'var(--quantum-color)', height: '100%' }} />
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>{healthyPct}% Control</span>
+                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>{diseasedPct}% Pathological</span>
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                        {comp.clinical_manifold}
+                    </div>
+
+                    <div style={{ padding: '18px 20px', background: 'var(--status-success-bg)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(22, 163, 74, 0.25)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <ShieldCheck size={16} style={{ color: 'var(--status-success)' }} />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--status-success)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                          Zero-Leakage Verified
+                        </span>
                       </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        {basic.data_hygiene_verdict}
+                      </div>
+                    </div>
+                  </div>
+                </MinimalCard>
+              </section>
+
+              {/* Biomarkers */}
+              <section>
+                <SectionHeader index="04" icon={Layers} title="Key Diagnostic Biomarkers" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                  {(basic.key_biomarkers_explained || []).map((bm, idx) => (
+                    <div key={idx} style={{
+                      padding: '20px', background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+                      border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)',
+                      position: 'relative', overflow: 'hidden', boxShadow: 'var(--shadow-card)'
+                    }}>
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'var(--brand-primary)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', gap: '8px' }}>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--brand-primary)', textTransform: 'capitalize', letterSpacing: '-0.01em' }}>
+                          {bm.feature_name}
+                        </span>
+                        <span style={{
+                          fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                          padding: '2px 8px', borderRadius: '4px',
+                          background: 'var(--brand-bg)', color: 'var(--brand-primary)',
+                          border: '1px solid var(--brand-glow)'
+                        }}>
+                          {bm.importance_tier}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                        {bm.clinical_significance}
+                      </p>
                     </div>
                   ))}
                 </div>
+              </section>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--quantum-bg)', padding: '10px 16px', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', flexWrap: 'wrap', gap: '8px' }}>
-                  <span>Cumulative PCA Variance Retained: <strong style={{ color: 'var(--quantum-color)' }}>{pcaData.cumulative_variance_pct}%</strong></span>
-                  <span>Barren Plateau Risk: <strong style={{ color: 'var(--status-success)' }}>{pcaData.barren_plateau_risk}</strong></span>
-                </div>
-              </div>
+              {/* Takeaways */}
+              <section>
+                <SectionHeader index="05" icon={Sparkles} title="Clinician & Student Takeaways" />
+                <MinimalCard accent="brand">
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {(basic.student_takeaways || []).map((t, idx) => (
+                      <li key={idx} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', paddingBottom: idx < (basic.student_takeaways?.length || 0) - 1 ? '12px' : 0, borderBottom: idx < (basic.student_takeaways?.length || 0) - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                        <span style={{
+                          width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0,
+                          background: 'var(--brand-bg)', color: 'var(--brand-primary)',
+                          border: '1px solid var(--brand-glow)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.72rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums'
+                        }}>
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.7, paddingTop: '2px' }}>
+                          {t}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </MinimalCard>
+              </section>
+            </div>
+          )}
 
-              {/* Feature Correlation Matrix & Top Pairs */}
-              <div className="eda-card">
-                <div className="eda-card-head">
-                  <h3 className="eda-card-title">
-                    <TrendingUp size={18} style={{ color: 'var(--brand-primary)' }} />
-                    <span>Feature Correlation & Multi-Collinearity Analysis</span>
-                  </h3>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Feature Correlation Pairs`}
-                    category="correlation_analysis"
-                    data={{
-                      top_pairs: advanced.top_correlated_pairs || []
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
+          {/* ── ADVANCED VIEW ── */}
+          {activeTab === 'advanced' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
 
+              {/* Quantum PCA */}
+              <section>
+                <SectionHeader
+                  index="02"
+                  icon={Cpu}
+                  title="4-Qubit Quantum Hilbert Space Embedding"
+                  subtitle="Orthogonal PCA projection scaled to rotation angles θ_j = π · (x_pca − min) / (max − min) ∈ [0, π] for ZZFeatureMap entanglement."
+                  actions={
+                    <span style={{
+                      fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '4px 10px', borderRadius: '6px',
+                      background: 'var(--quantum-bg)', color: 'var(--quantum-color)',
+                      border: '1px solid var(--quantum-glow)'
+                    }}>
+                      2⁴ = 16 Hilbert States
+                    </span>
+                  }
+                />
+
+                <MinimalCard accent="quantum">
+                  <div style={{
+                    padding: '16px 20px', background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)', marginBottom: '24px',
+                    fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.78rem', color: 'var(--quantum-color)'
+                  }}>
+                    θ<sub>j</sub> = π · (x<sub>pca</sub> − min) / (max − min) ∈ [0, π]
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+                    {(pcaData.components || []).map((comp, idx) => (
+                      <div key={idx} style={{ padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', borderLeft: '2px solid var(--quantum-color)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--quantum-color)' }}>{comp.qubit_name}</span>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{comp.explained_variance}%</span>
+                        </div>
+                        <div style={{ height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden', marginBottom: '10px' }}>
+                          <div style={{ width: `${comp.explained_variance * 2}%`, background: 'var(--quantum-color)', height: '100%', transition: 'width 0.5s ease' }} />
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                          {comp.clinical_manifold}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px',
+                    padding: '16px 20px', background: 'var(--quantum-bg)', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--quantum-glow)'
+                  }}>
+                    <div>
+                      <div style={T.eyebrow}>Cumulative Variance</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--quantum-color)', fontVariantNumeric: 'tabular-nums', marginTop: '4px' }}>
+                        {pcaData.cumulative_variance_pct}%
+                      </div>
+                    </div>
+                    <div>
+                      <div style={T.eyebrow}>Barren Plateau Risk</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--status-success)', marginTop: '4px' }}>
+                        {pcaData.barren_plateau_risk}
+                      </div>
+                    </div>
+                  </div>
+                </MinimalCard>
+              </section>
+
+              {/* Correlation Pairs */}
+              <section>
+                <SectionHeader index="03" icon={TrendingUp} title="Feature Correlation & Multi-Collinearity" />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
                   {(advanced.top_correlated_pairs || []).map((pair, pIdx) => (
-                    <div
-                      key={pIdx}
-                      style={{
-                        padding: '12px 14px',
-                        background: 'var(--bg-inset)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-color)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
+                    <div key={pIdx} style={{
+                      padding: '16px 18px', background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+                      border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                      boxShadow: 'var(--shadow-card)'
+                    }}>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                          {pair.feature_1} ↔ {pair.feature_2}
+                        <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                          {pair.feature_1} <span style={{ color: 'var(--text-tertiary)' }}>↔</span> {pair.feature_2}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                           {pair.relationship}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: '0.88rem',
-                          color: pair.correlation > 0 ? 'var(--brand-primary)' : 'var(--status-danger)',
-                          background: 'var(--bg-card-solid)',
-                          padding: '4px 8px',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-color)'
-                        }}
-                      >
+                      <div style={{
+                        padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-inset)', border: '1px solid var(--border-color)',
+                        fontWeight: 700, fontSize: '0.88rem', fontVariantNumeric: 'tabular-nums', fontFamily: 'monospace',
+                        color: pair.correlation > 0 ? 'var(--brand-primary)' : 'var(--status-danger)'
+                      }}>
                         r = {pair.correlation}
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Detailed Statistical Feature Table */}
-              <div className="eda-card">
-                <div className="eda-card-head">
-                  <div>
-                    <h3 className="eda-card-title">
-                      <Table size={18} style={{ color: 'var(--classical-color)' }} />
-                      <span>Feature Statistical Distribution Table ({statTable.length} Features)</span>
-                    </h3>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {/* Statistical Table */}
+              <section>
+                <SectionHeader
+                  index="04"
+                  icon={Table}
+                  title="Feature Statistical Distributions"
+                  subtitle={`${statTable.length} features profiled across mean, std, median, skewness, and missingness.`}
+                  actions={
                     <div style={{ position: 'relative' }}>
-                      <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+                      <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
                       <input
                         type="text"
                         placeholder="Search feature..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{
-                          padding: '6px 12px 6px 30px',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-color)',
-                          fontSize: '0.8rem',
-                          background: 'var(--bg-card-solid)',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
+                          padding: '8px 14px 8px 36px', borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                          color: 'var(--text-primary)', fontSize: '0.82rem', outline: 'none',
+                          transition: 'all 0.2s ease', width: '200px'
                         }}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--brand-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--brand-glow)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                       />
                     </div>
+                  }
+                />
 
-                    <CardActionMenu
-                      title={`${overviewData?.dataset_name || selectedDataset} - Feature Statistical Distributions`}
-                      category="feature_statistics"
-                      data={{
-                        features_summary: statTable.map(f => ({
-                          name: f.name,
-                          mean: f.mean,
-                          std: f.std,
-                          median: f.median,
-                          skewness: f.skewness
-                        }))
-                      }}
-                      metadata={{ dataset: selectedDataset }}
-                    />
-                  </div>
-                </div>
-
-                <div className="eda-table-container" style={{ maxHeight: '420px', overflowY: 'auto' }}>
-                  <table className="eda-table">
-                    <thead>
-                      <tr>
-                        <th>Feature Name</th>
-                        <th>Type</th>
-                        <th style={{ textAlign: 'right' }}>Mean</th>
-                        <th style={{ textAlign: 'right' }}>Std</th>
-                        <th style={{ textAlign: 'right' }}>Min</th>
-                        <th style={{ textAlign: 'right' }}>Median</th>
-                        <th style={{ textAlign: 'right' }}>Max</th>
-                        <th style={{ textAlign: 'right' }}>Skewness</th>
-                        <th style={{ textAlign: 'right' }}>Missing</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredStatTable.map((f, fIdx) => (
-                        <tr key={fIdx}>
-                          <td style={{ fontWeight: 600, color: 'var(--brand-primary)' }}>{f.name}</td>
-                          <td style={{ color: 'var(--text-secondary)' }}>{f.type}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{f.mean}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{f.std}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{f.min}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 600, fontFamily: 'monospace' }}>{f.median}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{f.max}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: Math.abs(f.skewness) > 1.0 ? 'var(--status-danger)' : 'inherit' }}>
-                            {f.skewness}
-                          </td>
-                          <td style={{ textAlign: 'right', color: f.missing_count === 0 ? 'var(--status-success)' : 'var(--status-danger)', fontWeight: 600 }}>
-                            {f.missing_count} ({f.missing_pct}%)
-                          </td>
+                <MinimalCard style={{ padding: 0, overflow: 'hidden' }}>
+                  <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-inset)', zIndex: 1 }}>
+                        <tr>
+                          {['Feature', 'Type', 'Mean', 'Std', 'Min', 'Median', 'Max', 'Skewness', 'Missing'].map(h => (
+                            <th key={h} style={{
+                              padding: '14px 16px',
+                              textAlign: ['Mean', 'Std', 'Min', 'Median', 'Max', 'Skewness', 'Missing'].includes(h) ? 'right' : 'left',
+                              fontWeight: 600, color: 'var(--text-tertiary),',
+                              fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em',
+                              borderBottom: '1px solid var(--border-color)'
+                            }}>
+                              {h}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                      </thead>
+                      <tbody>
+                        {filteredStatTable.map((f, fIdx) => (
+                          <tr key={fIdx} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--brand-primary)' }}>{f.name}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>{f.type}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>{f.mean}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>{f.std}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>{f.min}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{f.median}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>{f.max}</td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', color: Math.abs(f.skewness) > 1.0 ? 'var(--status-danger)' : 'inherit' }}>
+                              {f.skewness}
+                            </td>
+                            <td style={{ padding: '12px 16px', textAlign: 'right', color: f.missing_count === 0 ? 'var(--status-success)' : 'var(--status-danger)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                              {f.missing_count} ({f.missing_pct}%)
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </MinimalCard>
+              </section>
 
-              {/* Covariate Shift Verification */}
-              <div className="eda-card">
-                <div className="eda-card-head" style={{ marginBottom: '10px' }}>
-                  <h3 className="eda-card-title">
-                    <ShieldCheck size={18} style={{ color: 'var(--status-success)' }} />
-                    <span>Covariate Shift & Partition Drift (Kolmogorov-Smirnov Test)</span>
-                  </h3>
-                  <CardActionMenu
-                    title={`${overviewData?.dataset_name || selectedDataset} - Covariate Shift KS Analysis`}
-                    category="covariate_shift"
-                    data={{
-                      methodology: advanced.covariate_shift_analysis?.methodology,
-                      verdict: advanced.covariate_shift_analysis?.drift_verdict,
-                      results: advanced.covariate_shift_analysis?.tested_features
-                    }}
-                    metadata={{ dataset: selectedDataset }}
-                  />
-                </div>
-                <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', background: 'var(--bg-inset)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', lineHeight: 1.5 }}>
-                  <strong style={{ color: 'var(--text-primary)' }}>Statistical Verdict: </strong> {advanced.covariate_shift_analysis?.drift_verdict}
-                </div>
-              </div>
+              {/* Covariate Shift */}
+              <section>
+                <SectionHeader index="05" icon={ShieldCheck} title="Covariate Shift & Kolmogorov-Smirnov Test" />
+                <MinimalCard accent="classical">
+                  <div style={{
+                    padding: '18px 22px', background: 'var(--status-success-bg)',
+                    borderRadius: 'var(--radius-md)', border: '1px solid rgba(22, 163, 74, 0.25)',
+                    display: 'flex', gap: '12px', alignItems: 'flex-start'
+                  }}>
+                    <ShieldCheck size={18} style={{ color: 'var(--status-success)', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--status-success)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        Statistical Verdict
+                      </div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.65 }}>
+                        {advanced.covariate_shift_analysis?.drift_verdict}
+                      </div>
+                    </div>
+                  </div>
+                </MinimalCard>
+              </section>
             </div>
           )}
 
-          {/* Bottom Action Footer */}
-          <div className="eda-card" style={{ marginTop: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.02rem', color: 'var(--text-primary)', fontWeight: 700 }}>
-                  Dataset Preprocessed & Ready for Model Training
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  Proceed to run the 5-model classical & quantum benchmark or predict live patient risks.
-                </p>
-              </div>
+          {/* ── Bottom CTA Footer ── */}
+          <section style={{ marginTop: '80px' }}>
+            <MinimalCard accent="brand">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ ...T.eyebrow, marginBottom: '8px' }}>Ready</div>
+                  <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+                    Dataset preprocessed & ready for model training
+                  </h3>
+                  <p style={{ margin: 0, ...T.body }}>
+                    Proceed to run the 5-model classical & quantum benchmark or predict live patient risks.
+                  </p>
+                </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button
-                  onClick={() => navigate('/cumulative')}
-                  className="btn btn-primary"
-                  style={{ gap: '6px', fontWeight: 600 }}
-                >
-                  <Zap size={15} />
-                  <span>Run 5-Model Benchmark</span>
-                  <ArrowRight size={14} />
-                </button>
-
-                <button
-                  onClick={() => navigate('/inference')}
-                  className="btn btn-outline"
-                  style={{ gap: '6px', fontWeight: 600 }}
-                >
-                  <Activity size={15} />
-                  <span>Live Patient Inference</span>
-                </button>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <PillButton onClick={() => navigate('/inference')}><Activity size={14} /> Live Inference</PillButton>
+                  <PrimaryButton onClick={() => navigate('/cumulative')} icon={Zap}>Run 5-Model Benchmark <ArrowRight size={14} /></PrimaryButton>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </MinimalCard>
+          </section>
+        </>
       )}
 
-      {/* ===================================================================== */}
-      {/* MODAL 1: ZOOM / ENLARGE AUTHENTIC SCAN MODAL                          */}
-      {/* ===================================================================== */}
+      {/* ── MODAL: Enlarge Scan ── */}
       {activeEnlargedImage && (
         <div
-          className="eda-modal-backdrop"
           onClick={() => setActiveEnlargedImage(null)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(10, 15, 30, 0.85)', backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '24px'
+          }}
         >
           <div
-            className="eda-modal-box"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '720px', width: '100%', background: '#0F172A',
+              border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: 'var(--radius-lg)',
+              padding: '28px', boxShadow: '0 24px 48px rgba(0, 0, 0, 0.4)'
+            }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#FFF' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#F1F5F9', letterSpacing: '-0.01em' }}>
                   {activeEnlargedImage.sample_id}
-                </h3>
-                <span style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '2px' }}>
                   {activeEnlargedImage.case_id}
-                </span>
+                </div>
               </div>
               <button
                 onClick={() => setActiveEnlargedImage(null)}
-                style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '1.4rem' }}
+                style={{
+                  width: '32px', height: '32px', borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)',
+                  color: '#94A3B8', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
               >
-                &times;
+                <X size={14} />
               </button>
             </div>
 
-            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-              <img
-                src={activeEnlargedImage.image_data_url}
-                alt={activeEnlargedImage.sample_id}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '420px',
-                  borderRadius: 'var(--radius-md)',
-                  objectFit: 'contain',
-                  border: '1px solid #334155'
-                }}
-              />
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <img src={activeEnlargedImage.image_data_url} alt={activeEnlargedImage.sample_id} style={{ maxWidth: '100%', maxHeight: '440px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(99, 102, 241, 0.3)' }} />
             </div>
 
-            <div style={{ background: '#141C2B', padding: '12px 14px', borderRadius: 'var(--radius-md)', marginBottom: '12px' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700, marginBottom: '6px', letterSpacing: '0.04em' }}>
-                EXTRACTED RADIOMICS & GLCM TEXTURE:
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '0.76rem' }}>
+            <div style={{ padding: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-md)', marginBottom: '14px' }}>
+              <div style={{ ...T.eyebrow, color: '#94A3B8', marginBottom: '10px' }}>Extracted Radiomics & GLCM</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                 {Object.entries(activeEnlargedImage.key_metrics || {}).map(([k, v]) => (
-                  <div key={k} style={{ background: '#090D14', padding: '6px 8px', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ color: '#94A3B8', fontSize: '0.68rem' }}>{k}</div>
-                    <strong style={{ color: '#F1F5F9' }}>{typeof v === 'number' ? v.toFixed(3) : String(v)}</strong>
+                  <div key={k} style={{ padding: '10px', background: 'rgba(0,0,0,0.4)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{k}</div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#F1F5F9', fontVariantNumeric: 'tabular-nums', marginTop: '2px' }}>
+                      {typeof v === 'number' ? v.toFixed(3) : String(v)}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ fontSize: '0.82rem', color: '#CBD5E1', lineHeight: 1.5, background: '#141C2B', padding: '12px', borderRadius: 'var(--radius-md)' }}>
-              <strong style={{ color: 'var(--quantum-color)' }}>Diagnostic Finding: </strong>
-              {activeEnlargedImage.visual_breakdown}
+            <div style={{ padding: '16px', background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.3)', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                <Sparkles size={12} style={{ color: 'var(--quantum-color)' }} />
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--quantum-color)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Diagnostic Finding
+                </span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#E2E8F0', lineHeight: 1.7 }}>
+                {activeEnlargedImage.visual_breakdown}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ===================================================================== */}
-      {/* MODAL 2: VIEW PIPELINE EXECUTION LOGS MODAL                           */}
-      {/* ===================================================================== */}
+      {/* ── MODAL: Pipeline Logs ── */}
       {showLogsModal && (
         <div
-          className="eda-modal-backdrop"
           onClick={() => setShowLogsModal(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(10, 15, 30, 0.85)', backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '24px'
+          }}
         >
           <div
-            className="eda-modal-box"
-            style={{ maxWidth: '800px' }}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '820px', width: '100%', background: '#0B1020',
+              border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: 'var(--radius-lg)',
+              padding: '24px', boxShadow: '0 24px 48px rgba(0, 0, 0, 0.4)'
+            }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Terminal size={18} style={{ color: 'var(--brand-primary)' }} />
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#FFF' }}>
-                  Pipeline Execution Logs — {selectedDataset}
-                </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Terminal size={16} style={{ color: 'var(--brand-primary)' }} />
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#F1F5F9', letterSpacing: '-0.01em' }}>
+                    Pipeline Execution Logs
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '2px' }}>
+                    Cohort: {selectedDataset}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setShowLogsModal(false)}
-                style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '1.4rem' }}
+                style={{
+                  width: '32px', height: '32px', borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)',
+                  color: '#94A3B8', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
               >
-                &times;
+                <X size={14} />
               </button>
             </div>
 
             <div style={{
-              background: '#04070D',
-              padding: '16px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid #1C2433',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: '0.78rem',
-              maxHeight: '400px',
-              overflowY: 'auto',
-              lineHeight: 1.6
+              background: '#04070D', padding: '18px', borderRadius: 'var(--radius-md)',
+              border: '1px solid rgba(99, 102, 241, 0.2)',
+              fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.78rem',
+              maxHeight: '440px', overflowY: 'auto', lineHeight: 1.7
             }}>
-              {terminalLogs.map((log, idx) => (
-                <div key={idx} style={{
-                  color: log.includes('SUCCESS') ? 'var(--brand-primary)' : (log.includes('STAGE') ? 'var(--quantum-color)' : '#CBD5E1'),
-                  marginBottom: '3px'
-                }}>
-                  {log}
-                </div>
-              ))}
+              {terminalLogs.map((log, idx) => {
+                let color = '#CBD5E1';
+                if (log.includes('SUCCESS')) color = '#10B981';
+                if (log.includes('ERROR')) color = '#EF4444';
+                if (log.includes('STAGE')) color = '#0D9488';
+                return (
+                  <div key={idx} style={{ color, marginBottom: '3px' }}>
+                    <span style={{ color: '#475569', marginRight: '8px' }}>›</span>
+                    {log}
+                  </div>
+                );
+              })}
             </div>
 
-            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowLogsModal(false)}
-                className="btn btn-sm btn-primary"
-              >
-                Close Logs
-              </button>
+            <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end' }}>
+              <PrimaryButton onClick={() => setShowLogsModal(false)}>Close Logs</PrimaryButton>
             </div>
           </div>
         </div>

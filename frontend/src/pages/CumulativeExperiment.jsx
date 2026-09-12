@@ -11,6 +11,59 @@ import PipelineExecutionModal from '../components/PipelineExecutionModal';
 import LiveTelemetryConsole from '../components/LiveTelemetryConsole';
 import CustomModelModal from '../components/CustomModelModal';
 import { runMultimodalFusion, getDatasets, deleteDataset, getCustomModels, deleteCustomModel } from '../services/api';
+import Atom4Orbits from '../components/Atom4Orbits';
+
+/* ── Minimalist Design Tokens ──────────────────────────────── */
+const T = {
+  eyebrow: {
+    fontSize: '0.68rem',
+    fontWeight: 600,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    color: 'var(--text-tertiary)'
+  },
+  body: {
+    fontSize: '0.9rem',
+    lineHeight: 1.7,
+    color: 'var(--text-secondary)'
+  },
+  card: {
+    background: 'var(--bg-card)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-lg)',
+    boxShadow: 'var(--shadow-card)'
+  }
+};
+
+function SectionHeader({ index, icon: Icon, title, subtitle, actions }) {
+  return (
+    <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap' }}>
+      <div style={{ minWidth: '260px', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <span style={T.eyebrow}>{index}</span>
+          <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+          {Icon && <Icon size={14} style={{ color: 'var(--text-tertiary)' }} />}
+        </div>
+        <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+          {title}
+        </h2>
+        {subtitle && <p style={{ margin: '8px 0 0', ...T.body, maxWidth: '680px' }}>{subtitle}</p>}
+      </div>
+      {actions}
+    </div>
+  );
+}
+
+function HairlineDivider({ label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '64px 0 48px' }}>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+      <span style={T.eyebrow}>{label}</span>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+    </div>
+  );
+}
 
 export default function CumulativeExperiment() {
   const telemetryConsoleRef = useRef(null);
@@ -30,21 +83,16 @@ export default function CumulativeExperiment() {
   const [showFusionDetails, setShowFusionDetails] = useState(true);
   const [showExecutionModal, setShowExecutionModal] = useState(false);
 
-  // Card View / Table View Toggle state & Info Popover state
-  const [viewMode, setViewMode] = useState('card'); // 'card' | 'table'
+  const [viewMode, setViewMode] = useState('card');
   const [sortConfig, setSortConfig] = useState({ key: 'accuracy', direction: 'desc' });
   const [showSyncTooltip, setShowSyncTooltip] = useState(false);
 
-  // Quddos Diagnostic Consensus & Research Validation Tier States
-  const [inferenceTier, setInferenceTier] = useState('basic'); // 'basic' | 'researcher'
+  const [inferenceTier, setInferenceTier] = useState('basic');
   const [expandedQuestions, setExpandedQuestions] = useState({ q1: true, q2: true, q3: true });
-  const [activeValidationTab, setActiveValidationTab] = useState('hypothesis'); // 'hypothesis' | 'perturbation' | 'discordance' | 'kfold'
+  const [activeValidationTab, setActiveValidationTab] = useState('hypothesis');
 
   const toggleQuestion = (qKey) => {
-    setExpandedQuestions(prev => ({
-      ...prev,
-      [qKey]: !prev[qKey]
-    }));
+    setExpandedQuestions(prev => ({ ...prev, [qKey]: !prev[qKey] }));
   };
 
   const getCleanDatasetName = (ds) => {
@@ -120,21 +168,11 @@ export default function CumulativeExperiment() {
   const getQuddosConsensusMetrics = () => {
     if (!results?.models || results.models.length === 0) {
       return {
-        quddosScore: 98.8,
-        accuracy: 98.8,
-        sensitivity: 99.2,
-        specificity: 98.4,
-        rocAuc: 0.998,
-        latencyMs: 18,
-        uncertaintyMargin: 0.38,
-        pValue: 0.00038,
-        cohenD: 1.34,
-        perturbationRetention: 98.2,
-        borderlineResolved: '14 / 15',
-        kFoldMean: '98.6',
-        kFoldStd: '0.38',
-        classicalWeight: '50% (SVM + MLP)',
-        quantumWeight: '50% (QSVM + QNN + QVC)',
+        quddosScore: 98.8, accuracy: 98.8, sensitivity: 99.2, specificity: 98.4,
+        rocAuc: 0.998, latencyMs: 18, uncertaintyMargin: 0.38, pValue: 0.00038,
+        cohenD: 1.34, perturbationRetention: 98.2, borderlineResolved: '14 / 15',
+        kFoldMean: '98.6', kFoldStd: '0.38',
+        classicalWeight: '50% (SVM + MLP)', quantumWeight: '50% (QSVM + QNN + QVC)',
         clinicalGrade: 'Level IV (High Diagnostic Reliability)'
       };
     }
@@ -162,19 +200,11 @@ export default function CumulativeExperiment() {
     const latencyMs = fusionResults?.late_fusion?.latency_ms || fusionResults?.late_adaptive_consensus?.latency_ms || 18;
 
     return {
-      quddosScore,
-      accuracy: quddosScore,
-      sensitivity: consensusSensitivity,
-      specificity: consensusSpecificity,
-      rocAuc: 0.998,
-      latencyMs,
-      uncertaintyMargin: 0.38,
-      pValue: 0.00038,
-      cohenD: 1.34,
-      perturbationRetention: 98.2,
-      borderlineResolved: '14 / 15',
-      kFoldMean: (quddosScore - 0.2).toFixed(1),
-      kFoldStd: '0.38',
+      quddosScore, accuracy: quddosScore, sensitivity: consensusSensitivity,
+      specificity: consensusSpecificity, rocAuc: 0.998, latencyMs,
+      uncertaintyMargin: 0.38, pValue: 0.00038, cohenD: 1.34,
+      perturbationRetention: 98.2, borderlineResolved: '14 / 15',
+      kFoldMean: (quddosScore - 0.2).toFixed(1), kFoldStd: '0.38',
       classicalWeight: '50% (SVM Dual Margins + MLP Attributions)',
       quantumWeight: '50% (QSVM Hilbert Kernel + QNN & QVC Variational Phases)',
       clinicalGrade: 'Level IV (High Diagnostic Reliability)'
@@ -184,36 +214,25 @@ export default function CumulativeExperiment() {
   const fetchDatasets = async () => {
     try {
       const res = await getDatasets();
-      if (res && res.datasets && res.datasets.length > 0) {
-        setDatasetsList(res.datasets);
-      }
-    } catch (err) {
-      console.error('Error fetching datasets in cumulative experiment:', err);
-    }
+      if (res && res.datasets && res.datasets.length > 0) setDatasetsList(res.datasets);
+    } catch (err) { console.error('Error fetching datasets in cumulative experiment:', err); }
   };
 
   const fetchCustomModels = async () => {
     try {
       const cms = await getCustomModels();
       setCustomModels(cms);
-    } catch (err) {
-      console.error('Error fetching custom models in cumulative experiment:', err);
-    }
+    } catch (err) { console.error('Error fetching custom models in cumulative experiment:', err); }
   };
 
   const handleDeleteDataset = async (datasetKey) => {
     const dsObj = datasetsList.find(d => (d.id || d.key) === datasetKey);
     const dsName = dsObj ? dsObj.name : datasetKey;
-    if (!window.confirm(`Are you sure you want to delete custom dataset "${dsName}"?`)) {
-      return;
-    }
+    if (!window.confirm(`Are you sure you want to delete custom dataset "${dsName}"?`)) return;
     try {
       const res = await deleteDataset(datasetKey);
-      if (res && res.datasets) {
-        setDatasetsList(res.datasets);
-      } else {
-        await fetchDatasets();
-      }
+      if (res && res.datasets) setDatasetsList(res.datasets);
+      else await fetchDatasets();
       setSelectedDataset('cancer');
     } catch (err) {
       console.error('Error deleting dataset:', err);
@@ -235,9 +254,7 @@ export default function CumulativeExperiment() {
   const handleRunExecution = () => {
     setResults(null);
     setFusionResults(null);
-    setTimeout(() => {
-      telemetryConsoleRef.current?.startStream();
-    }, 50);
+    setTimeout(() => { telemetryConsoleRef.current?.startStream(); }, 50);
   };
 
   const fetchCumulativeResults = async () => {
@@ -246,8 +263,6 @@ export default function CumulativeExperiment() {
       const response = await fetch(`/api/cumulative-experiment/${selectedDataset}`);
       const data = await response.json();
       setResults(data);
-
-      // Fetch multimodal fusion comparison
       const fData = await runMultimodalFusion(selectedDataset);
       setFusionResults(fData);
     } catch (err) {
@@ -258,100 +273,101 @@ export default function CumulativeExperiment() {
   };
 
   const handleStreamComplete = async (liveResults) => {
-    if (liveResults) {
-      setResults(liveResults);
-    } else {
-      await fetchCumulativeResults();
-    }
+    if (liveResults) setResults(liveResults);
+    else await fetchCumulativeResults();
     try {
       const fData = await runMultimodalFusion(selectedDataset);
       setFusionResults(fData);
-    } catch (err) {
-      console.error('Error fetching multimodal fusion on stream complete:', err);
-    }
+    } catch (err) { console.error('Error fetching multimodal fusion on stream complete:', err); }
   };
 
   const toggleAdvanced = (modelId) => {
-    setShowAdvanced(prev => ({
-      ...prev,
-      [modelId]: !prev[modelId]
-    }));
+    setShowAdvanced(prev => ({ ...prev, [modelId]: !prev[modelId] }));
   };
 
   return (
-    <div className="hub-section active">
-      <div className="section-header">
-        <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BarChart3 size={24} style={{ color: 'var(--classical-color)' }} />
-            Cumulative Experiment & Comprehensive Benchmark
+    <div className="hub-section active" style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 32px 96px' }}>
+
+      {/* ── Editorial Hero ─────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '48px', flexWrap: 'wrap', padding: '56px 0 48px' }}>
+        <div style={{ flex: 1, minWidth: '320px', maxWidth: '760px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '6px 14px', marginBottom: '24px',
+            border: '1px solid var(--border-color)', borderRadius: '999px',
+            background: 'var(--bg-card)'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-primary)', boxShadow: '0 0 8px var(--brand-glow)' }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+              Comprehensive 5-Model Benchmark
+            </span>
+          </div>
+
+          <h1 style={{
+            margin: '0 0 18px',
+            fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+            fontWeight: 700,
+            letterSpacing: '-0.035em',
+            lineHeight: 1.1,
+            color: 'var(--text-primary)'
+          }}>
+            Cumulative experiment &{' '}
+            <span style={{ color: 'var(--brand-primary)' }}>diagnostic consensus</span>.
           </h1>
-          <p className="subtitle">
-            Side-by-side comparative analysis of all 5 classical and quantum models across diagnostic accuracy, sensitivity, specificity, ROC-AUC, latency, and multimodal fusion strategies.
+
+          <p style={{ margin: 0, ...T.body, maxWidth: '600px' }}>
+            Side-by-side comparative analysis of all 5 classical and quantum models
+            across diagnostic accuracy, sensitivity, specificity, ROC-AUC, latency,
+            and multimodal fusion strategies.
           </p>
+        </div>
+
+        <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ position: 'absolute', inset: 0, border: '1px solid var(--border-color)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', inset: '22px', border: '1px dashed var(--border-color)', borderRadius: '50%', opacity: 0.55 }} />
+          <Atom4Orbits size={104} color="var(--brand-primary)" />
         </div>
       </div>
 
-      {/* Command Center */}
+      {/* ── Command Center Toolbar ─────────────────────────── */}
       <div style={{
-        background: 'var(--bg-card)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '24px',
-        boxShadow: 'var(--shadow-card)',
-        marginBottom: '28px'
+        ...T.card,
+        padding: '20px',
+        marginBottom: '64px',
+        position: 'relative',
+        zIndex: 50
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           {/* Dataset Selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 auto', minWidth: '280px' }}>
             <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background: 'var(--classical-bg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
+              width: '40px', height: '40px', borderRadius: '10px',
+              background: 'var(--classical-bg)', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', flexShrink: 0
             }}>
               <Database size={20} style={{ color: 'var(--classical-color)' }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+              <div style={{ ...T.eyebrow, fontSize: '0.62rem', marginBottom: '4px' }}>
                 Benchmark Dataset
               </div>
               <select
                 value={selectedDataset}
                 onChange={(e) => handleDatasetSelect(e.target.value)}
                 style={{
-                  width: '100%',
-                  maxWidth: '420px',
-                  height: '40px',
-                  padding: '0 12px',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
+                  width: '100%', maxWidth: '420px', height: '40px', padding: '0 12px',
+                  fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)',
+                  background: 'var(--bg-input)', border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                  appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 12px center',
+                  backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
                   paddingRight: '36px'
                 }}
               >
                 {datasetsList.map(ds => {
                   const dKey = ds.id || ds.key;
-                  return (
-                    <option key={dKey} value={dKey}>
-                      {getCleanDatasetName(ds)}
-                    </option>
-                  );
+                  return <option key={dKey} value={dKey}>{getCleanDatasetName(ds)}</option>;
                 })}
               </select>
             </div>
@@ -360,18 +376,11 @@ export default function CumulativeExperiment() {
                 type="button"
                 onClick={() => handleDeleteDataset(selectedDataset)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 14px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  color: 'var(--status-danger)',
-                  background: 'var(--status-danger-bg)',
-                  border: '1px solid var(--status-danger-border)',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '8px 14px', fontSize: '0.78rem', fontWeight: 600,
+                  color: 'var(--status-danger)', background: 'var(--status-danger-bg)',
+                  border: '1px solid rgba(220, 38, 38, 0.25)', borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer', transition: 'all 0.15s ease'
                 }}
                 title="Permanently remove this uploaded custom dataset"
               >
@@ -386,33 +395,24 @@ export default function CumulativeExperiment() {
             <button
               onClick={() => setIsCustomModelModalOpen(true)}
               style={{
-                height: '44px',
-                padding: '0 18px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-md)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                background: 'transparent',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-color)',
-                cursor: 'pointer',
+                height: '44px', padding: '0 18px', fontSize: '0.85rem', fontWeight: 600,
+                borderRadius: 'var(--radius-md)', display: 'inline-flex',
+                alignItems: 'center', justifyContent: 'center', gap: '8px',
+                background: 'transparent', color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)', cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
               title="Import pre-trained custom ML model (.joblib or .pkl) for benchmarking"
             >
               <UploadCloud size={16} />
               <span>Import Model</span>
               {customModels.length > 0 && (
                 <span style={{
-                  background: 'var(--brand-primary)',
-                  color: '#FFFFFF',
-                  borderRadius: '10px',
-                  padding: '1px 7px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700
+                  background: 'var(--brand-primary)', color: '#FFFFFF',
+                  borderRadius: '10px', padding: '1px 7px',
+                  fontSize: '0.72rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums'
                 }}>
                   {customModels.length}
                 </span>
@@ -422,22 +422,15 @@ export default function CumulativeExperiment() {
             <button
               onClick={handleRunExecution}
               style={{
-                height: '44px',
-                padding: '0 22px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-md)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                background: 'var(--brand-primary)',
-                color: '#FFFFFF',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px var(--brand-glow)',
-                transition: 'all 0.2s ease'
+                height: '44px', padding: '0 22px', fontSize: '0.85rem', fontWeight: 600,
+                borderRadius: 'var(--radius-md)', display: 'inline-flex',
+                alignItems: 'center', justifyContent: 'center', gap: '8px',
+                background: 'var(--brand-primary)', color: '#FFFFFF', border: 'none',
+                cursor: 'pointer', boxShadow: '0 2px 8px var(--brand-glow)',
+                transition: 'all 0.2s ease', letterSpacing: '-0.01em'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'var(--brand-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'var(--brand-primary)'; }}
             >
               <Play size={16} fill="currentColor" />
               <span>Run Benchmark</span>
@@ -447,26 +440,17 @@ export default function CumulativeExperiment() {
 
         {/* Status Ribbon */}
         <div style={{
-          marginTop: '18px',
-          padding: '12px 16px',
-          background: 'var(--bg-inset)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--radius-md)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          flexWrap: 'wrap'
+          marginTop: '18px', padding: '12px 16px',
+          background: 'var(--bg-inset)', border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-md)', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between',
+          gap: '12px', flexWrap: 'wrap'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
-              width: '24px',
-              height: '24px',
-              borderRadius: '6px',
+              width: '24px', height: '24px', borderRadius: '6px',
               background: loading ? 'var(--status-warning-bg)' : 'var(--status-success-bg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               {loading ? <Loader2 size={14} className="spinner" style={{ color: 'var(--status-warning)' }} /> : <CheckCircle2 size={14} style={{ color: 'var(--status-success)' }} />}
             </div>
@@ -484,16 +468,10 @@ export default function CumulativeExperiment() {
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowSyncTooltip(prev => !prev); }}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 10px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                background: 'transparent',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600,
+                color: 'var(--text-secondary)', background: 'transparent',
+                border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)',
                 cursor: 'pointer'
               }}
             >
@@ -503,17 +481,10 @@ export default function CumulativeExperiment() {
 
             {showSyncTooltip && (
               <div style={{
-                position: 'absolute',
-                top: 'calc(100% + 8px)',
-                right: 0,
-                width: '360px',
-                maxWidth: '90vw',
-                background: 'var(--bg-card-solid)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '18px',
-                boxShadow: 'var(--shadow-card)',
-                zIndex: 1000
+                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                width: '360px', maxWidth: '90vw', background: 'var(--bg-card-solid)',
+                border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)',
+                padding: '18px', boxShadow: 'var(--shadow-card)', zIndex: 1000
               }}>
                 <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '10px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckCircle2 size={16} style={{ color: 'var(--status-success)' }} />
@@ -556,11 +527,8 @@ export default function CumulativeExperiment() {
         onComplete={(liveResults) => {
           if (liveResults) {
             setResults(liveResults);
-            if (liveResults.fusion_results) {
-              setFusionResults(liveResults.fusion_results);
-            } else {
-              fetchCumulativeResults();
-            }
+            if (liveResults.fusion_results) setFusionResults(liveResults.fusion_results);
+            else fetchCumulativeResults();
           } else {
             fetchCumulativeResults();
           }
@@ -573,86 +541,23 @@ export default function CumulativeExperiment() {
 
         return (
           <>
-            {/* 1. TOP HERO: QUDDOS DIAGNOSTIC CONSENSUS SCORE & COMPOSITE RELIABILITY INDEX */}
-            <div style={{
-              background: 'var(--bg-card)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '32px',
-              boxShadow: 'var(--shadow-card)',
-              marginBottom: '28px',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              {/* Subtle gradient accent */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '3px',
-                background: 'linear-gradient(90deg, var(--brand-primary), var(--quantum-color), transparent)'
-              }} />
-
-              {/* Hero Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', marginBottom: '28px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', flexWrap: 'wrap' }}>
+            {/* 01 — QUDDOS DIAGNOSTIC CONSENSUS */}
+            <section style={{ marginBottom: '80px' }}>
+              <SectionHeader
+                index="01"
+                icon={Award}
+                title="Quddos Diagnostic Consensus"
+                subtitle="Authoritative clinical composite combining Classical Dual Margins (SVM + MLP) with Quantum Hilbert Space Projections (QSVM, QNN, QVC)."
+                actions={
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      background: 'var(--brand-bg)',
-                      color: 'var(--brand-primary)',
-                      border: '1px solid var(--brand-glow)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em',
+                      padding: '4px 10px', borderRadius: '6px',
+                      background: 'var(--status-success-bg)', color: 'var(--status-success)',
+                      border: '1px solid rgba(22, 163, 74, 0.25)'
                     }}>
-                      <Sparkles size={12} /> Quddos Consensus
+                      {quddos.clinicalGrade}
                     </span>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: 'var(--text-secondary)',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-inset)'
-                    }}>
-                      5-Model Bayesian Fusion · Research-Grade
-                    </span>
-                  </div>
-                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <Award size={28} style={{ color: 'var(--status-warning)' }} />
-                    Consensus Score: <span style={{ color: 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>{quddos.quddosScore}%</span>
-                  </h2>
-                  <p style={{ margin: '8px 0 0 0', fontSize: '0.9rem', color: 'var(--text-secondary)', maxWidth: '780px', lineHeight: 1.6 }}>
-                    Authoritative clinical composite combining <strong style={{ color: 'var(--classical-color)' }}>Classical Dual Margins</strong> (SVM + MLP) with <strong style={{ color: 'var(--quantum-color)' }}>Quantum Hilbert Space Projections</strong> (QSVM, QNN, QVC).
-                  </p>
-                </div>
-
-                {/* Level Badge and Action */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      background: 'var(--status-success-bg)',
-                      border: '1px solid var(--status-success-border)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '10px 16px',
-                      textAlign: 'right'
-                    }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--status-success)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '2px' }}>
-                        Diagnostic Confidence
-                      </div>
-                      <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {quddos.clinicalGrade}
-                      </div>
-                    </div>
                     <CardActionMenu
                       title="Quddos Consensus Diagnostic Score & Research Suite"
                       category="metrics"
@@ -660,254 +565,206 @@ export default function CumulativeExperiment() {
                       metadata={{ page: 'cumulative', dataset: selectedDataset, section: 'quddos_consensus' }}
                     />
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>
-                    Hypothesis Test: <strong style={{ color: 'var(--status-success)' }}>p = {quddos.pValue} (Significant)</strong>
-                  </div>
-                </div>
-              </div>
+                }
+              />
 
-              {/* Metric Summary Ribbon */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-                {[
-                  { icon: Activity, label: 'Sensitivity / Recall', value: `${quddos.sensitivity}%`, sub: 'False-Negative Risk: < 0.4%', color: 'var(--status-success)' },
-                  { icon: ShieldCheck, label: 'Specificity', value: `${quddos.specificity}%`, sub: 'False-Alarm Rejection: 98.4%', color: 'var(--status-success)' },
-                  { icon: TrendingUp, label: 'Area Under ROC', value: quddos.rocAuc, sub: 'Near-Perfect Discriminative Power', color: 'var(--banner-warn-text)' },
-                  { icon: Zap, label: 'Latency', value: `${quddos.latencyMs}ms`, sub: 'Instant Real-Time Triage', color: 'var(--quantum-color)' },
-                  { icon: Gauge, label: 'Epistemic Uncertainty', value: `±${quddos.uncertaintyMargin}%`, sub: '5-Fold Stratified Variance', color: 'var(--brand-primary)' }
-                ].map((stat, idx) => (
-                  <div key={idx} style={{
-                    padding: '18px',
-                    background: 'var(--bg-inset)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    position: 'relative',
-                    overflow: 'hidden'
+              <div style={{ ...T.card, padding: '32px', position: 'relative', overflow: 'hidden' }}>
+                {/* Hero Score */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ ...T.eyebrow }}>Consensus Score</span>
+                  <span style={{ width: '28px', height: '1px', background: 'var(--border-color)' }} />
+                  <Sparkles size={14} style={{ color: 'var(--brand-primary)' }} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '28px' }}>
+                  <span style={{
+                    fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+                    fontWeight: 700,
+                    color: 'var(--brand-primary)',
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: '-0.04em',
+                    lineHeight: 1
                   }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '3px',
-                      background: stat.color
-                    }} />
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-tertiary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                      <stat.icon size={13} style={{ color: stat.color }} /> {stat.label}
-                    </div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 700, color: stat.color, fontVariantNumeric: 'tabular-nums', marginBottom: '4px' }}>
-                      {stat.value}
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
-                      {stat.sub}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Research-Grade Validation Suite */}
-              <div style={{
-                background: 'var(--bg-inset)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '24px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      background: 'var(--brand-bg)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <CheckCheck size={16} style={{ color: 'var(--brand-primary)' }} />
-                    </div>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      Research-Grade Statistical Validation & Stress-Test Suite
-                    </span>
-                  </div>
-
-                  {/* Validation Tab Selectors */}
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {[
-                      { key: 'hypothesis', icon: Scale, label: 'Hypothesis Testing' },
-                      { key: 'perturbation', icon: Activity, label: 'Perturbation Noise' },
-                      { key: 'discordance', icon: Atom, label: 'Epistemic Boundary' },
-                      { key: 'kfold', icon: Layers, label: '5-Fold Stability' }
-                    ].map(tab => {
-                      const isActive = activeValidationTab === tab.key;
-                      return (
-                        <button
-                          key={tab.key}
-                          type="button"
-                          onClick={() => setActiveValidationTab(tab.key)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 12px',
-                            borderRadius: 'var(--radius-md)',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            border: '1px solid',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                            background: isActive ? 'var(--brand-bg)' : 'var(--bg-card)',
-                            color: isActive ? 'var(--brand-primary)' : 'var(--text-secondary)',
-                            borderColor: isActive ? 'var(--brand-glow)' : 'var(--border-color)'
-                          }}
-                        >
-                          <tab.icon size={13} /> {tab.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    {quddos.quddosScore}
+                  </span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>%</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>
+                    p = {quddos.pValue} <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>(Significant)</span>
+                  </span>
                 </div>
 
-                {/* Active Validation Tab Content */}
+                {/* Hairline Metrics Table */}
                 <div style={{
-                  fontSize: '0.84rem',
-                  color: 'var(--text-primary)',
-                  lineHeight: 1.7,
-                  background: 'var(--bg-card)',
-                  padding: '18px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-color)'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  borderTop: '1px solid var(--border-color)',
+                  borderBottom: '1px solid var(--border-color)',
+                  marginBottom: '32px'
                 }}>
-                  {activeValidationTab === 'hypothesis' && (
-                    <div className="fade-in">
-                      <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Paired Student's t-Test & Effect Size Verification
+                  {[
+                    { label: 'Sensitivity', value: `${quddos.sensitivity}%`, sub: 'FN Risk: < 0.4%', color: 'var(--status-success)' },
+                    { label: 'Specificity', value: `${quddos.specificity}%`, sub: 'False-Alarm Rejection', color: 'var(--status-success)' },
+                    { label: 'ROC-AUC', value: quddos.rocAuc, sub: 'Near-Perfect', color: 'var(--hybrid-color)' },
+                    { label: 'Latency', value: `${quddos.latencyMs}ms`, sub: 'Real-Time Triage', color: 'var(--quantum-color)' },
+                    { label: 'Uncertainty', value: `±${quddos.uncertaintyMargin}%`, sub: '5-Fold Variance', color: 'var(--brand-primary)' }
+                  ].map((stat, idx, arr) => (
+                    <div key={stat.label} style={{ padding: '24px 20px', borderLeft: idx > 0 ? '1px solid var(--border-color)' : 'none' }}>
+                      <div style={{
+                        fontSize: '1.7rem', fontWeight: 700, color: stat.color,
+                        fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+                        letterSpacing: '-0.025em', marginBottom: '10px'
+                      }}>
+                        {stat.value}
                       </div>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                        <strong>Null Hypothesis (H₀):</strong> Quddos composite ensemble confers no statistically superior diagnostic benefit over individual models.<br />
-                        <strong>Empirical Finding:</strong> Paired <em>t</em>-test across 100 bootstrap splits yields <strong>t = 4.82, p = {quddos.pValue}</strong> (rejecting H₀ with 99.96% confidence). Cohen's <em>d</em> effect size is <strong>{quddos.cohenD}</strong> (classified as a <em>Very Large Clinical Effect Size</em>), proving high reproducibility across distinct patient splits.
-                      </p>
-                    </div>
-                  )}
-
-                  {activeValidationTab === 'perturbation' && (
-                    <div className="fade-in">
-                      <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Monte Carlo Continuous Feature Perturbation (Gaussian ±5% Drift)
+                      <div style={T.eyebrow}>{stat.label}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                        {stat.sub}
                       </div>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                        <strong>Stress Protocol:</strong> Injected zero-mean Gaussian measurement noise (σ = 0.05 · std(X)) across all radiomic/clinical continuous features to simulate clinical scanner calibration variance and patient movement.<br />
-                        <strong>Diagnostic Retention:</strong> The ensemble maintains <strong>{quddos.perturbationRetention}% baseline diagnostic accuracy</strong> (&lt;0.6% deviation), whereas standalone baseline trees suffered 3.8% degradation. Proves field readiness for noisy real-world hospital data.
-                      </p>
                     </div>
-                  )}
-
-                  {activeValidationTab === 'discordance' && (
-                    <div className="fade-in">
-                      <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Epistemic Discordance & Borderline Patient Arbitration
-                      </div>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                        <strong>Borderline Ambiguity Criterion:</strong> Cases where classical SVM margin distance |d(x, H)| &lt; 0.12 or MLP softmax probability P ∈ [0.45, 0.55].<br />
-                        <strong>Quantum Arbitration Outcome:</strong> In 15 high-discordance borderline cases, the 4-qubit Hilbert kernel projection correctly arbitrated <strong>{quddos.borderlineResolved} cases</strong> (93.3% accuracy in ambiguous regimes), converting potential classical false negatives into accurate diagnoses.
-                      </p>
-                    </div>
-                  )}
-
-                  {activeValidationTab === 'kfold' && (
-                    <div className="fade-in">
-                      <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={16} style={{ color: 'var(--status-warning)' }} /> Stratified 5-Fold Cross-Validation Cohort Coherence
-                      </div>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                        <strong>Fold Consistency:</strong> Fold 1 (98.8%), Fold 2 (98.4%), Fold 3 (98.9%), Fold 4 (98.5%), Fold 5 (98.6%).<br />
-                        <strong>Aggregate Distribution:</strong> Cross-validation mean is <strong>{quddos.kFoldMean}% ± {quddos.kFoldStd}%</strong>. Zero catastrophic fold collapse observed, confirming absence of data leakage and validating out-of-distribution generalizability.
-                      </p>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            </div>
 
-            {/* 2. STRUCTURED SCIENTIFIC INFERENCE ENGINE: 3 CORE DECISION-MAKING QUESTIONS */}
-            <div style={{
-              background: 'var(--bg-card)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '28px',
-              boxShadow: 'var(--shadow-card)',
-              marginBottom: '28px'
-            }}>
-              {/* Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {/* Research-Grade Validation Suite */}
+                <div style={{
+                  background: 'var(--bg-inset)', border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)', padding: '24px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <CheckCheck size={16} style={{ color: 'var(--brand-primary)' }} />
+                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                        Research-Grade Validation & Stress-Test Suite
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-card-solid)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                      {[
+                        { key: 'hypothesis', icon: Scale, label: 'Hypothesis' },
+                        { key: 'perturbation', icon: Activity, label: 'Perturbation' },
+                        { key: 'discordance', icon: Atom, label: 'Epistemic' },
+                        { key: 'kfold', icon: Layers, label: '5-Fold' }
+                      ].map(tab => {
+                        const isActive = activeValidationTab === tab.key;
+                        return (
+                          <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => setActiveValidationTab(tab.key)}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '6px',
+                              padding: '6px 12px', borderRadius: 'calc(var(--radius-md) - 2px)',
+                              fontSize: '0.76rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              background: isActive ? 'var(--brand-bg)' : 'transparent',
+                              color: isActive ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                              boxShadow: isActive ? 'var(--shadow-card)' : 'none'
+                            }}
+                          >
+                            <tab.icon size={12} /> {tab.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
-                    background: 'var(--classical-bg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    fontSize: '0.84rem', color: 'var(--text-primary)', lineHeight: 1.7,
+                    background: 'var(--bg-card-solid)', padding: '20px 22px',
+                    borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'
                   }}>
-                    <Brain size={24} style={{ color: 'var(--classical-color)' }} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      Diagnostic Decision-Making Inferences
-                    </h3>
-                    <p style={{ margin: '3px 0 0 0', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                      Rigorous comparative breakdown answering how classical vs quantum algorithms inform medical choices.
-                    </p>
-                  </div>
-                </div>
+                    {activeValidationTab === 'hypothesis' && (
+                      <div className="fade-in">
+                        <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', letterSpacing: '-0.01em' }}>
+                          <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Paired Student's t-Test & Effect Size Verification
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                          <strong>Null Hypothesis (H₀):</strong> Quddos composite ensemble confers no statistically superior diagnostic benefit over individual models.<br />
+                          <strong>Empirical Finding:</strong> Paired <em>t</em>-test across 100 bootstrap splits yields <strong>t = 4.82, p = {quddos.pValue}</strong> (rejecting H₀ with 99.96% confidence). Cohen's <em>d</em> effect size is <strong>{quddos.cohenD}</strong> (classified as a <em>Very Large Clinical Effect Size</em>), proving high reproducibility across distinct patient splits.
+                        </p>
+                      </div>
+                    )}
 
-                {/* Perspective Mode Switcher */}
-                <div style={{ display: 'flex', background: 'var(--bg-inset)', padding: '3px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                  <button
-                    type="button"
-                    onClick={() => setInferenceTier('basic')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 14px',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      borderRadius: 'var(--radius-sm)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      background: inferenceTier === 'basic' ? 'var(--classical-color)' : 'transparent',
-                      color: inferenceTier === 'basic' ? '#FFFFFF' : 'var(--text-secondary)'
-                    }}
-                  >
-                    <GraduationCap size={14} /> Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInferenceTier('researcher')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 14px',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      borderRadius: 'var(--radius-sm)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      background: inferenceTier === 'researcher' ? 'var(--quantum-color)' : 'transparent',
-                      color: inferenceTier === 'researcher' ? '#FFFFFF' : 'var(--text-secondary)'
-                    }}
-                  >
-                    <Microscope size={14} /> Researcher
-                  </button>
+                    {activeValidationTab === 'perturbation' && (
+                      <div className="fade-in">
+                        <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', letterSpacing: '-0.01em' }}>
+                          <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Monte Carlo Continuous Feature Perturbation (Gaussian ±5% Drift)
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                          <strong>Stress Protocol:</strong> Injected zero-mean Gaussian measurement noise (σ = 0.05 · std(X)) across all radiomic/clinical continuous features to simulate clinical scanner calibration variance and patient movement.<br />
+                          <strong>Diagnostic Retention:</strong> The ensemble maintains <strong>{quddos.perturbationRetention}% baseline diagnostic accuracy</strong> (&lt;0.6% deviation), whereas standalone baseline trees suffered 3.8% degradation. Proves field readiness for noisy real-world hospital data.
+                        </p>
+                      </div>
+                    )}
+
+                    {activeValidationTab === 'discordance' && (
+                      <div className="fade-in">
+                        <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', letterSpacing: '-0.01em' }}>
+                          <CheckCircle size={16} style={{ color: 'var(--status-success)' }} /> Epistemic Discordance & Borderline Patient Arbitration
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                          <strong>Borderline Ambiguity Criterion:</strong> Cases where classical SVM margin distance |d(x, H)| &lt; 0.12 or MLP softmax probability P ∈ [0.45, 0.55].<br />
+                          <strong>Quantum Arbitration Outcome:</strong> In 15 high-discordance borderline cases, the 4-qubit Hilbert kernel projection correctly arbitrated <strong>{quddos.borderlineResolved} cases</strong> (93.3% accuracy in ambiguous regimes), converting potential classical false negatives into accurate diagnoses.
+                        </p>
+                      </div>
+                    )}
+
+                    {activeValidationTab === 'kfold' && (
+                      <div className="fade-in">
+                        <div style={{ fontWeight: 700, color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', letterSpacing: '-0.01em' }}>
+                          <CheckCircle size={16} style={{ color: 'var(--status-warning)' }} /> Stratified 5-Fold Cross-Validation Cohort Coherence
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                          <strong>Fold Consistency:</strong> Fold 1 (98.8%), Fold 2 (98.4%), Fold 3 (98.9%), Fold 4 (98.5%), Fold 5 (98.6%).<br />
+                          <strong>Aggregate Distribution:</strong> Cross-validation mean is <strong>{quddos.kFoldMean}% ± {quddos.kFoldStd}%</strong>. Zero catastrophic fold collapse observed, confirming absence of data leakage and validating out-of-distribution generalizability.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+            </section>
 
-              {/* Accordion Questions Container */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* 02 — DECISION-MAKING INFERENCES */}
+            <section style={{ marginBottom: '80px' }}>
+              <SectionHeader
+                index="02"
+                icon={Brain}
+                title="Diagnostic Decision-Making Inferences"
+                subtitle="Rigorous comparative breakdown answering how classical vs quantum algorithms inform medical choices."
+                actions={
+                  <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setInferenceTier('basic')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600,
+                        borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        background: inferenceTier === 'basic' ? 'var(--classical-color)' : 'transparent',
+                        color: inferenceTier === 'basic' ? '#FFFFFF' : 'var(--text-secondary)'
+                      }}
+                    >
+                      <GraduationCap size={13} /> Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInferenceTier('researcher')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600,
+                        borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        background: inferenceTier === 'researcher' ? 'var(--quantum-color)' : 'transparent',
+                        color: inferenceTier === 'researcher' ? '#FFFFFF' : 'var(--text-secondary)'
+                      }}
+                    >
+                      <Microscope size={13} /> Researcher
+                    </button>
+                  </div>
+                }
+              />
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {[
                   {
                     qKey: 'q1',
@@ -931,19 +788,16 @@ export default function CumulativeExperiment() {
                     borderColor: 'var(--quantum-color)',
                     objectiveColor: 'var(--quantum-color)'
                   }
-                ].map((q) => (
+                ].map((q, idx) => (
                   <div key={q.qKey} style={{
-                    background: 'var(--bg-inset)',
-                    border: `1px solid var(--border-color)`,
-                    borderLeft: `3px solid ${q.borderColor}`,
-                    borderRadius: 'var(--radius-md)',
-                    overflow: 'hidden',
+                    borderTop: '1px solid var(--border-color)',
+                    borderBottom: idx === 2 ? '1px solid var(--border-color)' : 'none',
                     transition: 'all 0.15s ease'
                   }}>
                     <div
                       onClick={() => toggleQuestion(q.qKey)}
                       style={{
-                        padding: '16px 20px',
+                        padding: '22px 4px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'flex-start',
@@ -951,40 +805,33 @@ export default function CumulativeExperiment() {
                         gap: '16px'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flex: 1 }}>
-                        <div style={{
-                          width: '28px',
-                          height: '28px',
-                          borderRadius: '8px',
-                          background: q.borderColor === 'var(--quantum-color)' ? 'var(--quantum-bg)' : 'var(--classical-bg)',
-                          color: q.borderColor,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', flex: 1 }}>
+                        <span style={{
+                          fontSize: '1.5rem',
                           fontWeight: 700,
-                          fontSize: '0.82rem',
+                          color: q.borderColor,
+                          fontVariantNumeric: 'tabular-nums',
+                          letterSpacing: '-0.02em',
+                          lineHeight: 1,
                           flexShrink: 0,
-                          marginTop: '1px'
+                          minWidth: '28px'
                         }}>
-                          {q.num}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                          {String(q.num).padStart(2, '0')}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, letterSpacing: '-0.01em' }}>
                             {q.question}
                           </div>
-                          <div style={{ fontSize: '0.76rem', color: q.objectiveColor || 'var(--text-secondary)', marginTop: '3px', fontWeight: 500 }}>
+                          <div style={{ fontSize: '0.78rem', color: q.objectiveColor || 'var(--text-tertiary)', marginTop: '6px', fontWeight: 500 }}>
                             {q.objective}
                           </div>
                         </div>
                       </div>
-                      {expandedQuestions[q.qKey] ? <ChevronUp size={18} style={{ color: 'var(--text-secondary)', flexShrink: 0, marginTop: '4px' }} /> : <ChevronDown size={18} style={{ color: 'var(--text-secondary)', flexShrink: 0, marginTop: '4px' }} />}
+                      {expandedQuestions[q.qKey] ? <ChevronUp size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: '4px' }} /> : <ChevronDown size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: '4px' }} />}
                     </div>
 
                     {expandedQuestions[q.qKey] && (
-                      <div className="narration-fade-in" style={{
-                        padding: '0 20px 20px 62px',
-                        lineHeight: 1.7
-                      }}>
+                      <div className="narration-fade-in" style={{ padding: '0 4px 24px 50px', lineHeight: 1.7 }}>
                         {q.qKey === 'q1' && inferenceTier === 'basic' && (
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                             Classical algorithms (<strong>Support Vector Machines (SVM)</strong> and <strong>Multi-Layer Perceptrons (MLP)</strong>) analyze continuous medical measurements to deliver 3 primary clinical insights:
@@ -998,7 +845,7 @@ export default function CumulativeExperiment() {
                         {q.qKey === 'q1' && inferenceTier === 'researcher' && (
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                             <strong>Mathematical Formulation & Empirical Risk Bounds:</strong> Classical classifiers optimize empirical risk over smooth Euclidean manifolds ℝᵈ:
-                            <div style={{ background: 'var(--bg-card)', padding: '12px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--classical-color)', margin: '12px 0', lineHeight: 1.5 }}>
+                            <div style={{ background: 'var(--bg-inset)', padding: '12px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.78rem', color: 'var(--classical-color)', margin: '12px 0', lineHeight: 1.5 }}>
                               SVM Dual Formulation: max_α ∑ α_i - 0.5 ∑ α_i α_j y_i y_j K_RBF(x_i, x_j) s.t. 0 ≤ α_i ≤ C, ∑ α_i y_i = 0
                             </div>
                             <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
@@ -1031,7 +878,7 @@ export default function CumulativeExperiment() {
                         {q.qKey === 'q3' && inferenceTier === 'basic' && (
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                             Quantum algorithms (<strong>QSVM</strong>, <strong>QNN</strong>, <strong>QVC</strong>) solve the most dangerous problem in clinical medicine: <strong>the borderline ambiguous patient</strong>.
-                            <div style={{ background: 'var(--quantum-bg)', padding: '14px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--quantum-glow)', margin: '12px 0' }}>
+                            <div style={{ background: 'var(--quantum-bg)', padding: '14px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--quantum-glow)', margin: '12px 0', borderLeft: '2px solid var(--quantum-color)' }}>
                               <div style={{ fontWeight: 700, color: 'var(--quantum-color)', fontSize: '0.85rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Sparkles size={14} /> The Entangled Correlation Detector
                               </div>
@@ -1049,7 +896,7 @@ export default function CumulativeExperiment() {
                         {q.qKey === 'q3' && inferenceTier === 'researcher' && (
                           <div style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                             <strong>16-Dimensional Complex Hilbert Space Mapping (ℋ = ℂ¹⁶):</strong>
-                            <div style={{ background: 'var(--bg-card)', padding: '12px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--quantum-color)', margin: '12px 0', lineHeight: 1.5 }}>
+                            <div style={{ background: 'var(--bg-inset)', padding: '12px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.78rem', color: 'var(--quantum-color)', margin: '12px 0', lineHeight: 1.5 }}>
                               Quantum Feature Map: U_Φ(x) = exp( i ∑_j x_j Z_j + i ∑_(j&lt;k) (π - x_j)(π - x_k) Z_j Z_k )<br />
                               Quantum Gram Kernel: K_Q(x_i, x_j) = |⟨0^⊗n | U_Φ^†(x_j) U_Φ(x_i) | 0^⊗n⟩|² = |⟨Φ(x_i)|Φ(x_j)⟩|²
                             </div>
@@ -1065,629 +912,500 @@ export default function CumulativeExperiment() {
                   </div>
                 ))}
               </div>
+            </section>
+
+            {/* 03 — MULTIMODAL FUSION BENCHMARK */}
+            {fusionResults && (() => {
+              const early = fusionResults?.early_fusion || fusionResults?.fusion_strategies?.early_fusion;
+              const inter = fusionResults?.intermediate_fusion || fusionResults?.fusion_strategies?.intermediate_fusion;
+              const late = fusionResults?.late_fusion || fusionResults?.late_adaptive_consensus || fusionResults?.fusion_strategies?.late_adaptive_consensus || fusionResults?.fusion_strategies?.late_fusion;
+
+              return (
+                <section style={{ marginBottom: '80px' }}>
+                  <SectionHeader
+                    index="03"
+                    icon={Layers}
+                    title="Multimodal Adaptive Fusion Strategies"
+                    subtitle="Feature-level concatenation, latent interaction tensors, and confidence-weighted decision blending."
+                    actions={
+                      <CardActionMenu
+                        title="Multimodal Fusion Strategies Comparison"
+                        category="metrics"
+                        data={fusionResults}
+                        metadata={{ page: 'cumulative', dataset: selectedDataset, section: 'fusion' }}
+                      />
+                    }
+                  />
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                    {[
+                      { label: 'Early (Feature-Level)', acc: (Number(early?.accuracy || 0.956) * 100).toFixed(1), auc: early?.roc_auc || 0.985, latency: early?.latency_ms || 42, desc: 'Joint concatenation of tabular clinical metrics and imaging morphometrics.', accent: 'var(--classical-color)' },
+                      { label: 'Intermediate (Latent)', acc: (Number(inter?.accuracy || 0.971) * 100).toFixed(1), auc: inter?.roc_auc || 0.992, latency: inter?.latency_ms || 68, desc: 'Bilinear cross-modality interaction mapping non-linear anatomical correlations.', accent: 'var(--quantum-color)' },
+                      { label: 'Late Consensus (Optimal)', acc: (Number(late?.accuracy || 0.985) * 100).toFixed(1), auc: late?.roc_auc || 0.999, latency: late?.latency_ms || 18, desc: 'Dynamic confidence weighting with automated missing-modality compensation.', accent: 'var(--status-warning)', isOptimal: true }
+                    ].map((strategy, idx) => (
+                      <div key={idx} style={{
+                        padding: '22px 24px',
+                        background: 'var(--bg-card)',
+                        borderRadius: 'var(--radius-lg)',
+                        border: '1px solid var(--border-color)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: strategy.isOptimal ? '0 4px 16px var(--shadow-card)' : 'none',
+                        transition: 'all 0.25s ease'
+                      }}
+                      onMouseEnter={(e) => { if (!strategy.isOptimal) { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = strategy.accent; } }}
+                      onMouseLeave={(e) => { if (!strategy.isOptimal) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border-color)'; } }}
+                      >
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: strategy.accent }} />
+
+                        {strategy.isOptimal && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+                            <Sparkles size={12} style={{ color: 'var(--status-warning)' }} />
+                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--status-warning)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Optimal Strategy</span>
+                          </div>
+                        )}
+
+                        <div style={{ ...T.eyebrow, marginBottom: '12px' }}>{strategy.label}</div>
+
+                        <div style={{ fontSize: '2.1rem', fontWeight: 700, color: strategy.accent, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.025em', lineHeight: 1, marginBottom: '10px' }}>
+                          {strategy.acc}<span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: '2px' }}>%</span>
+                        </div>
+
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: '14px', fontVariantNumeric: 'tabular-nums' }}>
+                          ROC-AUC: <strong style={{ color: 'var(--text-secondary)' }}>{strategy.auc}</strong> · Latency: <strong style={{ color: 'var(--text-secondary)' }}>{strategy.latency}ms</strong>
+                        </div>
+
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.55, paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
+                          {strategy.desc}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Missing Modality Callout */}
+                  <div style={{
+                    padding: '16px 22px',
+                    background: 'var(--bg-inset)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    borderLeft: '2px solid var(--brand-primary)',
+                    fontSize: '0.84rem',
+                    color: 'var(--text-primary)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    lineHeight: 1.6
+                  }}>
+                    <Activity size={16} style={{ color: 'var(--brand-primary)', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <strong>Missing-Modality Robustness:</strong> In real-world emergency triage when imaging or biosignals are absent, the adaptive consensus engine preserves <strong>{(Number(fusionResults?.fallback_performance_retention || 0.994) * 100).toFixed(1)}%</strong> of baseline accuracy without pipeline crash.
+                    </div>
+                  </div>
+                </section>
+              );
+            })()}
+
+            {/* Verdict Banner */}
+            <div style={{
+              marginBottom: '64px', padding: '24px 28px',
+              background: 'var(--banner-warn-bg)', border: '1px solid var(--banner-warn-border)',
+              borderRadius: 'var(--radius-md)', display: 'flex', gap: '18px',
+              alignItems: 'flex-start'
+            }}>
+              <ShieldCheck size={22} style={{ color: 'var(--banner-warn-text)', flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ ...T.eyebrow, color: 'var(--banner-warn-text)', marginBottom: '8px' }}>
+                  Quantum vs Classical Verdict
+                </div>
+                <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--banner-warn-text)', lineHeight: 1.7, fontWeight: 500 }}>
+                  {results?.basic_inference?.summary}
+                </p>
+                {results?.basic_inference?.takeaway && (
+                  <p style={{ margin: '10px 0 0 0', fontSize: '0.82rem', color: 'var(--banner-warn-text)', lineHeight: 1.65, fontStyle: 'italic', opacity: 0.9 }}>
+                    {results?.basic_inference?.takeaway}
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* 3. MULTIMODAL FUSION BENCHMARK SECTION */}
-          {fusionResults && (() => {
-            const early = fusionResults?.early_fusion || fusionResults?.fusion_strategies?.early_fusion;
-            const inter = fusionResults?.intermediate_fusion || fusionResults?.fusion_strategies?.intermediate_fusion;
-            const late = fusionResults?.late_fusion || fusionResults?.late_adaptive_consensus || fusionResults?.fusion_strategies?.late_adaptive_consensus || fusionResults?.fusion_strategies?.late_fusion;
+            <HairlineDivider label="5-Model Matrix" />
 
-            return (
-              <div style={{
-                background: 'var(--bg-card)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '28px',
-                boxShadow: 'var(--shadow-card)',
-                marginBottom: '28px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
-                  <CardActionMenu
-                    title="Multimodal Fusion Strategies Comparison"
-                    category="metrics"
-                    data={fusionResults}
-                    metadata={{ page: 'cumulative', dataset: selectedDataset, section: 'fusion' }}
-                  />
-                </div>
-
-                {/* Section Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '22px' }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
-                    background: 'var(--status-warning-bg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Layers size={24} style={{ color: 'var(--status-warning)' }} />
+            {/* 04 — 5-MODEL PERFORMANCE MATRIX */}
+            <section style={{ marginBottom: '80px' }}>
+              <SectionHeader
+                index="04"
+                icon={Cpu}
+                title="5-Model Performance Matrix"
+                subtitle="Canonical comparative benchmark across classical and quantum architectures."
+                actions={
+                  <div style={{ display: 'inline-flex', padding: '3px', background: 'var(--bg-inset)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', gap: '2px' }}>
+                    {[
+                      { mode: 'card', icon: LayoutGrid, label: 'Card' },
+                      { mode: 'table', icon: Table, label: 'Table' }
+                    ].map(({ mode, icon: Icon, label }) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setViewMode(mode)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '7px 16px', fontSize: '0.82rem', fontWeight: 600,
+                          borderRadius: 'calc(var(--radius-md) - 2px)', border: 'none', cursor: 'pointer',
+                          background: viewMode === mode ? 'var(--classical-color)' : 'transparent',
+                          color: viewMode === mode ? '#FFFFFF' : 'var(--text-secondary)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <Icon size={14} />
+                        <span>{label} View</span>
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      Multimodal Adaptive Fusion Strategies
-                    </h3>
-                    <p style={{ margin: '3px 0 0 0', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                      Feature-level concatenation, latent interaction tensors, and confidence-weighted decision blending.
-                    </p>
+                }
+              />
+
+              {/* TABLE VIEW */}
+              {viewMode === 'table' ? (
+                <div style={{
+                  ...T.card,
+                  padding: 0,
+                  overflow: 'hidden',
+                  marginBottom: '28px'
+                }}>
+                  <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-inset)' }}>
+                    <div>
+                      <div style={T.eyebrow}>Canonical Matrix</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px', letterSpacing: '-0.01em' }}>
+                        Click column headers to sort metrics across models.
+                      </div>
+                    </div>
+                    <CardActionMenu
+                      title="5-Model Performance Comparison Table"
+                      category="metrics"
+                      data={getSortedModels()}
+                      metadata={{ page: 'cumulative', dataset: selectedDataset, view: 'table' }}
+                    />
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--bg-inset)', borderBottom: '1px solid var(--border-color)' }}>
+                          {[
+                            { key: 'name', label: 'Architecture', align: 'left' },
+                            { key: 'type', label: 'Paradigm', align: 'center' },
+                            { key: 'accuracy', label: 'Accuracy', align: 'right' },
+                            { key: 'sensitivity', label: 'Sensitivity', align: 'right' },
+                            { key: 'specificity', label: 'Specificity', align: 'right' },
+                            { key: 'precision', label: 'Precision', align: 'right' },
+                            { key: 'f1_score', label: 'F1-Score', align: 'right' },
+                            { key: 'roc_auc', label: 'ROC-AUC', align: 'right' },
+                            { key: 'qubits', label: 'Qubits', align: 'center' },
+                            { key: 'circuit_depth', label: 'Depth', align: 'center' }
+                          ].map(col => (
+                            <th
+                              key={col.key}
+                              onClick={() => handleSort(col.key)}
+                              style={{
+                                padding: '14px 18px',
+                                textAlign: col.align,
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                                ...T.eyebrow,
+                                fontSize: '0.68rem'
+                              }}
+                            >
+                              {col.label} {renderSortIcon(col.key)}
+                            </th>
+                          ))}
+                          <th style={{ padding: '14px 18px', textAlign: 'right', ...T.eyebrow, fontSize: '0.68rem' }}>
+                            5-Fold
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(() => {
+                          const sorted = getSortedModels();
+                          return sorted.map((m, idx) => {
+                            const isQuantum = m.type === 'quantum';
+                            const isCustom = m.is_custom || m.type === 'custom';
+                            const foldVar = m.cv_score_display || (
+                              m.id === 'classical_svm' ? '97.1% ± 0.5' :
+                              m.id === 'classical_mlp' ? '96.9% ± 0.8' :
+                              m.id === 'quantum_qsvm' ? '85.1% ± 1.2' :
+                              m.id === 'quantum_qnn' ? '82.5% ± 1.5' :
+                              m.id === 'quantum_qvc' ? '81.8% ± 1.6' : 'Custom Holdout'
+                            );
+
+                            return (
+                              <tr key={m.id} style={{
+                                borderBottom: '1px solid var(--border-color)',
+                                transition: 'background 0.15s ease'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                              >
+                                <td style={{ padding: '16px 18px', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    {isCustom ? (
+                                      <Layers size={15} style={{ color: '#F59E0B' }} />
+                                    ) : isQuantum ? (
+                                      <Atom size={15} style={{ color: 'var(--quantum-color)' }} />
+                                    ) : (
+                                      <Zap size={15} style={{ color: 'var(--classical-color)' }} />
+                                    )}
+                                    <span>{m.name}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '16px 10px', textAlign: 'center' }}>
+                                  <span
+                                    className={`badge-paradigm ${isCustom ? 'badge-custom' : m.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`}
+                                    style={isCustom ? { background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', borderColor: 'rgba(245, 158, 11, 0.3)' } : {}}
+                                  >
+                                    {isCustom ? 'Custom' : m.type === 'classical' ? 'Classical' : 'Quantum'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>
+                                  {m.accuracy}%
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.sensitivity}%
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.specificity}%
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.precision ? `${m.precision}%` : '—'}
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.f1_score ?? '—'}
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.roc_auc}
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'center', color: isQuantum ? 'var(--quantum-color)' : isCustom ? '#F59E0B' : 'var(--text-tertiary)', fontWeight: isQuantum || isCustom ? 600 : 400, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.qubits === 'N/A' || !m.qubits ? '—' : m.qubits}
+                                </td>
+                                <td style={{ padding: '16px 12px', textAlign: 'center', color: isQuantum ? 'var(--quantum-color)' : isCustom ? '#F59E0B' : 'var(--text-tertiary)', fontWeight: isQuantum || isCustom ? 600 : 400, fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.circuit_depth === 'N/A' || !m.circuit_depth ? '—' : m.circuit_depth}
+                                </td>
+                                <td style={{ padding: '16px 18px', textAlign: 'right', color: isCustom ? '#F59E0B' : 'var(--text-secondary)', fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
+                                  {foldVar}
+                                </td>
+                              </tr>
+                            );
+                          });
+                        })()}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
+              ) : (
+                /* CARD VIEW */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '28px' }}>
+                  {results?.models?.map(model => {
+                    const isCustom = model.is_custom || model.type === 'custom';
+                    const isQuantum = model.type === 'quantum';
+                    const accent = isCustom ? '#F59E0B' : isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)';
 
-                {/* Fusion Strategy Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                  {[
-                    { label: '1. Early (Feature-Level)', acc: (Number(early?.accuracy || 0.956) * 100).toFixed(1), auc: early?.roc_auc || 0.985, latency: early?.latency_ms || 42, desc: 'Joint concatenation of tabular clinical metrics and imaging morphometrics.', accent: 'var(--classical-color)' },
-                    { label: '2. Intermediate (Latent)', acc: (Number(inter?.accuracy || 0.971) * 100).toFixed(1), auc: inter?.roc_auc || 0.992, latency: inter?.latency_ms || 68, desc: 'Bilinear cross-modality interaction mapping non-linear anatomical correlations.', accent: 'var(--quantum-color)' },
-                    { label: '3. Late Consensus (Optimal)', acc: (Number(late?.accuracy || 0.985) * 100).toFixed(1), auc: late?.roc_auc || 0.999, latency: late?.latency_ms || 18, desc: 'Dynamic confidence weighting with automated missing-modality compensation.', accent: 'var(--status-warning)', isOptimal: true }
-                  ].map((strategy, idx) => (
-                    <div key={idx} style={{
-                      padding: '20px',
-                      background: strategy.isOptimal ? 'var(--status-warning-bg)' : 'var(--bg-inset)',
-                      borderRadius: 'var(--radius-md)',
-                      border: strategy.isOptimal ? '1px solid var(--status-warning-border)' : '1px solid var(--border-color)',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '3px',
-                        background: strategy.accent
-                      }} />
-                      {strategy.isOptimal && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                          <Sparkles size={14} style={{ color: 'var(--status-warning)' }} />
-                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--status-warning)' }}>Optimal Strategy</span>
+                    return (
+                      <div key={model.id} style={{
+                        ...T.card,
+                        padding: '28px 32px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: accent }} />
+
+                        <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
+                          <CardActionMenu
+                            title={`${model.name} - Cumulative Benchmark`}
+                            category="metrics"
+                            data={model}
+                            metadata={{ model_type: model.id, dataset: selectedDataset, page: 'cumulative', type: model.type }}
+                          />
                         </div>
-                      )}
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: strategy.accent, marginBottom: '8px' }}>
-                        {strategy.label}
+
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <div style={{
+                              width: '40px', height: '40px', borderRadius: '10px',
+                              background: isCustom ? 'rgba(245, 158, 11, 0.12)' : isQuantum ? 'var(--quantum-bg)' : 'var(--classical-bg)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                              {isCustom ? (
+                                <Layers size={20} style={{ color: '#F59E0B' }} />
+                              ) : model.type === 'classical' ? (
+                                <Zap size={20} style={{ color: 'var(--classical-color)' }} />
+                              ) : (
+                                <Atom size={20} style={{ color: 'var(--quantum-color)' }} />
+                              )}
+                            </div>
+                            <div>
+                              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+                                {model.name}
+                              </h3>
+                              <span
+                                className={`badge-paradigm ${isCustom ? 'badge-custom' : model.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`}
+                                style={{ marginTop: '6px', display: 'inline-block', ...(isCustom ? { background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', borderColor: 'rgba(245, 158, 11, 0.3)' } : {}) }}
+                              >
+                                {model.tag || (isCustom ? 'Custom Imported Estimator' : model.type)}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginRight: '40px', textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                            <div>Latency: <strong style={{ color: 'var(--text-primary)' }}>{model.training_time}</strong></div>
+                            {model.qubits && model.qubits !== 'N/A' && (
+                              <div style={{ marginTop: '2px' }}>Qubits: <strong style={{ color: 'var(--quantum-color)' }}>{model.qubits}</strong></div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Basic Section */}
+                        <div>
+                          <div style={{ ...T.eyebrow, marginBottom: '10px' }}>Basic Information</div>
+                          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.88rem', margin: '0 0 20px 0' }}>{model.basic_summary}</p>
+
+                          {/* Hairline Metrics */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                            borderTop: '1px solid var(--border-color)',
+                            borderBottom: '1px solid var(--border-color)',
+                            marginBottom: '16px'
+                          }}>
+                            {[
+                              { val: `${model.accuracy}%`, lbl: 'Accuracy', accent: accent },
+                              { val: `${model.sensitivity}%`, lbl: 'Sensitivity', accent: 'var(--text-primary)' },
+                              { val: `${model.specificity}%`, lbl: 'Specificity', accent: 'var(--text-primary)' },
+                              { val: model.roc_auc, lbl: 'ROC-AUC', accent: 'var(--text-primary)' }
+                            ].map((metric, idx, arr) => (
+                              <div key={idx} style={{ padding: '18px 16px', borderLeft: idx > 0 ? '1px solid var(--border-color)' : 'none' }}>
+                                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: metric.accent, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '6px' }}>
+                                  {metric.val}
+                                </div>
+                                <div style={T.eyebrow}>{metric.lbl}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Advanced Section */}
+                        <div>
+                          <button
+                            onClick={() => toggleAdvanced(model.id)}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '6px',
+                              padding: '6px 14px', fontSize: '0.78rem', fontWeight: 600,
+                              borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                              background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                          >
+                            {showAdvanced[model.id] ? 'Hide' : 'Show'} Advanced Telemetry
+                            {showAdvanced[model.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </button>
+
+                          {showAdvanced[model.id] && (
+                            <div style={{
+                              marginTop: '14px', padding: '18px 20px',
+                              background: 'var(--bg-inset)',
+                              borderRadius: 'var(--radius-md)',
+                              border: '1px solid var(--border-color)',
+                              borderLeft: '2px solid var(--text-tertiary)'
+                            }}>
+                              <p style={{ color: 'var(--text-primary)', lineHeight: 1.7, fontSize: '0.88rem', margin: 0 }}>{model.advanced_summary}</p>
+                              {model.circuit_depth !== 'N/A' && (
+                                <div style={{ marginTop: '12px', fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', gap: '16px', flexWrap: 'wrap', fontVariantNumeric: 'tabular-nums' }}>
+                                  <span><strong style={{ color: 'var(--quantum-color)' }}>Circuit Depth:</strong> {model.circuit_depth}</span>
+                                  <span><strong style={{ color: 'var(--quantum-color)' }}>Entanglement:</strong> Linear CX gate mapping</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: strategy.accent, fontVariantNumeric: 'tabular-nums', marginBottom: '6px' }}>
-                        {strategy.acc}%
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* 05 — BENCHMARK VISUALIZATIONS */}
+            {results?.comparison_figures && (
+              <section style={{ marginBottom: '40px' }}>
+                <SectionHeader
+                  index="05"
+                  icon={BarChart3}
+                  title="Benchmark Visualizations"
+                  subtitle="Multi-axis radar overlay and per-metric bar comparison across all 5 models."
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
+                  {[
+                    {
+                      title: 'Multi-Metric Radar Chart',
+                      desc: 'Six-axis performance overlay across all model architectures.',
+                      img: results.comparison_figures.radar_chart,
+                      alt: 'Radar Chart',
+                      chartType: 'radar',
+                      menuTitle: 'All Models Radar Chart Comparison'
+                    },
+                    {
+                      title: 'Accuracy & Sensitivity Breakdown',
+                      desc: 'Side-by-side bar comparison of key diagnostic metrics.',
+                      img: results.comparison_figures.metric_comparison,
+                      alt: 'Metric Comparison',
+                      chartType: 'bar',
+                      menuTitle: 'Metric Comparison Bar Chart'
+                    }
+                  ].map((chart, idx) => (
+                    <div key={idx} style={{
+                      ...T.card,
+                      padding: '24px',
+                      position: 'relative'
+                    }}>
+                      <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
+                        <CardActionMenu
+                          title={chart.menuTitle}
+                          category="plot"
+                          data={{ dataset: selectedDataset, comparison_type: chart.chartType }}
+                          metadata={{ page: 'cumulative', chart_type: chart.chartType }}
+                          imageUrl={chart.img}
+                        />
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: '8px' }}>
-                        ROC-AUC: {strategy.auc} · Latency: {strategy.latency}ms
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={T.eyebrow}>Figure {idx + 1}</div>
+                        <h4 style={{ margin: '6px 0 4px 0', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{chart.title}</h4>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{chart.desc}</p>
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                        {strategy.desc}
+                      <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                        <img src={chart.img} alt={chart.alt} style={{ width: '100%', borderRadius: '6px', display: 'block' }} />
                       </div>
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+          </>
+        );
+      })()}
 
-                {/* Missing Modality Fallback Callout */}
-                <div style={{
-                  marginTop: '18px',
-                  padding: '14px 18px',
-                  background: 'var(--bg-inset)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '0.84rem',
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  lineHeight: 1.6
-                }}>
-                  <Activity size={16} style={{ color: 'var(--brand-primary)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <strong>Missing-Modality Robustness:</strong> In real-world emergency triage when imaging or biosignals are absent, the adaptive consensus engine preserves <strong>{(Number(fusionResults?.fallback_performance_retention || 0.994) * 100).toFixed(1)}%</strong> of baseline accuracy without pipeline crash.
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Quantum vs Classical Verdict Banner */}
-          <div style={{
-            marginBottom: '28px',
-            padding: '24px 28px',
-            background: 'var(--status-warning-bg)',
-            border: '1px solid var(--status-warning-border)',
-            borderRadius: 'var(--radius-lg)',
-            display: 'flex',
-            gap: '18px',
-            alignItems: 'flex-start',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '3px',
-              background: 'linear-gradient(90deg, var(--classical-color), var(--quantum-color), var(--status-warning))'
-            }} />
-            <div style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '14px',
-              background: 'rgba(255,255,255,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <ShieldCheck size={26} style={{ color: 'var(--status-warning)' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Quantum vs Classical Diagnostic Verdict
-              </h3>
-              <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
-                {results?.basic_inference?.summary}
-              </p>
-              {results?.basic_inference?.takeaway && (
-                <p style={{ margin: '10px 0 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, fontStyle: 'italic' }}>
-                  {results?.basic_inference?.takeaway}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* 5-Model Performance Matrix Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 20px 0', flexWrap: 'wrap', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'var(--classical-bg)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Cpu size={24} style={{ color: 'var(--classical-color)' }} />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  5-Model Performance Matrix
-                </h3>
-                <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                  Canonical comparative benchmark across classical and quantum architectures.
-                </p>
-              </div>
-            </div>
-
-            {/* View Toggle Segmented Buttons */}
-            <div style={{ display: 'flex', background: 'var(--bg-inset)', padding: '4px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-              {[
-                { mode: 'card', icon: LayoutGrid, label: 'Card' },
-                { mode: 'table', icon: Table, label: 'Table' }
-              ].map(({ mode, icon: Icon, label }) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setViewMode(mode)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '7px 16px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    borderRadius: '7px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: viewMode === mode ? 'var(--classical-color)' : 'transparent',
-                    color: viewMode === mode ? '#FFFFFF' : 'var(--text-secondary)',
-                    transition: 'all 0.2s ease',
-                    boxShadow: viewMode === mode ? '0 2px 6px rgba(0,0,0,0.2)' : 'none'
-                  }}
-                >
-                  <Icon size={15} />
-                  <span>{label} View</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* TABLE VIEW */}
-          {viewMode === 'table' ? (
-            <div style={{
-              padding: 0,
-              overflow: 'hidden',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              background: 'var(--bg-card)',
-              backdropFilter: 'blur(16px)',
-              boxShadow: 'var(--shadow-card)',
-              marginBottom: '28px'
-            }}>
-              <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card-solid)' }}>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>
-                    Canonical 5-Model Comparative Matrix
-                  </h4>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                    Click column headers to sort metrics across models.
-                  </p>
-                </div>
-                <CardActionMenu
-                  title="5-Model Performance Comparison Table"
-                  category="metrics"
-                  data={getSortedModels()}
-                  metadata={{ page: 'cumulative', dataset: selectedDataset, view: 'table' }}
-                />
-              </div>
-
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--bg-inset)', borderBottom: '2px solid var(--border-color)' }}>
-                      <th onClick={() => handleSort('name')} style={{ padding: '14px 18px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                        Model Architecture {renderSortIcon('name')}
-                      </th>
-                      <th onClick={() => handleSort('type')} style={{ padding: '14px 10px', textAlign: 'center', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                        Paradigm {renderSortIcon('type')}
-                      </th>
-                      <th onClick={() => handleSort('accuracy')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        Accuracy {renderSortIcon('accuracy')}
-                      </th>
-                      <th onClick={() => handleSort('sensitivity')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        Sensitivity {renderSortIcon('sensitivity')}
-                      </th>
-                      <th onClick={() => handleSort('specificity')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        Specificity {renderSortIcon('specificity')}
-                      </th>
-                      <th onClick={() => handleSort('precision')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        Precision {renderSortIcon('precision')}
-                      </th>
-                      <th onClick={() => handleSort('f1_score')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        F1-Score {renderSortIcon('f1_score')}
-                      </th>
-                      <th onClick={() => handleSort('roc_auc')} style={{ padding: '14px 12px', textAlign: 'right', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
-                        ROC-AUC {renderSortIcon('roc_auc')}
-                      </th>
-                      <th onClick={() => handleSort('qubits')} style={{ padding: '14px 12px', textAlign: 'center', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                        Qubits {renderSortIcon('qubits')}
-                      </th>
-                      <th onClick={() => handleSort('circuit_depth')} style={{ padding: '14px 12px', textAlign: 'center', cursor: 'pointer', userSelect: 'none', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                        Depth {renderSortIcon('circuit_depth')}
-                      </th>
-                      <th style={{ padding: '14px 18px', textAlign: 'right', color: 'var(--text-secondary)', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                        5-Fold Score
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(() => {
-                      const sorted = getSortedModels();
-                      return sorted.map((m, idx) => {
-                        const isQuantum = m.type === 'quantum';
-                        const isCustom = m.is_custom || m.type === 'custom';
-                        const foldVar = m.cv_score_display || (
-                          m.id === 'classical_svm' ? '97.1% ± 0.5' :
-                          m.id === 'classical_mlp' ? '96.9% ± 0.8' :
-                          m.id === 'quantum_qsvm' ? '85.1% ± 1.2' :
-                          m.id === 'quantum_qnn' ? '82.5% ± 1.5' :
-                          m.id === 'quantum_qvc' ? '81.8% ± 1.6' : 'Custom Holdout'
-                        );
-
-                        return (
-                          <tr key={m.id} style={{
-                            borderBottom: '1px solid var(--border-color)',
-                            background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.025)',
-                            transition: 'background 0.15s ease'
-                          }}>
-                            <td style={{ padding: '14px 18px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {isCustom ? (
-                                  <Layers size={16} style={{ color: '#F59E0B' }} />
-                                ) : isQuantum ? (
-                                  <Atom size={16} style={{ color: 'var(--quantum-color)' }} />
-                                ) : (
-                                  <Zap size={16} style={{ color: 'var(--classical-color)' }} />
-                                )}
-                                <span>{m.name}</span>
-                              </div>
-                            </td>
-                            <td style={{ padding: '14px 10px', textAlign: 'center' }}>
-                              <span
-                                className={`badge-paradigm ${isCustom ? 'badge-custom' : m.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`}
-                                style={isCustom ? { background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', borderColor: 'rgba(245, 158, 11, 0.3)' } : {}}
-                              >
-                                {isCustom ? 'Custom' : m.type === 'classical' ? 'Classical' : 'Quantum'}
-                              </span>
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.accuracy}%
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.sensitivity}%
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.specificity}%
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.precision ? `${m.precision}%` : '—'}
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.f1_score ?? '—'}
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-                              {m.roc_auc}
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'center', color: isQuantum ? 'var(--quantum-color)' : isCustom ? '#F59E0B' : 'var(--text-secondary)', fontWeight: isQuantum || isCustom ? 600 : 400 }}>
-                              {m.qubits === 'N/A' || !m.qubits ? '—' : m.qubits}
-                            </td>
-                            <td style={{ padding: '14px 12px', textAlign: 'center', color: isQuantum ? 'var(--quantum-color)' : isCustom ? '#F59E0B' : 'var(--text-secondary)', fontWeight: isQuantum || isCustom ? 600 : 400 }}>
-                              {m.circuit_depth === 'N/A' || !m.circuit_depth ? '—' : m.circuit_depth}
-                            </td>
-                            <td style={{ padding: '14px 18px', textAlign: 'right', color: isCustom ? '#F59E0B' : 'var(--text-secondary)', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                              {foldVar}
-                            </td>
-                          </tr>
-                        );
-                      });
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            /* CARD VIEW */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '28px' }}>
-              {results?.models?.map(model => {
-                const isCustom = model.is_custom || model.type === 'custom';
-                const isQuantum = model.type === 'quantum';
-                const accent = isCustom ? '#F59E0B' : isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)';
-
-                return (
-                <div key={model.id} style={{
-                  background: 'var(--bg-card)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '24px 28px',
-                  boxShadow: 'var(--shadow-card)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  {/* Top accent bar */}
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '3px',
-                    background: accent
-                  }} />
-                  <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
-                    <CardActionMenu
-                      title={`${model.name} - Cumulative Benchmark`}
-                      category="metrics"
-                      data={model}
-                      metadata={{
-                        model_type: model.id,
-                        dataset: selectedDataset,
-                        page: 'cumulative',
-                        type: model.type
-                      }}
-                    />
-                  </div>
-
-                  {/* Header Bar */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '10px',
-                        background: isCustom ? 'rgba(245, 158, 11, 0.12)' : isQuantum ? 'var(--quantum-bg)' : 'var(--classical-bg)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        {isCustom ? (
-                          <Layers size={20} style={{ color: '#F59E0B' }} />
-                        ) : model.type === 'classical' ? (
-                          <Zap size={20} style={{ color: 'var(--classical-color)' }} />
-                        ) : (
-                          <Atom size={20} style={{ color: 'var(--quantum-color)' }} />
-                        )}
-                      </div>
-                      <div>
-                        <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700 }}>
-                          {model.name}
-                        </h3>
-                        <span
-                          className={`badge-paradigm ${isCustom ? 'badge-custom' : model.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`}
-                          style={{
-                            marginTop: '6px',
-                            display: 'inline-block',
-                            ...(isCustom ? { background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', borderColor: 'rgba(245, 158, 11, 0.3)' } : {})
-                          }}
-                        >
-                          {model.tag || (isCustom ? 'Custom Imported Estimator' : model.type)}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginRight: '40px', textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                      Latency: <strong style={{ color: 'var(--text-primary)' }}>{model.training_time}</strong>
-                      {model.qubits && model.qubits !== 'N/A' && <> | Qubits: <strong style={{ color: 'var(--quantum-color)' }}>{model.qubits}</strong></>}
-                    </div>
-                  </div>
-
-                  {/* Basic Section (Student Level) */}
-                  <div style={{ marginTop: '4px' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                      Basic Information
-                    </div>
-                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.85rem', margin: '0 0 16px 0' }}>{model.basic_summary}</p>
-
-                    {/* Metric Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-                      {[
-                        { val: `${model.accuracy}%`, lbl: 'Accuracy', accent: accent },
-                        { val: `${model.sensitivity}%`, lbl: 'Sensitivity', accent: 'var(--text-primary)' },
-                        { val: `${model.specificity}%`, lbl: 'Specificity', accent: 'var(--text-primary)' },
-                        { val: model.roc_auc, lbl: 'ROC-AUC Score', accent: 'var(--text-primary)' }
-                      ].map((metric, idx) => (
-                        <div key={idx} style={{
-                          padding: '14px 16px',
-                          background: 'var(--bg-inset)',
-                          borderRadius: 'var(--radius-md)',
-                          border: '1px solid var(--border-color)',
-                          position: 'relative',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '2px',
-                            background: metric.accent
-                          }} />
-                          <div style={{ fontSize: '1.15rem', fontWeight: 700, color: metric.accent, fontVariantNumeric: 'tabular-nums', marginBottom: '2px' }}>
-                            {metric.val}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                            {metric.lbl}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Advanced Section (Researcher Level) */}
-                  <div style={{ marginTop: '16px' }}>
-                    <button
-                      onClick={() => toggleAdvanced(model.id)}
-                      className="btn btn-sm btn-outline"
-                      type="button"
-                    >
-                      {showAdvanced[model.id] ? 'Hide' : 'Show'} Advanced Telemetry
-                      {showAdvanced[model.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-
-                    {showAdvanced[model.id] && (
-                      <div style={{
-                        marginTop: '12px',
-                        padding: '18px',
-                        background: 'var(--bg-inset)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-color)'
-                      }}>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: 1.6, fontSize: '0.85rem', margin: 0 }}>{model.advanced_summary}</p>
-                        {model.circuit_depth !== 'N/A' && (
-                          <div style={{ marginTop: '10px', fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                            <span><strong style={{ color: 'var(--quantum-color)' }}>Circuit Depth:</strong> {model.circuit_depth}</span>
-                            <span><strong style={{ color: 'var(--quantum-color)' }}>Entanglement:</strong> Linear CX gate mapping</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            </div>
-          )}
-
-          {/* Comparison Visualizations Grid */}
-          {results?.comparison_figures && (
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  background: 'var(--classical-bg)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <BarChart3 size={24} style={{ color: 'var(--classical-color)' }} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Benchmark Visualizations
-                  </h3>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                    Multi-axis radar overlay and per-metric bar comparison across all 5 models.
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
-                {[
-                  {
-                    title: 'Multi-Metric Radar Chart',
-                    desc: 'Six-axis performance overlay across all model architectures.',
-                    img: results.comparison_figures.radar_chart,
-                    alt: 'Radar Chart',
-                    chartType: 'radar',
-                    menuTitle: 'All Models Radar Chart Comparison'
-                  },
-                  {
-                    title: 'Accuracy & Sensitivity Breakdown',
-                    desc: 'Side-by-side bar comparison of key diagnostic metrics.',
-                    img: results.comparison_figures.metric_comparison,
-                    alt: 'Metric Comparison',
-                    chartType: 'bar',
-                    menuTitle: 'Metric Comparison Bar Chart'
-                  }
-                ].map((chart, idx) => (
-                  <div key={idx} style={{
-                    background: 'var(--bg-card)',
-                    backdropFilter: 'blur(16px)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '24px',
-                    boxShadow: 'var(--shadow-card)',
-                    position: 'relative'
-                  }}>
-                    <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
-                      <CardActionMenu
-                        title={chart.menuTitle}
-                        category="plot"
-                        data={{ dataset: selectedDataset, comparison_type: chart.chartType }}
-                        metadata={{ page: 'cumulative', chart_type: chart.chartType }}
-                        imageUrl={chart.img}
-                      />
-                    </div>
-                    <div style={{ marginBottom: '16px' }}>
-                      <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>{chart.title}</h4>
-                      <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{chart.desc}</p>
-                    </div>
-                    <div style={{ background: 'var(--bg-card-solid)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                      <img
-                        src={chart.img}
-                        alt={chart.alt}
-                        style={{ width: '100%', borderRadius: '6px', display: 'block' }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      );
-    })()}
-
-    {/* Custom Model Upload & Management Modal */}
-    <CustomModelModal
-      isOpen={isCustomModelModalOpen}
-      onClose={() => setIsCustomModelModalOpen(false)}
-      onModelAdded={async () => {
-        await fetchCustomModels();
-        fetchCumulativeResults();
-      }}
-      onModelDeleted={async () => {
-        await fetchCustomModels();
-        fetchCumulativeResults();
-      }}
-    />
-  </div>
-);
+      {/* Custom Model Upload & Management Modal */}
+      <CustomModelModal
+        isOpen={isCustomModelModalOpen}
+        onClose={() => setIsCustomModelModalOpen(false)}
+        onModelAdded={async () => {
+          await fetchCustomModels();
+          fetchCumulativeResults();
+        }}
+        onModelDeleted={async () => {
+          await fetchCustomModels();
+          fetchCumulativeResults();
+        }}
+      />
+    </div>
+  );
 }
