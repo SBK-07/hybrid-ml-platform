@@ -632,33 +632,76 @@ export default function IndividualExperiment() {
         </div>
       </div>
 
-      {/* PART 1 — CONTROL ROW LAYOUT */}
-      <div className="card slide-in-up" style={{ marginBottom: '24px', padding: '16px 20px', position: 'relative', zIndex: 50 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+      {/* PART 1 — COMMAND CENTER */}
+      <div style={{
+        marginBottom: '32px',
+        padding: '24px',
+        background: 'var(--bg-card)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-card)',
+        position: 'relative',
+        zIndex: 50
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
 
           {/* 1. Model Selector Custom Dropdown */}
-          <div ref={modelDropdownRef} style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <div onClick={() => !loading && setIsModelOpen(!isModelOpen)} style={dropdownTriggerStyle(isModelOpen)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1 }}>
-                <Zap size={18} style={{ color: currentModelObj?.is_custom ? '#F59E0B' : currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)', flexShrink: 0 }} />
+          <div ref={modelDropdownRef} style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+            <div onClick={() => !loading && setIsModelOpen(!isModelOpen)} style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'var(--bg-input)',
+              border: isModelOpen ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              height: '56px',
+              padding: '0 16px',
+              gap: '12px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: isModelOpen ? '0 0 0 4px var(--brand-glow)' : 'none',
+              userSelect: 'none',
+              transition: 'all 0.2s ease'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden', flex: 1 }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: currentModelObj?.is_custom ? 'rgba(245, 158, 11, 0.12)' : currentModelObj?.type === 'classical' ? 'var(--classical-bg)' : 'var(--quantum-bg)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Zap size={18} style={{ color: currentModelObj?.is_custom ? '#F59E0B' : currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)' }} />
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Model</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '3px' }}>Algorithm</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentModelObj?.name}
                   </span>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                 {currentModelObj?.is_custom ? (
-                  <span className="badge-paradigm" style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                  <span style={{ fontSize: '0.7rem', padding: '3px 10px', background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '6px', fontWeight: 600 }}>
                     Custom
                   </span>
                 ) : (
-                  <span className={`badge-paradigm ${currentModelObj?.type === 'classical' ? 'badge-classical' : 'badge-quantum'}`} style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    padding: '3px 10px',
+                    background: currentModelObj?.type === 'classical' ? 'var(--classical-bg)' : 'var(--quantum-bg)',
+                    color: currentModelObj?.type === 'classical' ? 'var(--classical-color)' : 'var(--quantum-color)',
+                    border: `1px solid ${currentModelObj?.type === 'classical' ? 'var(--classical-glow)' : 'var(--quantum-glow)'}`,
+                    borderRadius: '6px',
+                    fontWeight: 600
+                  }}>
                     {currentModelObj?.type === 'classical' ? 'Classical' : 'Quantum'}
                   </span>
                 )}
-                <ChevronDown size={16} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isModelOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                <ChevronDown size={18} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isModelOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </div>
             </div>
 
@@ -754,19 +797,49 @@ export default function IndividualExperiment() {
           </div>
 
           {/* 2. Dataset Selector Custom Dropdown */}
-          <div ref={datasetDropdownRef} style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-            <div onClick={() => !loading && !uploading && setIsDatasetOpen(!isDatasetOpen)} style={dropdownTriggerStyle(isDatasetOpen)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1 }}>
-                <Database size={18} style={{ color: 'var(--classical-color)', flexShrink: 0 }} />
+          <div ref={datasetDropdownRef} style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+            <div onClick={() => !loading && !uploading && setIsDatasetOpen(!isDatasetOpen)} style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'var(--bg-input)',
+              border: isDatasetOpen ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              height: '56px',
+              padding: '0 16px',
+              gap: '12px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: isDatasetOpen ? '0 0 0 4px var(--brand-glow)' : 'none',
+              userSelect: 'none',
+              transition: 'all 0.2s ease'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden', flex: 1 }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'var(--brand-bg)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Database size={18} style={{ color: 'var(--brand-primary)' }} />
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '2px' }}>Dataset</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1, marginBottom: '3px' }}>Clinical Dataset</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentDatasetObj?.name || 'Select Dataset'}
                   </span>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <ChevronDown size={16} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isDatasetOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                {currentDatasetObj?.features_count && (
+                  <span style={{ fontSize: '0.7rem', padding: '3px 10px', background: 'var(--status-success-bg)', color: 'var(--status-success)', borderRadius: '6px', fontWeight: 600 }}>
+                    {currentDatasetObj.features_count} features
+                  </span>
+                )}
+                <ChevronDown size={18} style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s ease', transform: isDatasetOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </div>
             </div>
 
@@ -871,185 +944,294 @@ export default function IndividualExperiment() {
             style={{ display: 'none' }}
           />
 
-          {/* 3. Run Experiment Button (Stage-Grouped Live SSE Stream) */}
-          <button
-            onClick={handleRunExperiment}
-            disabled={loading || uploading}
-            className="btn btn-primary"
-            style={{ height: '44px', padding: '0 22px', fontSize: '0.875rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}
-          >
-            {loading ? <Loader2 size={16} className="spinner" /> : <Play size={16} fill="currentColor" />}
-            {loading ? 'Executing Pipeline...' : 'Run Experiment'}
-          </button>
+          {/* 3. Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            {/* Run Experiment — Primary Action */}
+            <button
+              onClick={handleRunExperiment}
+              disabled={loading || uploading}
+              style={{
+                height: '56px',
+                padding: '0 28px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-md)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                background: loading ? 'var(--brand-hover)' : 'var(--brand-primary)',
+                color: '#FFFFFF',
+                border: 'none',
+                cursor: loading || uploading ? 'not-allowed' : 'pointer',
+                boxShadow: '0 2px 8px var(--brand-glow)',
+                transition: 'all 0.2s ease',
+                letterSpacing: '-0.01em',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
+              {loading ? <Loader2 size={18} className="spinner" /> : <Play size={18} fill="currentColor" />}
+              {loading ? 'Executing...' : 'Run Experiment'}
+            </button>
 
-          {/* 4. Upload Custom CSV Button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current && fileInputRef.current.click()}
-            disabled={loading || uploading}
-            className="btn btn-outline"
-            style={{ height: '44px', padding: '0 18px', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}
-          >
-            {uploading ? <Loader2 size={16} className="spinner" /> : <Plus size={16} />}
-            {uploading ? 'Preprocessing...' : 'Upload Custom CSV'}
-          </button>
+            {/* Upload Custom CSV */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current && fileInputRef.current.click()}
+              disabled={loading || uploading}
+              style={{
+                height: '56px',
+                padding: '0 20px',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                borderRadius: 'var(--radius-md)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+                cursor: loading || uploading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
+              {uploading ? <Loader2 size={16} className="spinner" /> : <Plus size={16} />}
+              {uploading ? 'Preprocessing...' : 'Upload CSV'}
+            </button>
 
-          {/* 5. Import Custom Model (.joblib / .pkl) Button */}
-          <button
-            type="button"
-            onClick={() => setIsCustomModelModalOpen(true)}
-            disabled={loading || uploading}
-            className="btn btn-outline"
-            style={{ height: '44px', padding: '0 18px', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0, borderColor: 'rgba(245, 158, 11, 0.4)', color: '#F59E0B' }}
-          >
-            <UploadCloud size={16} />
-            Import Model (.joblib / .pkl)
-          </button>
+            {/* Import Custom Model */}
+            <button
+              type="button"
+              onClick={() => setIsCustomModelModalOpen(true)}
+              disabled={loading || uploading}
+              style={{
+                height: '56px',
+                padding: '0 20px',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                borderRadius: 'var(--radius-md)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                background: 'transparent',
+                color: '#F59E0B',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                cursor: loading || uploading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
+              <UploadCloud size={16} />
+              Import Model
+            </button>
+          </div>
         </div>
 
         {/* Custom Upload Banner Message */}
         {uploadMessage && (
-          <div className="banner" style={{
-            marginTop: '12px', padding: '8px 14px', fontSize: '0.82rem',
+          <div style={{
+            marginTop: '16px',
+            padding: '14px 18px',
+            fontSize: '0.85rem',
             background: uploadMessage.type === 'success' ? 'var(--status-success-bg)' : 'var(--status-danger-bg)',
-            border: `1px solid ${uploadMessage.type === 'success' ? 'rgba(22, 163, 74, 0.2)' : 'rgba(220, 38, 38, 0.2)'}`,
-            color: uploadMessage.type === 'success' ? 'var(--status-success)' : 'var(--status-danger)'
+            border: `1px solid ${uploadMessage.type === 'success' ? 'rgba(22, 163, 74, 0.25)' : 'rgba(220, 38, 38, 0.25)'}`,
+            borderRadius: 'var(--radius-md)',
+            color: uploadMessage.type === 'success' ? 'var(--status-success)' : 'var(--status-danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontWeight: 500,
+            animation: 'fadeIn 0.2s ease-out'
           }}>
+            {uploadMessage.type === 'success' ? '✓' : '⚠'}
             {uploadMessage.text}
           </div>
         )}
       </div>
 
-      {/* PHASES 2 & 3: STAGE-ANIMATED EXECUTION / ACCORDION DISCLOSURE ROW */}
+      {/* EXECUTION PHASE */}
       {phase !== 'idle' && (
-        <div style={{ marginBottom: '24px' }}>
-          {/* PHASE 2: LIVE NARRATING MODE — ACTIVE STAGE ANIMATION */}
+        <div style={{ marginBottom: '32px' }}>
+          {/* LIVE NARRATING MODE */}
           {phase === 'narrating' && (
-            <div
-              key={activeStageObj.id}
-              className="stage-group-enter"
-              style={{
-                position: 'relative',
-                paddingLeft: '36px',
-                minHeight: '80px',
-                transition: 'all 300ms ease'
-              }}
-            >
-              {/* Soft Pulsing Atom Icon inline-left of title */}
+            <div style={{
+              background: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '28px',
+              boxShadow: 'var(--shadow-card)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Animated accent bar at top */}
               <div style={{
                 position: 'absolute',
-                left: '0px',
-                top: '0px',
-                display: 'flex',
-                alignItems: 'center',
-                justify: 'center'
-              }}>
-                <Atom4Orbits
-                  size={28}
-                  color="var(--classical-color)"
-                  className="atom-soft-pulse"
-                />
-              </div>
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '3px',
+                background: `linear-gradient(90deg, ${isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'}, transparent)`,
+                animation: 'pulse 2s ease-in-out infinite'
+              }} />
 
-              {/* Active Stage Header Badge */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  background: 'var(--classical-bg)',
-                  color: 'var(--classical-color)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
+                {/* Stage indicator */}
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: isQuantum ? 'var(--quantum-bg)' : 'var(--brand-bg)',
+                  border: `1px solid ${isQuantum ? 'var(--quantum-glow)' : 'var(--brand-glow)'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}>
-                  Stage {activeStageIdx + 1} of {stageDefs.length}
-                </span>
-                <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {activeStageObj.title}
-                </span>
-              </div>
+                  <Atom4Orbits
+                    size={28}
+                    color={isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'}
+                    className="atom-soft-pulse"
+                  />
+                </div>
 
-              {/* Active Stage Streamed Log Lines (Smooth UI narrative fade-in) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {activeStageLogs.length > 0 ? (
-                  activeStageLogs.map((logLine, idx) => (
-                    <div
-                      key={idx}
-                      className="narration-fade-in"
-                      style={{
-                        fontSize: '14px',
-                        color: getLogTagColor(logLine),
-                        lineHeight: 1.6,
-                        fontFamily: 'inherit',
-                        fontWeight: logLine.startsWith('->') || logLine.startsWith('>>>') ? 600 : 400,
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '8px'
-                      }}
-                    >
-                      <span style={{ color: 'var(--text-tertiary)', fontSize: '11px', marginTop: '2px' }}>•</span>
-                      <span>{logLine.replace(/^\[(INGEST|PREPROC|CLASSICAL|QUANTUM|QISKIT|SIMULATOR|EDA|SYSTEM|EVAL|SUCCESS|VERDICT|XAI|BLOCH|UNCERTAINTY)\]\s*/, '')}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="narration-fade-in" style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    Initializing stage computation ...
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Stage header */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: isQuantum ? 'var(--quantum-bg)' : 'var(--brand-bg)',
+                      color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      border: `1px solid ${isQuantum ? 'var(--quantum-glow)' : 'var(--brand-glow)'}`
+                    }}>
+                      Stage {activeStageIdx + 1} / {stageDefs.length}
+                    </span>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      {activeStageObj.title}
+                    </h3>
                   </div>
-                )}
+
+                  {/* Streamed logs */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    maxHeight: '240px',
+                    overflowY: 'auto',
+                    padding: '16px',
+                    background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)'
+                  }}>
+                    {activeStageLogs.length > 0 ? (
+                      activeStageLogs.map((logLine, idx) => (
+                        <div
+                          key={idx}
+                          className="narration-fade-in"
+                          style={{
+                            fontSize: '0.85rem',
+                            color: getLogTagColor(logLine),
+                            lineHeight: 1.6,
+                            fontFamily: 'inherit',
+                            fontWeight: logLine.startsWith('->') || logLine.startsWith('>>>') ? 600 : 400,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '10px'
+                          }}
+                        >
+                          <span style={{ color: 'var(--text-tertiary)', fontSize: '10px', marginTop: '4px', flexShrink: 0 }}>●</span>
+                          <span>{logLine.replace(/^\[(INGEST|PREPROC|CLASSICAL|QUANTUM|QISKIT|SIMULATOR|EDA|SYSTEM|EVAL|SUCCESS|VERDICT|XAI|BLOCH|UNCERTAINTY)\]\s*/, '')}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="narration-fade-in" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, padding: '8px 0' }}>
+                        Initializing stage computation...
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* UNIFIED EXECUTION LOG CONTAINER CARD */}
+          {/* EXECUTION LOG ACCORDION */}
           {(phase === 'collapsed' || phase === 'results') && (
             <div style={{
-              background: 'var(--bg-card-solid)',
+              background: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
               border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              marginBottom: '24px',
+              borderRadius: 'var(--radius-lg)',
               boxShadow: 'var(--shadow-card)',
-              transition: 'all 0.2s ease'
+              overflow: 'hidden',
+              marginBottom: '24px'
             }}>
-              {/* Container Card Header Bar: Execution Log Disclosure */}
+              {/* Disclosure header */}
               <div
                 onClick={() => setIsLogExpanded(!isLogExpanded)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justify: 'space-between',
-                  padding: '12px 18px',
+                  justifyContent: 'space-between',
+                  padding: '18px 24px',
                   cursor: 'pointer',
                   background: 'var(--bg-inset)',
                   userSelect: 'none',
                   borderBottom: isLogExpanded ? '1px solid var(--border-color)' : 'none',
-                  transition: 'background 0.15s ease'
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', color: 'var(--text-primary)' }}>
-                  <span style={{
-                    display: 'inline-flex',
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: 'var(--bg-card-solid)',
+                    border: '1px solid var(--border-color)',
+                    display: 'flex',
                     alignItems: 'center',
-                    justify: 'center',
-                    transition: 'transform 0.3s ease',
-                    transform: isLogExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                    color: 'var(--text-secondary)'
+                    justifyContent: 'center'
                   }}>
-                    <ChevronRight size={16} />
-                  </span>
-                  <span>
-                    Execution logs &nbsp;&nbsp;
-                  </span>
+                    <CheckCircle2 size={16} style={{ color: 'var(--status-success)' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>
+                      Execution Logs
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                      Pipeline completed in {executionDuration}
+                    </div>
+                  </div>
                 </div>
+                <ChevronDown
+                  size={18}
+                  style={{
+                    color: 'var(--text-secondary)',
+                    transition: 'transform 0.2s ease',
+                    transform: isLogExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }}
+                />
               </div>
 
-              {/* Stage Steps List inside the Container */}
+              {/* Accordion content */}
               {isLogExpanded && (
-                <div>
+                <div style={{ padding: '8px 0' }}>
                   {stageDefs.filter(stg => (stageLogsMap[stg.id] || []).length > 0).map((stg, sIdx, arr) => {
                     const logs = stageLogsMap[stg.id] || [];
-                    const isAccordionExpanded = !!expandedAccordionStages[stg.id]; // default CLOSED (false)
+                    const isAccordionExpanded = !!expandedAccordionStages[stg.id];
                     const isLast = sIdx === arr.length - 1;
 
                     return (
@@ -1059,41 +1241,58 @@ export default function IndividualExperiment() {
                           borderBottom: isLast ? 'none' : '1px solid var(--border-color)'
                         }}
                       >
-                        {/* Stage Header Row */}
+                        {/* Stage header */}
                         <div
                           onClick={() => setExpandedAccordionStages(prev => ({ ...prev, [stg.id]: !isAccordionExpanded }))}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justify: 'space-between',
-                            padding: '11px 18px 11px 24px',
+                            justifyContent: 'space-between',
+                            padding: '14px 24px',
                             cursor: 'pointer',
-                            background: 'var(--bg-card-solid)',
                             userSelect: 'none',
                             transition: 'background 0.15s ease'
                           }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-inset)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <CheckCircle2 size={16} style={{ color: 'var(--status-success)', flexShrink: 0 }} />
-                            <span style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '6px',
+                              background: 'var(--status-success-bg)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <CheckCircle2 size={14} style={{ color: 'var(--status-success)' }} />
+                            </div>
+                            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>
                               {stg.title}
                             </span>
                           </div>
-
-                          <ChevronRight size={14} style={{ color: 'var(--text-tertiary)', transition: 'transform 0.2s ease', transform: isAccordionExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }} />
+                          <ChevronRight
+                            size={16}
+                            style={{
+                              color: 'var(--text-tertiary)',
+                              transition: 'transform 0.2s ease',
+                              transform: isAccordionExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
+                            }}
+                          />
                         </div>
 
-                        {/* Stage Body (Smooth Fading Narrative Steps) */}
+                        {/* Stage logs */}
                         {isAccordionExpanded && (
                           <div
                             className="narration-fade-in"
                             style={{
-                              padding: '12px 18px 14px 44px',
+                              padding: '16px 24px 20px 60px',
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '6px',
-                              borderTop: '1px solid var(--border-color)',
-                              background: 'var(--bg-inset)'
+                              gap: '8px',
+                              background: 'var(--bg-inset)',
+                              borderTop: '1px solid var(--border-color)'
                             }}
                           >
                             {logs.map((logLine, lIdx) => (
@@ -1101,17 +1300,17 @@ export default function IndividualExperiment() {
                                 key={lIdx}
                                 className="stage-group-enter"
                                 style={{
-                                  fontSize: '13px',
+                                  fontSize: '0.82rem',
                                   color: getLogTagColor(logLine),
                                   fontFamily: 'inherit',
-                                  lineHeight: 1.5,
+                                  lineHeight: 1.6,
                                   fontWeight: logLine.startsWith('->') || logLine.startsWith('>>>') ? 600 : 400,
                                   display: 'flex',
                                   alignItems: 'flex-start',
-                                  gap: '8px'
+                                  gap: '10px'
                                 }}
                               >
-                                <span style={{ color: 'var(--text-tertiary)', fontSize: '11px', marginTop: '2px' }}>•</span>
+                                <span style={{ color: 'var(--text-tertiary)', fontSize: '8px', marginTop: '6px', flexShrink: 0 }}>●</span>
                                 <span>{logLine.replace(/^\[(INGEST|PREPROC|CLASSICAL|QUANTUM|QISKIT|SIMULATOR|EDA|SYSTEM|EVAL|SUCCESS|VERDICT|XAI|BLOCH|UNCERTAINTY)\]\s*/, '')}</span>
                               </div>
                             ))}
@@ -1127,12 +1326,20 @@ export default function IndividualExperiment() {
         </div>
       )}
 
-      {/* RESULTS DISPLAY: 2-Column Performance Card + Old-Style Detailed Cards */}
+      {/* RESULTS DISPLAY */}
       {phase === 'results' && results && (
-        <div className="results-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
-          {/* BASIC INFORMATION (STUDENT LEVEL) WITH INTEGRATED MODEL PERFORMANCE TELEMETRY */}
-          <div className="card slide-in-up" style={{ position: 'relative' }}>
+        <div className="results-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+          {/* HERO METRICS SECTION */}
+          <div style={{
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '32px',
+            boxShadow: 'var(--shadow-card)',
+            position: 'relative'
+          }}>
             <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
               <CardActionMenu
                 title={`${results.basic_info?.model_name} - Basic Metrics`}
@@ -1150,256 +1357,459 @@ export default function IndividualExperiment() {
               />
             </div>
 
-            <div className="card-header-bar" style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.1rem', color: 'var(--classical-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BookOpen size={18} /> Basic Information (Student Level)
-              </h3>
-            </div>
-
-            <div>
-              <h4 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '1rem', fontWeight: 600 }}>
-                Model: {results.basic_info?.model_name}
-              </h4>
-              <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+            {/* Model Header */}
+            <div style={{ marginBottom: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: isQuantum ? 'var(--quantum-bg)' : 'var(--classical-bg)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <BookOpen size={24} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+                    {results.basic_info?.model_name}
+                  </h2>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, marginTop: '2px' }}>
+                    Diagnostic Performance Analysis
+                  </p>
+                </div>
+              </div>
+              <p style={{ lineHeight: '1.7', color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
                 {results.basic_info?.concept_explanation}
               </p>
+            </div>
 
-              <div style={{ marginTop: '18px', padding: '16px', background: 'var(--bg-card-solid, #FFFFFF)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <HelpCircle size={16} style={{ color: 'var(--classical-color)' }} /> Why use this model?
-                </strong>
-                <p style={{ marginTop: '6px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
-                  {results.basic_info?.why_use_this_model}
-                </p>
+            {/* Performance Metrics Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '20px',
+              marginBottom: '28px'
+            }}>
+              {/* Accuracy */}
+              <div style={{
+                padding: '24px',
+                background: 'var(--bg-inset)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  Accuracy
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.accuracy}
+                </div>
               </div>
 
-              {/* MODEL PERFORMANCE TELEMETRY SECTION (IN PLACE OF 4 METRIC BOXES) */}
+              {/* Sensitivity */}
               <div style={{
-                marginTop: '20px',
-                padding: '20px',
-                background: 'var(--bg-card-solid, #FFFFFF)',
+                padding: '24px',
+                background: 'var(--bg-inset)',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)'
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
               }}>
-                <div style={{ display: 'flex', gap: '28px', alignItems: 'stretch' }}>
-                  {/* Left Metrics Column */}
-                  <div style={{ flex: (featureImportances && featureImportances.length > 0) ? '0 0 55%' : '1 1 100%', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
-                        Model Performance Telemetry
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  Sensitivity / Recall
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.sensitivity}
+                </div>
+              </div>
+
+              {/* Specificity */}
+              <div style={{
+                padding: '24px',
+                background: 'var(--bg-inset)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  Specificity
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.specificity}
+                </div>
+              </div>
+
+              {/* Precision */}
+              <div style={{
+                padding: '24px',
+                background: 'var(--bg-inset)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  Precision
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.precision}
+                </div>
+              </div>
+
+              {/* F1-Score */}
+              <div style={{
+                padding: '24px',
+                background: 'var(--bg-inset)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  F1-Score
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.f1Score}
+                </div>
+              </div>
+
+              {/* AUC-ROC */}
+              <div style={{
+                padding: '24px',
+                background: 'var(--bg-inset)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)'
+                }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  AUC-ROC
+                </div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 700, lineHeight: 1, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {metrics?.aucRoc}
+                </div>
+              </div>
+            </div>
+
+            {/* Training Info Bar */}
+            <div style={{
+              padding: '16px 20px',
+              background: 'var(--bg-inset)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Training Time:</span>
+                <span>{metrics?.trainTime}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Dataset:</span>
+                <span>{currentDatasetObj?.name || 'Dataset'}</span>
+              </div>
+            </div>
+
+            {/* SHAP Feature Importance Chart */}
+            {featureImportances && featureImportances.length > 0 && (
+              <div style={{ marginTop: '28px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BarChart2 size={20} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)' }} />
+                  Top Feature Contributions
+                </h3>
+                <div style={{
+                  padding: '24px',
+                  background: 'var(--bg-inset)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-color)',
+                  height: '280px'
+                }}>
+                  <Bar data={chartData} options={chartOptions} />
+                </div>
+              </div>
+            )}
+
+            {/* Student Takeaway */}
+            <div style={{
+              marginTop: '28px',
+              padding: '20px',
+              background: 'var(--banner-warn-bg)',
+              border: '1px solid var(--banner-warn-border)',
+              borderRadius: 'var(--radius-md)',
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'flex-start'
+            }}>
+              <GraduationCap size={24} style={{ color: 'var(--banner-warn-text)', flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--banner-warn-text)', margin: 0, marginBottom: '8px' }}>
+                  Student Diagnostic Takeaway
+                </h4>
+                <p style={{ fontSize: '0.875rem', color: 'var(--banner-warn-text)', lineHeight: '1.6', margin: 0, marginBottom: '6px' }}>
+                  <strong>Graph Signal:</strong> {results.basic_info?.student_takeaway?.what_graph_indicates}
+                </p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--banner-warn-text-dark)', lineHeight: '1.6', margin: 0 }}>
+                  <strong>Clinical Significance:</strong> {results.basic_info?.student_takeaway?.clinical_meaning}
+                </p>
+              </div>
+            </div>
+
+            {/* Why Use This Model */}
+            <div style={{
+              marginTop: '20px',
+              padding: '20px',
+              background: 'var(--bg-inset)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)'
+            }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <HelpCircle size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)' }} />
+                Why Use This Model?
+              </h4>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
+                {results.basic_info?.why_use_this_model}
+              </p>
+            </div>
+
+            {/* Visualizations */}
+            {results.advanced_info?.figure_artifacts && (
+              <div style={{ marginTop: '28px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Image size={20} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)' }} />
+                  Result Artifacts & Visualizations
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                  {results.advanced_info.figure_artifacts.roc_curve && (
+                    <div style={{ position: 'relative', background: 'var(--bg-inset)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
+                        <CardActionMenu
+                          title={`${results.basic_info?.model_name} - ROC Curve`}
+                          category="plot"
+                          data={{ roc_auc: results.basic_info?.key_metrics?.roc_auc }}
+                          metadata={{ model_type: selectedModel, dataset: selectedDataset, plot_type: 'roc' }}
+                          imageUrl={results.advanced_info.figure_artifacts.roc_curve}
+                        />
                       </div>
-
-                      {/* 3x2 Metric Grid */}
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '20px 16px'
-                      }}>
-                        {/* 1. Accuracy */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            Accuracy
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.accuracy}
-                          </div>
-                        </div>
-
-                        {/* 2. Sensitivity / Recall */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            Sensitivity / Recall
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.sensitivity}
-                          </div>
-                        </div>
-
-                        {/* 3. Specificity */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            Specificity
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.specificity}
-                          </div>
-                        </div>
-
-                        {/* 4. Precision */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            Precision
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.precision}
-                          </div>
-                        </div>
-
-                        {/* 5. F1-Score */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            F1-Score
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.f1Score}
-                          </div>
-                        </div>
-
-                        {/* 6. AUC-ROC */}
-                        <div>
-                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            AUC-ROC
-                          </div>
-                          <div style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2, color: isQuantum ? '#0D9488' : '#059669' }}>
-                            {metrics?.aucRoc}
-                          </div>
-                        </div>
-                      </div>
+                      <img src={results.advanced_info.figure_artifacts.roc_curve} alt="ROC Curve" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
                     </div>
-
-                    {/* Footer Caption Strip */}
-                    <div style={{
-                      fontSize: '12px',
-                      color: 'var(--text-secondary)',
-                      borderTop: '1px solid var(--border-color)',
-                      marginTop: '20px',
-                      paddingTop: '10px'
-                    }}>
-                      Train Time: {metrics?.trainTime} &nbsp;&nbsp;·&nbsp;&nbsp; Model: {currentModelObj?.name} &nbsp;&nbsp;·&nbsp;&nbsp; Dataset: {currentDatasetObj?.name || 'Dataset'}
-                    </div>
-                  </div>
-
-                  {/* Right Column SHAP Chart if available */}
-                  {featureImportances && featureImportances.length > 0 && (
-                    <>
-                      <div style={{ width: '1px', background: 'var(--border-color)', flexShrink: 0 }} />
-                      <div style={{ flex: '1 1 45%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
-                          Top Feature Contributions
-                        </div>
-                        <div style={{ height: '220px', position: 'relative', flex: 1 }}>
-                          <Bar data={chartData} options={chartOptions} />
-                        </div>
+                  )}
+                  {results.advanced_info.figure_artifacts.confusion_matrix && (
+                    <div style={{ position: 'relative', background: 'var(--bg-inset)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
+                        <CardActionMenu
+                          title={`${results.basic_info?.model_name} - Confusion Matrix`}
+                          category="plot"
+                          data={{
+                            accuracy: results.basic_info?.key_metrics?.accuracy,
+                            sensitivity: results.basic_info?.key_metrics?.sensitivity,
+                            specificity: results.basic_info?.key_metrics?.specificity
+                          }}
+                          metadata={{ model_type: selectedModel, dataset: selectedDataset, plot_type: 'confusion_matrix' }}
+                          imageUrl={results.advanced_info.figure_artifacts.confusion_matrix}
+                        />
                       </div>
-                    </>
+                      <img src={results.advanced_info.figure_artifacts.confusion_matrix} alt="Confusion Matrix" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
+                    </div>
                   )}
                 </div>
               </div>
-
-              {/* Student Takeaway Banner */}
-              <div className="banner reality-banner" style={{ marginTop: '20px' }}>
-                <GraduationCap size={20} style={{ flexShrink: 0, color: 'var(--banner-warn-text)' }} />
-                <div>
-                  <strong style={{ color: 'var(--banner-warn-text)', fontSize: '0.875rem' }}>Student Diagnostic Takeaway:</strong>
-                  <p style={{ marginTop: '4px', fontSize: '0.85rem', color: 'var(--banner-warn-text)' }}>
-                    <strong>Graph Signal:</strong> {results.basic_info?.student_takeaway?.what_graph_indicates}
-                  </p>
-                  <p style={{ marginTop: '2px', fontSize: '0.85rem', color: 'var(--banner-warn-text-dark)' }}>
-                    <strong>Clinical Significance:</strong> {results.basic_info?.student_takeaway?.clinical_meaning}
-                  </p>
-                </div>
-              </div>
-
-              {/* Figures Grid */}
-              {results.advanced_info?.figure_artifacts && (
-                <div style={{ marginTop: '24px' }}>
-                  <h4 style={{ marginBottom: '14px', color: 'var(--text-primary)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Image size={16} style={{ color: 'var(--classical-color)' }} /> Result Artifacts & Visualizations
-                  </h4>
-                  <div className="grid-2" style={{ gap: '16px' }}>
-                    {results.advanced_info.figure_artifacts.roc_curve && (
-                      <div style={{ position: 'relative', background: 'var(--bg-card-solid)', padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
-                        <div style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}>
-                          <CardActionMenu
-                            title={`${results.basic_info?.model_name} - ROC Curve`}
-                            category="plot"
-                            data={{ roc_auc: results.basic_info?.key_metrics?.roc_auc }}
-                            metadata={{ model_type: selectedModel, dataset: selectedDataset, plot_type: 'roc' }}
-                            imageUrl={results.advanced_info.figure_artifacts.roc_curve}
-                          />
-                        </div>
-                        <img src={results.advanced_info.figure_artifacts.roc_curve} alt="ROC Curve" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
-                      </div>
-                    )}
-                    {results.advanced_info.figure_artifacts.confusion_matrix && (
-                      <div style={{ position: 'relative', background: 'var(--bg-card-solid)', padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
-                        <div style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}>
-                          <CardActionMenu
-                            title={`${results.basic_info?.model_name} - Confusion Matrix`}
-                            category="plot"
-                            data={{
-                              accuracy: results.basic_info?.key_metrics?.accuracy,
-                              sensitivity: results.basic_info?.key_metrics?.sensitivity,
-                              specificity: results.basic_info?.key_metrics?.specificity
-                            }}
-                            metadata={{ model_type: selectedModel, dataset: selectedDataset, plot_type: 'confusion_matrix' }}
-                            imageUrl={results.advanced_info.figure_artifacts.confusion_matrix}
-                          />
-                        </div>
-                        <img src={results.advanced_info.figure_artifacts.confusion_matrix} alt="Confusion Matrix" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* 3. OLD-STYLE CARD 2: Expandable Quantum Feasibility & Noise Telemetry Section */}
+          {/* QUANTUM HARDWARE FEASIBILITY */}
           {isQuantum && feasibilityData && (
-            <div className="card" style={{ borderLeft: '4px solid var(--quantum-color)' }}>
+            <div style={{
+              background: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-card)',
+              overflow: 'hidden'
+            }}>
+              {/* Header */}
               <div
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
                 onClick={() => setShowFeasibility(!showFeasibility)}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '24px 32px',
+                  cursor: 'pointer',
+                  background: 'var(--quantum-bg)',
+                  borderBottom: showFeasibility ? '1px solid var(--border-color)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
               >
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--quantum-color)', margin: 0, fontSize: '1.05rem' }}>
-                  <Cpu size={18} /> Quantum Hardware Feasibility & Depolarizing Noise Telemetry
-                </h3>
-                <button className="btn btn-sm btn-outline" type="button">
-                  {showFeasibility ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  {showFeasibility ? 'Hide Feasibility' : 'View Feasibility Telemetry'}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: 'var(--quantum-bg)',
+                    border: '1px solid var(--quantum-glow)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Cpu size={20} style={{ color: 'var(--quantum-color)' }} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      Quantum Hardware Feasibility
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, marginTop: '2px' }}>
+                      Depolarizing noise telemetry & NISQ readiness
+                    </p>
+                  </div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  background: 'var(--bg-card-solid)',
+                  border: '1px solid var(--border-color)',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)'
+                }}>
+                  {showFeasibility ? 'Collapse' : 'Expand'}
+                  <ChevronDown size={14} style={{ transition: 'transform 0.2s ease', transform: showFeasibility ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                </div>
               </div>
 
               {showFeasibility && (
-                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div className="stagger-children" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                    <div className="metric-mini-box">
-                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.qubits_required} Qubits</div>
-                      <div className="mini-lbl">Hilbert Dim: 2⁴ = {feasibilityData.hilbert_space_dimension}</div>
-                    </div>
-                    <div className="metric-mini-box">
-                      <div className="mini-val" style={{ color: 'var(--quantum-color)' }}>{feasibilityData.circuit_depth}</div>
-                      <div className="mini-lbl">Circuit Depth ({feasibilityData.cnot_count} CNOTs)</div>
-                    </div>
-                    <div className="metric-mini-box">
-                      <div className="mini-val" style={{ color: 'var(--status-success)' }}>{feasibilityData.barren_plateau_risk}</div>
-                      <div className="mini-lbl">Barren Plateau Risk</div>
-                    </div>
-                    <div className="metric-mini-box">
-                      <div className="mini-val" style={{ color: 'var(--classical-color)' }}>{feasibilityData.nisq_readiness_level}</div>
-                      <div className="mini-lbl">NISQ Hardware Tier</div>
-                    </div>
+                <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* 4 Hardware Metrics */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                    {[
+                      { val: `${feasibilityData.qubits_required} Qubits`, label: `Hilbert Dim: 2⁴ = ${feasibilityData.hilbert_space_dimension}`, color: 'var(--quantum-color)' },
+                      { val: feasibilityData.circuit_depth, label: `Circuit Depth (${feasibilityData.cnot_count} CNOTs)`, color: 'var(--quantum-color)' },
+                      { val: feasibilityData.barren_plateau_risk, label: 'Barren Plateau Risk', color: 'var(--status-success)' },
+                      { val: feasibilityData.nisq_readiness_level, label: 'NISQ Hardware Tier', color: 'var(--classical-color)' }
+                    ].map((m, i) => (
+                      <div key={i} style={{
+                        padding: '18px',
+                        background: 'var(--bg-inset)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: m.color, marginBottom: '4px', fontVariantNumeric: 'tabular-nums' }}>
+                          {m.val}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                          {m.label}
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Depolarizing Noise Degradation Table */}
-                  <div style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                      Depolarizing Noise Degradation Profile: ℰ(ρ) = (1-p)ρ + (p/2ⁿ)I
+                  {/* Noise Degradation */}
+                  <div style={{
+                    padding: '24px',
+                    background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)'
+                  }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                      Depolarizing Noise Degradation Profile
                     </h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: '14px', fontFamily: 'monospace' }}>
+                      ℰ(ρ) = (1-p)ρ + (p/2ⁿ)I
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                       {feasibilityData.noise_curve?.map((pt, i) => (
-                        <div key={i} style={{ background: 'var(--bg-card-solid)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', textAlign: 'center', transition: 'all 0.2s ease' }}>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>p = {pt.noise_rate_percentage}% Noise</div>
-                          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--quantum-color)', margin: '4px 0' }}>{(pt.accuracy * 100).toFixed(1)}% Acc</div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Fidelity: {pt.fidelity_score}</div>
+                        <div key={i} style={{
+                          padding: '14px',
+                          background: 'var(--bg-card-solid)',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-color)',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px' }}>
+                            p = {pt.noise_rate_percentage}%
+                          </div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--quantum-color)', margin: '4px 0', fontVariantNumeric: 'tabular-nums' }}>
+                            {(pt.accuracy * 100).toFixed(1)}%
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
+                            Fidelity: {pt.fidelity_score}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="banner" style={{ background: 'var(--classical-bg)', border: '1px solid var(--classical-glow)', color: 'var(--classical-color)', fontSize: '0.85rem' }}>
-                    <ShieldAlert size={18} style={{ flexShrink: 0 }} />
+                  {/* Scientific Verdict */}
+                  <div style={{
+                    padding: '18px 20px',
+                    background: 'var(--banner-warn-bg)',
+                    border: '1px solid var(--banner-warn-border)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    gap: '14px',
+                    alignItems: 'flex-start',
+                    fontSize: '0.875rem',
+                    color: 'var(--banner-warn-text)'
+                  }}>
+                    <ShieldAlert size={20} style={{ flexShrink: 0, marginTop: '1px' }} />
                     <div>
                       <strong>Scientific Integrity Verdict:</strong> {feasibilityData.scientific_verdict}
                     </div>
@@ -1409,56 +1819,103 @@ export default function IndividualExperiment() {
             </div>
           )}
 
-          {/* 4. OLD-STYLE CARD 3: Advanced Information (Researcher Level) */}
-          <div className="card">
+          {/* ADVANCED RESEARCHER TELEMETRY */}
+          <div style={{
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-card)',
+            overflow: 'hidden'
+          }}>
+            {/* Header */}
             <div
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
               onClick={() => setShowAdvanced(!showAdvanced)}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '24px 32px',
+                cursor: 'pointer',
+                background: 'var(--bg-inset)',
+                borderBottom: showAdvanced ? '1px solid var(--border-color)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
             >
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', margin: 0, fontSize: '1.05rem' }}>
-                <FlaskConical size={18} style={{ color: 'var(--classical-color)' }} /> Advanced Information (Researcher Telemetry)
-              </h3>
-              <button className="btn btn-sm btn-outline" type="button">
-                {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                {showAdvanced ? 'Hide Advanced' : 'Show Advanced Details'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: isQuantum ? 'var(--quantum-bg)' : 'var(--classical-bg)',
+                  border: `1px solid ${isQuantum ? 'var(--quantum-glow)' : 'var(--classical-glow)'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <FlaskConical size={20} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    Advanced Researcher Telemetry
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, marginTop: '2px' }}>
+                    Hyperparameters, cross-validation, and diagnostic analysis
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                background: 'var(--bg-card-solid)',
+                border: '1px solid var(--border-color)',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                color: 'var(--text-secondary)'
+              }}>
+                {showAdvanced ? 'Collapse' : 'Expand'}
+                <ChevronDown size={14} style={{ transition: 'transform 0.2s ease', transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+              </div>
             </div>
 
             {showAdvanced && (
-              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                
-                {/* 1. Architectural Hyperparameters Labeled Key-Value Grid */}
-                <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Settings size={17} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+              <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+                {/* 1. Architectural Hyperparameters */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Settings size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
                       Architectural Hyperparameters
                     </h4>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', background: 'var(--card-bg)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', background: 'var(--bg-inset)', padding: '3px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
                       Simulated Telemetry
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {Object.entries(
                       mockArchitecturalHyperparameters[selectedModel] || mockArchitecturalHyperparameters.svm
                     ).map(([paramKey, paramVal]) => (
                       <div
                         key={paramKey}
                         style={{
-                          padding: '10px 12px',
-                          background: 'var(--bg-card-solid)',
-                          borderRadius: '8px',
+                          padding: '14px 16px',
+                          background: 'var(--bg-inset)',
+                          borderRadius: 'var(--radius-md)',
                           border: '1px solid var(--border-color)',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '4px'
+                          gap: '6px'
                         }}
                       >
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           {paramKey.replace(/_/g, ' ')}
                         </span>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>
                           {String(paramVal)}
                         </span>
                       </div>
@@ -1466,14 +1923,14 @@ export default function IndividualExperiment() {
                   </div>
                 </div>
 
-                {/* 2. Hyperparameter Search Breakdown */}
-                <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <BarChart2 size={17} style={{ color: 'var(--classical-color)' }} />
-                      Hyperparameter Search & Cross-Validation Strategy
+                {/* 2. Hyperparameter Search */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <BarChart2 size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                      Hyperparameter Search & Cross-Validation
                     </h4>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', background: 'var(--card-bg)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', background: 'var(--bg-inset)', padding: '3px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
                       Simulated Telemetry
                     </span>
                   </div>
@@ -1481,28 +1938,26 @@ export default function IndividualExperiment() {
                   {(() => {
                     const hpInfo = mockHyperparameterSearch[selectedModel] || mockHyperparameterSearch.svm;
                     return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                          <div style={{ padding: '10px 12px', background: 'var(--bg-card-solid)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>Search Method</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '2px' }}>{hpInfo.method}</div>
-                          </div>
-                          <div style={{ padding: '10px 12px', background: 'var(--bg-card-solid)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>Candidates Evaluated</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--classical-color)', fontWeight: 700, marginTop: '2px' }}>{hpInfo.n_candidates_evaluated} Candidates</div>
-                          </div>
-                          <div style={{ padding: '10px 12px', background: 'var(--bg-card-solid)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>Optimized Metric</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '2px' }}>{hpInfo.scoring_metric}</div>
-                          </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                          {[
+                            { label: 'Search Method', value: hpInfo.method, color: 'var(--text-primary)' },
+                            { label: 'Candidates Evaluated', value: `${hpInfo.n_candidates_evaluated} Candidates`, color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)' },
+                            { label: 'Optimized Metric', value: hpInfo.scoring_metric, color: 'var(--text-primary)' }
+                          ].map((item, i) => (
+                            <div key={i} style={{ padding: '14px 16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>{item.label}</div>
+                              <div style={{ fontSize: '0.9rem', color: item.color, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
+                            </div>
+                          ))}
                         </div>
 
-                        <div style={{ padding: '12px', background: 'var(--bg-card-solid)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>Search Space & Best Parameters:</div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-secondary)' }}>
-                            <div>• <strong>Search Grid:</strong> {JSON.stringify(hpInfo.search_space)}</div>
-                            <div>• <strong>Optimal Config Found:</strong> <code style={{ color: 'var(--classical-color)', fontWeight: 600 }}>{JSON.stringify(hpInfo.best_params)}</code></div>
-                            <div>• <strong>Real Backend Methodology:</strong> {results.advanced_info?.cross_validation_details?.methodology || '5-Fold Stratified CV'}</div>
+                        <div style={{ padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Search Space & Best Parameters</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                            <div><strong style={{ color: 'var(--text-primary)' }}>Search Grid:</strong> {JSON.stringify(hpInfo.search_space)}</div>
+                            <div><strong style={{ color: 'var(--text-primary)' }}>Optimal Config:</strong> <code style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--brand-primary)', fontWeight: 600, background: 'var(--bg-card-solid)', padding: '2px 6px', borderRadius: '4px' }}>{JSON.stringify(hpInfo.best_params)}</code></div>
+                            <div><strong style={{ color: 'var(--text-primary)' }}>Methodology:</strong> {results.advanced_info?.cross_validation_details?.methodology || '5-Fold Stratified CV'}</div>
                           </div>
                         </div>
                       </div>
@@ -1510,14 +1965,14 @@ export default function IndividualExperiment() {
                   })()}
                 </div>
 
-                {/* 3. Confusion Matrix (REAL DATA) & Per-Fold CV Scores (REAL DATA) Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  
-                  {/* 3A. Confusion Matrix (REAL DATA) */}
-                  <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 14px 0', fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <ShieldAlert size={17} style={{ color: 'var(--classical-color)' }} />
-                      Confusion Matrix Heatmap (Real Test Set)
+                {/* 3. Confusion Matrix & CV Scores */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
+                  {/* Confusion Matrix */}
+                  <div>
+                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <ShieldAlert size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                      Confusion Matrix (Test Set)
                     </h4>
 
                     {(() => {
@@ -1530,50 +1985,33 @@ export default function IndividualExperiment() {
 
                       return (
                         <div>
-                          <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: '8px',
-                            textAlign: 'center'
-                          }}>
-                            <div style={{ padding: '14px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>True Negative (TN)</div>
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', margin: '4px 0 2px 0' }}>{tn}</div>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{((tn / total) * 100).toFixed(1)}% Healthy</div>
-                            </div>
-
-                            <div style={{ padding: '14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>False Positive (FP)</div>
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#DC2626', margin: '4px 0 2px 0' }}>{fp}</div>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{((fp / total) * 100).toFixed(1)}% False Alarm</div>
-                            </div>
-
-                            <div style={{ padding: '14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>False Negative (FN)</div>
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#DC2626', margin: '4px 0 2px 0' }}>{fn}</div>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{((fn / total) * 100).toFixed(1)}% Missed Risk</div>
-                            </div>
-
-                            <div style={{ padding: '14px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>True Positive (TP)</div>
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', margin: '4px 0 2px 0' }}>{tp}</div>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{((tp / total) * 100).toFixed(1)}% Detected</div>
-                            </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            {[
+                              { label: 'True Negative', short: 'TN', value: tn, pct: ((tn / total) * 100).toFixed(1), sub: 'Healthy', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.25)', color: '#059669' },
+                              { label: 'False Positive', short: 'FP', value: fp, pct: ((fp / total) * 100).toFixed(1), sub: 'False Alarm', bg: 'rgba(239, 68, 68, 0.06)', border: 'rgba(239, 68, 68, 0.2)', color: '#DC2626' },
+                              { label: 'False Negative', short: 'FN', value: fn, pct: ((fn / total) * 100).toFixed(1), sub: 'Missed Risk', bg: 'rgba(239, 68, 68, 0.06)', border: 'rgba(239, 68, 68, 0.2)', color: '#DC2626' },
+                              { label: 'True Positive', short: 'TP', value: tp, pct: ((tp / total) * 100).toFixed(1), sub: 'Detected', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.25)', color: '#059669' }
+                            ].map((cell, i) => (
+                              <div key={i} style={{ padding: '16px', background: cell.bg, border: `1px solid ${cell.border}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '6px' }}>{cell.short}</div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 700, color: cell.color, lineHeight: 1, marginBottom: '4px', fontVariantNumeric: 'tabular-nums' }}>{cell.value}</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>{cell.pct}% {cell.sub}</div>
+                              </div>
+                            ))}
                           </div>
-
-                          <div style={{ marginTop: '10px', fontSize: '0.75rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
-                            Total Cohort Evaluated: <strong>{total} Patients</strong>
+                          <div style={{ marginTop: '12px', padding: '10px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                            Total Cohort: <strong style={{ color: 'var(--text-primary)' }}>{total} Patients</strong>
                           </div>
                         </div>
                       );
                     })()}
                   </div>
 
-                  {/* 3B. Per-Fold Cross Validation Scores (REAL DATA) */}
-                  <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 14px 0', fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <BarChart2 size={17} style={{ color: 'var(--classical-color)' }} />
-                      5-Fold CV Accuracy Distribution (Real Data)
+                  {/* 5-Fold CV Distribution */}
+                  <div>
+                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <BarChart2 size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                      5-Fold Cross-Validation
                     </h4>
 
                     {(() => {
@@ -1582,16 +2020,14 @@ export default function IndividualExperiment() {
 
                       const cvChartData = {
                         labels: ['Fold 1', 'Fold 2', 'Fold 3', 'Fold 4', 'Fold 5'],
-                        datasets: [
-                          {
-                            label: 'Fold Accuracy (%)',
-                            data: foldNumArr,
-                            backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.7)' : 'rgba(16, 185, 129, 0.7)',
-                            borderColor: isQuantum ? '#0D9488' : '#059669',
-                            borderWidth: 1.5,
-                            borderRadius: 4
-                          }
-                        ]
+                        datasets: [{
+                          label: 'Fold Accuracy (%)',
+                          data: foldNumArr,
+                          backgroundColor: isQuantum ? 'rgba(13, 148, 136, 0.7)' : 'rgba(16, 185, 129, 0.7)',
+                          borderColor: isQuantum ? '#0D9488' : '#059669',
+                          borderWidth: 1.5,
+                          borderRadius: 6
+                        }]
                       };
 
                       const cvChartOptions = {
@@ -1599,18 +2035,18 @@ export default function IndividualExperiment() {
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                          y: { min: Math.max(0, Math.min(...foldNumArr) - 5), max: 100, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } } },
-                          x: { ticks: { color: 'var(--text-tertiary)', font: { size: 10 } } }
+                          y: { min: Math.max(0, Math.min(...foldNumArr) - 5), max: 100, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } }, grid: { color: 'var(--border-color)' } },
+                          x: { ticks: { color: 'var(--text-tertiary)', font: { size: 10 } }, grid: { display: false } }
                         }
                       };
 
                       return (
                         <div>
-                          <div style={{ height: '160px' }}>
+                          <div style={{ height: '200px', padding: '16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                             <Bar data={cvChartData} options={cvChartOptions} />
                           </div>
-                          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                            Variance: {results.advanced_info?.cross_validation_details?.fold_variance || '± 1.8% SD'}
+                          <div style={{ marginTop: '12px', padding: '10px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                            Variance: <strong style={{ color: 'var(--text-primary)' }}>{results.advanced_info?.cross_validation_details?.fold_variance || '± 1.8% SD'}</strong>
                           </div>
                         </div>
                       );
@@ -1618,14 +2054,14 @@ export default function IndividualExperiment() {
                   </div>
                 </div>
 
-                {/* 4. ROC Curve Visualization (Point Array Mocked, Real AUC Scalar) */}
-                <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <LineChart size={17} style={{ color: 'var(--classical-color)' }} />
-                      Receiver Operating Characteristic (ROC Curve)
+                {/* 4. ROC Curve */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <LineChart size={18} style={{ color: isQuantum ? 'var(--quantum-color)' : 'var(--classical-color)' }} />
+                      Receiver Operating Characteristic
                     </h4>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', background: 'var(--card-bg)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', background: 'var(--bg-inset)', padding: '3px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', fontWeight: 500 }}>
                       Simulated Curve
                     </span>
                   </div>
@@ -1634,7 +2070,7 @@ export default function IndividualExperiment() {
                     const rocDataObj = mockRocCurvePoints[selectedModel] || mockRocCurvePoints.svm;
                     const realAuc = metrics?.roc_auc || '0.995';
 
-                    const chartData = {
+                    const rocChartData = {
                       labels: rocDataObj.fpr.map(f => f.toFixed(3)),
                       datasets: [
                         {
@@ -1645,7 +2081,7 @@ export default function IndividualExperiment() {
                           fill: true,
                           tension: 0.35,
                           borderWidth: 2,
-                          pointRadius: 3
+                          pointRadius: 0
                         },
                         {
                           label: 'Random Chance (AUC = 0.500)',
@@ -1658,21 +2094,21 @@ export default function IndividualExperiment() {
                       ]
                     };
 
-                    const chartOptions = {
+                    const rocChartOptions = {
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: { position: 'bottom', labels: { color: 'var(--text-secondary)', font: { size: 11 } } }
                       },
                       scales: {
-                        x: { title: { display: true, text: 'False Positive Rate (1 - Specificity)', color: 'var(--text-tertiary)', font: { size: 10 } }, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } } },
-                        y: { title: { display: true, text: 'True Positive Rate (Sensitivity)', color: 'var(--text-tertiary)', font: { size: 10 } }, min: 0, max: 1.05, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } } }
+                        x: { title: { display: true, text: 'False Positive Rate', color: 'var(--text-tertiary)', font: { size: 10 } }, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } }, grid: { color: 'var(--border-color)' } },
+                        y: { title: { display: true, text: 'True Positive Rate', color: 'var(--text-tertiary)', font: { size: 10 } }, min: 0, max: 1.05, ticks: { color: 'var(--text-tertiary)', font: { size: 10 } }, grid: { color: 'var(--border-color)' } }
                       }
                     };
 
                     return (
-                      <div style={{ height: '220px' }}>
-                        <Line data={chartData} options={chartOptions} />
+                      <div style={{ height: '280px', padding: '20px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                        <Line data={rocChartData} options={rocChartOptions} />
                       </div>
                     );
                   })()}
@@ -1680,12 +2116,12 @@ export default function IndividualExperiment() {
 
                 {/* 5. Quantum Circuit Schematic (IF QUANTUM MODEL SELECTED) */}
                 {isQuantum && (
-                  <div style={{ padding: '18px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--quantum-glow)', borderLeft: '4px solid var(--quantum-color)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <h4 style={{ color: 'var(--quantum-color)', margin: 0, fontSize: '0.92rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Atom size={18} /> Quantum Circuit Schematic & QPU Gate Layers
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                      <h4 style={{ color: 'var(--quantum-color)', margin: 0, fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Atom size={18} /> Quantum Circuit Schematic
                       </h4>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--quantum-color)', background: 'var(--quantum-bg)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--quantum-glow)', fontWeight: 500 }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--quantum-color)', background: 'var(--quantum-bg)', padding: '3px 10px', borderRadius: '6px', border: '1px solid var(--quantum-glow)', fontWeight: 500 }}>
                         Simulated Schematic
                       </span>
                     </div>
@@ -1697,27 +2133,25 @@ export default function IndividualExperiment() {
                       const realCnot = results.advanced_info?.quantum_hardware_profile?.cnot_entangler_count || 12;
 
                       return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           {/* Real Quantum Scalars */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                            <div style={{ padding: '8px 12px', background: 'var(--bg-card-solid)', borderRadius: '6px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--quantum-color)' }}>{realQubits}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Qubits (Real)</div>
-                            </div>
-                            <div style={{ padding: '8px 12px', background: 'var(--bg-card-solid)', borderRadius: '6px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--quantum-color)' }}>{realDepth}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Circuit Depth (Real)</div>
-                            </div>
-                            <div style={{ padding: '8px 12px', background: 'var(--bg-card-solid)', borderRadius: '6px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--quantum-color)' }}>{realCnot}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>CNOT Entanglers (Real)</div>
-                            </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                            {[
+                              { value: realQubits, label: 'Qubits (Real)' },
+                              { value: realDepth, label: 'Circuit Depth (Real)' },
+                              { value: realCnot, label: 'CNOT Entanglers (Real)' }
+                            ].map((item, i) => (
+                              <div key={i} style={{ padding: '14px 16px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--quantum-color)', marginBottom: '4px', fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>{item.label}</div>
+                              </div>
+                            ))}
                           </div>
 
                           {/* Graphic Qiskit Wire Schematic */}
-                          <div style={{ padding: '12px 16px', background: '#0F172A', color: '#5EEAD4', borderRadius: '8px', fontFamily: 'Consolas, monospace', fontSize: '0.75rem', overflowX: 'auto', lineHeight: 1.6, border: '1px solid rgba(20, 184, 166, 0.25)' }}>
-                            <div style={{ color: '#94A3B8', marginBottom: '8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                              // {qSchematic.type} Wire Diagram
+                          <div style={{ padding: '20px', background: '#0F172A', color: '#5EEAD4', borderRadius: 'var(--radius-md)', fontFamily: 'Consolas, monospace', fontSize: '0.78rem', overflowX: 'auto', lineHeight: 1.7, border: '1px solid rgba(20, 184, 166, 0.3)' }}>
+                            <div style={{ color: '#94A3B8', marginBottom: '12px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                              {qSchematic.type} Wire Diagram
                             </div>
                             {qSchematic.ascii_diagram.map((line, lIdx) => (
                               <div key={lIdx} style={{ whiteSpace: 'pre' }}>{line}</div>
@@ -1729,12 +2163,38 @@ export default function IndividualExperiment() {
                   </div>
                 )}
 
-                {/* 6. View Raw Execution Payload JSON */}
-                <details style={{ marginTop: '4px' }}>
-                  <summary style={{ cursor: 'pointer', padding: '10px 14px', background: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                {/* 6. Raw Execution Payload */}
+                <details style={{ marginTop: '8px' }}>
+                  <summary style={{
+                    cursor: 'pointer',
+                    padding: '14px 18px',
+                    background: 'var(--bg-inset)',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.85rem',
+                    border: '1px solid var(--border-color)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <span style={{ fontSize: '0.9rem' }}>▶</span>
                     View Raw Execution Payload JSON
                   </summary>
-                  <pre style={{ marginTop: '10px', background: 'var(--bg-card-solid)', color: 'var(--text-secondary)', padding: '16px', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', border: '1px solid var(--border-color)', overflow: 'auto', maxHeight: '350px' }}>
+                  <pre style={{
+                    marginTop: '14px',
+                    background: 'var(--bg-inset)',
+                    color: 'var(--text-secondary)',
+                    padding: '20px',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.78rem',
+                    border: '1px solid var(--border-color)',
+                    overflow: 'auto',
+                    maxHeight: '400px',
+                    lineHeight: '1.6',
+                    fontFamily: 'Consolas, Monaco, monospace'
+                  }}>
                     {JSON.stringify(results.advanced_info?.raw_json_results, null, 2)}
                   </pre>
                 </details>
