@@ -377,35 +377,43 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
   const getProviderBadge = (provider, model) => {
     if (provider?.includes('Gemini') || aiConfig.provider === 'gemini') {
-      return <span className="val-badge ready" style={{ background: '#E0F2FE', color: '#0369A1', border: '1px solid #BAE6FD', fontWeight: 600 }}>✨ Google Gemini ({model || aiConfig.model})</span>;
+      return <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--brand-bg)', color: 'var(--brand-primary)', border: '1px solid var(--brand-glow)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>✨ Google Gemini ({model || aiConfig.model})</span>;
     }
     if (provider?.includes('Groq') || aiConfig.provider === 'groq') {
-      return <span className="val-badge ready" style={{ background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', fontWeight: 600 }}>⚡ Groq DeepSeek-R1</span>;
+      return <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.25)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>⚡ Groq DeepSeek-R1</span>;
     }
-    return <span className="val-badge ready" style={{ background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', fontWeight: 600 }}>🔬 360° Grounded Core</span>;
+    return <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-inset)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>🔬 360° Grounded Core</span>;
   };
 
   return (
-    <div className="hub-section active" style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '30px' }}>
+    <div className="hub-section active" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      
       {/* Top Header */}
-      <div className="section-header" style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.45rem', margin: 0 }}>
+            <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               <Bot size={26} style={{ color: 'var(--classical-color)' }} />
               Quddos AI Research Studio
             </h1>
-            <p className="subtitle" style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '800px', lineHeight: '1.6' }}>
               NotebookLM-grade 360° Multimodal & Quantum Clinical Intelligence. Powered by SOTA reasoning models with citation grounding.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {getProviderBadge(aiConfig.provider, aiConfig.model)}
             <button
               onClick={() => setShowSettingsModal(true)}
-              className="btn btn-sm btn-outline"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+              style={{
+                height: '40px', padding: '0 14px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'transparent',
+                color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
               title="Configure Reasoning Model & Free API Keys"
             >
               <Settings size={15} /> Model & Keys
@@ -421,11 +429,18 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                   setActivePodcastScript(null);
                 }
               }}
-              className="btn btn-sm btn-outline-danger"
-              style={{ padding: '6px 10px' }}
+              style={{
+                height: '40px', padding: '0 14px', borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(220, 38, 38, 0.2)', background: 'transparent',
+                color: 'var(--status-danger)', fontSize: '0.82rem', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--status-danger-bg)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               title="Clear Session"
             >
-              <Trash2 size={14} />
+              <Trash2 size={15} />
             </button>
           </div>
         </div>
@@ -433,70 +448,44 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
       {/* NotebookLM Studio Quick Actions Toolbar */}
       <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-color)',
-        borderRadius: '10px',
-        padding: '12px 16px',
-        marginBottom: '16px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+        borderRadius: 'var(--radius-lg)', padding: '24px',
+        border: '1px solid var(--border-color)', marginBottom: '24px',
+        boxShadow: 'var(--shadow-card)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Sparkles size={14} style={{ color: 'var(--hybrid-color)' }} /> NotebookLM Studio Quick Synthesizers
           </span>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>One-click publication-grade research generation</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
-          <button
-            onClick={() => handleStudioAction('study_guide', 'Comprehensive Research Study Guide')}
-            disabled={studioLoading !== null}
-            className="btn btn-sm btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
-          >
-            <BookOpen size={15} style={{ color: 'var(--brand-primary)' }} />
-            <span>{studioLoading === 'study_guide' ? 'Synthesizing...' : '📘 Study Guide'}</span>
-          </button>
-
-          <button
-            onClick={() => handleStudioAction('audio_script', '2-Expert Audio Overview / Podcast')}
-            disabled={studioLoading !== null}
-            className="btn btn-sm btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
-          >
-            <Volume2 size={15} style={{ color: '#059669' }} />
-            <span>{studioLoading === 'audio_script' ? 'Scripting...' : '🎙️ Audio Overview'}</span>
-          </button>
-
-          <button
-            onClick={() => handleStudioAction('clinical_briefing', 'Clinical XAI & Triage Briefing')}
-            disabled={studioLoading !== null}
-            className="btn btn-sm btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
-          >
-            <Microscope size={15} style={{ color: '#D97706' }} />
-            <span>{studioLoading === 'clinical_briefing' ? 'Analyzing...' : '🩺 Clinical XAI Brief'}</span>
-          </button>
-
-          <button
-            onClick={() => handleStudioAction('quantum_audit', 'Quantum Hardware & Noise Audit')}
-            disabled={studioLoading !== null}
-            className="btn btn-sm btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
-          >
-            <Cpu size={15} style={{ color: '#7C3AED' }} />
-            <span>{studioLoading === 'quantum_audit' ? 'Auditing...' : '⚛️ Quantum Audit'}</span>
-          </button>
-
-          <button
-            onClick={() => handleStudioAction('defense_faq', 'Research Defense & Viva FAQ')}
-            disabled={studioLoading !== null}
-            className="btn btn-sm btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start', padding: '8px 12px', fontSize: '0.8rem', background: '#FAFAFA' }}
-          >
-            <Shield size={15} style={{ color: '#DC2626' }} />
-            <span>{studioLoading === 'defense_faq' ? 'Formulating...' : '🛡️ Defense FAQ'}</span>
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+          {[
+            { action: 'study_guide', title: '📘 Study Guide', icon: BookOpen, color: 'var(--brand-primary)' },
+            { action: 'audio_script', title: '🎙️ Audio Overview', icon: Volume2, color: '#059669' },
+            { action: 'clinical_briefing', title: '🩺 Clinical XAI Brief', icon: Microscope, color: '#D97706' },
+            { action: 'quantum_audit', title: '⚛️ Quantum Audit', icon: Cpu, color: '#7C3AED' },
+            { action: 'defense_faq', title: '🛡️ Defense FAQ', icon: Shield, color: '#DC2626' }
+          ].map(({ action, title, icon: Icon, color }) => (
+            <button
+              key={action}
+              onClick={() => handleStudioAction(action, title)}
+              disabled={studioLoading !== null}
+              style={{
+                height: '44px', padding: '0 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'var(--bg-inset)',
+                color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600',
+                cursor: studioLoading !== null ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { if (studioLoading === null) { e.currentTarget.style.background = 'var(--bg-card-solid)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
+              onMouseLeave={(e) => { if (studioLoading === null) { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+            >
+              <Icon size={15} style={{ color: studioLoading === action ? color : 'var(--text-tertiary)', transition: 'color 0.2s ease' }} />
+              <span>{studioLoading === action ? 'Synthesizing...' : title}</span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -504,29 +493,34 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
       <div style={{
         display: 'grid',
         gridTemplateColumns: showSources ? '320px 1fr' : '1fr',
-        gap: '16px',
-        minHeight: '650px',
-        height: 'calc(100vh - 270px)'
+        gap: '24px',
+        minHeight: '650px'
       }}>
+        
         {/* Left Panel: 360-Degree Source Manager */}
         {showSources && (
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: '14px', border: '1px solid var(--border-color)', margin: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{
+            background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+            borderRadius: 'var(--radius-lg)', padding: '24px',
+            border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)',
+            display: 'flex', flexDirection: 'column', overflow: 'hidden'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Layers size={16} style={{ color: 'var(--classical-color)' }} /> 360° Source Corpus
               </span>
-              <span className="val-badge ready" style={{ fontSize: '0.7rem' }}>
+              <span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'var(--status-success-bg)', color: 'var(--status-success)', border: '1px solid rgba(22, 163, 74, 0.25)', fontWeight: '600' }}>
                 {selectedPresetSourceIds.length + artifacts.length} Active
               </span>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Preset Grounded Sources */}
               <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
                   Platform Knowledge Base
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {PRESET_SOURCES.map((source) => {
                     const isChecked = selectedPresetSourceIds.includes(source.id);
                     return (
@@ -534,24 +528,26 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                         key={source.id}
                         onClick={() => handleTogglePresetSource(source.id)}
                         style={{
-                          background: isChecked ? '#F0FDF4' : '#F8FAFC',
-                          border: `1px solid ${isChecked ? '#BBF7D0' : 'var(--border-color)'}`,
-                          borderRadius: '6px',
-                          padding: '8px 10px',
+                          background: isChecked ? 'var(--classical-bg)' : 'var(--bg-inset)',
+                          border: `1px solid ${isChecked ? 'var(--classical-glow)' : 'var(--border-color)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          padding: '12px',
                           cursor: 'pointer',
-                          fontSize: '0.78rem',
-                          transition: 'all 0.15s'
+                          fontSize: '0.82rem',
+                          transition: 'all 0.2s ease'
                         }}
+                        onMouseEnter={(e) => { if (!isChecked) e.currentTarget.style.background = 'var(--bg-card-solid)'; }}
+                        onMouseLeave={(e) => { if (!isChecked) e.currentTarget.style.background = 'var(--bg-inset)'; }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                          <span style={{ color: isChecked ? '#16A34A' : '#94A3B8', marginTop: '1px' }}>
-                            {isChecked ? <CheckSquare size={14} /> : <Square size={14} />}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                          <span style={{ color: isChecked ? 'var(--classical-color)' : 'var(--text-tertiary)', marginTop: '2px', transition: 'color 0.2s ease' }}>
+                            {isChecked ? <CheckSquare size={15} /> : <Square size={15} />}
                           </span>
                           <div>
-                            <div style={{ fontWeight: 600, color: isChecked ? '#15803D' : 'var(--text-primary)', lineHeight: '1.2' }}>
+                            <div style={{ fontWeight: '600', color: isChecked ? 'var(--classical-color)' : 'var(--text-primary)', lineHeight: '1.3', transition: 'color 0.2s ease' }}>
                               {source.title}
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>
                               {source.description}
                             </div>
                           </div>
@@ -564,8 +560,8 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
               {/* Dynamic Attached Artifacts */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     Pinned Telemetry ({artifacts.length})
                   </span>
                   {artifacts.length > 0 && (
@@ -574,7 +570,9 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                         setArtifacts([]);
                         localStorage.removeItem('quddos_artifacts');
                       }}
-                      style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: '0.7rem', cursor: 'pointer' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--status-danger)', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                     >
                       Clear All
                     </button>
@@ -582,34 +580,37 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                 </div>
 
                 {artifacts.length === 0 ? (
-                  <div style={{ background: '#F8FAFC', border: '1px dashed var(--border-color)', borderRadius: '6px', padding: '14px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    <FileText size={22} style={{ margin: '0 auto 6px', opacity: 0.4 }} />
-                    <p style={{ margin: 0 }}>No cards pinned yet.</p>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem' }}>Use <strong>⋮ → Add to Quddos AI</strong> on any plot or table.</p>
+                  <div style={{ background: 'var(--bg-inset)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-md)', padding: '20px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                    <FileText size={24} style={{ margin: '0 auto 8px', opacity: 0.4, color: 'var(--text-tertiary)' }} />
+                    <p style={{ margin: 0, fontWeight: '500' }}>No cards pinned yet.</p>
+                    <p style={{ margin: '6px 0 0 0', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Use <strong>⋮ → Add to Quddos AI</strong> on any plot or table.</p>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {artifacts.map((art, idx) => (
                       <div key={idx} style={{
-                        background: '#FFFFFF',
+                        background: 'var(--bg-card-solid)',
                         border: '1px solid var(--border-color)',
-                        borderRadius: '6px',
-                        padding: '8px',
-                        fontSize: '0.78rem'
+                        borderRadius: 'var(--radius-md)',
+                        padding: '12px',
+                        fontSize: '0.82rem',
+                        transition: 'all 0.2s ease'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <BarChart size={13} style={{ color: 'var(--classical-color)' }} /> {art.title || `Artifact ${idx+1}`}
+                          <span style={{ fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <BarChart size={14} style={{ color: 'var(--classical-color)' }} /> {art.title || `Artifact ${idx+1}`}
                           </span>
                           <button
                             onClick={() => handleRemoveArtifact(idx)}
-                            style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', padding: '2px' }}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', transition: 'all 0.2s ease' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--status-danger)'; e.currentTarget.style.background = 'var(--status-danger-bg)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'none'; }}
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                         {art.image_url && (
-                          <img src={art.image_url} alt={art.title} style={{ width: '100%', borderRadius: '4px', marginTop: '4px' }} />
+                          <img src={art.image_url} alt={art.title} style={{ width: '100%', borderRadius: '6px', marginTop: '8px', border: '1px solid var(--border-color)' }} />
                         )}
                       </div>
                     ))}
@@ -621,46 +622,52 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
         )}
 
         {/* Right Panel: Interactive Research Workspace */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', border: '1px solid var(--border-color)', margin: 0 }}>
+        <div style={{
+          background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+          borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)',
+          boxShadow: 'var(--shadow-card)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
+        }}>
           {/* Header Bar */}
           <div style={{
-            padding: '12px 18px',
-            borderBottom: '1px solid var(--border-color)',
-            background: 'var(--bg-card-solid)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            padding: '16px 24px', borderBottom: '1px solid var(--border-color)',
+            background: 'var(--bg-inset)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 onClick={() => setShowSources(!showSources)}
-                className="btn btn-sm btn-outline"
-                style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                style={{
+                  height: '36px', padding: '0 12px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-color)', background: 'var(--bg-card-solid)',
+                  color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: '600',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-card-solid)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                 title="Toggle Source Manager Drawer"
               >
-                <Layers size={13} /> {showSources ? 'Hide Sources' : 'Show Sources'}
+                <Layers size={14} /> {showSources ? 'Hide Sources' : 'Show Sources'}
               </button>
               <div>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Research Dialogue & Synthesis</span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>Grounded in {selectedPresetSourceIds.length + artifacts.length} active sources</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)' }}>Research Dialogue & Synthesis</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>Grounded in {selectedPresetSourceIds.length + artifacts.length} active sources</span>
               </div>
             </div>
 
             {activePodcastScript && (
               <button
                 onClick={togglePlayPodcast}
-                className="btn btn-sm"
                 style={{
-                  background: isPlayingPodcast ? '#DC2626' : '#059669',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.78rem'
+                  height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none',
+                  background: isPlayingPodcast ? 'var(--status-danger)' : 'var(--status-success)',
+                  color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px',
+                  fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer',
+                  boxShadow: isPlayingPodcast ? '0 2px 8px rgba(220, 38, 38, 0.25)' : '0 2px 8px rgba(22, 163, 74, 0.25)',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                {isPlayingPodcast ? <Pause size={14} /> : <Play size={14} />}
-                {isPlayingPodcast ? 'Pause Podcast' : 'Play Audio Overview (TTS)'}
+                {isPlayingPodcast ? <Pause size={14} /> : <Play size={14} fill="#fff" />}
+                {isPlayingPodcast ? 'Pause Podcast' : 'Play Audio Overview'}
               </button>
             )}
           </div>
@@ -668,20 +675,16 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
           {/* Audio Overview Podcast Highlight Player Banner */}
           {activePodcastScript && (
             <div style={{
-              background: '#ECFDF5',
-              borderBottom: '1px solid #A7F3D0',
-              padding: '10px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+              background: 'var(--status-success-bg)', borderBottom: '1px solid rgba(22, 163, 74, 0.25)',
+              padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Radio size={18} style={{ color: '#059669', animation: isPlayingPodcast ? 'pulse 1.5s infinite' : 'none' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Radio size={18} style={{ color: 'var(--status-success)', animation: isPlayingPodcast ? 'pulse 1.5s infinite' : 'none' }} />
                 <div>
-                  <strong style={{ fontSize: '0.82rem', color: '#065F46' }}>
+                  <strong style={{ fontSize: '0.85rem', color: 'var(--status-success)' }}>
                     🎙️ Active Audio Overview Podcast: "The Quantum Clinical Frontier"
                   </strong>
-                  <div style={{ fontSize: '0.75rem', color: '#047857' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     {isPlayingPodcast ? `Currently speaking: ${activePodcastScript[podcastSpeakerIndex]?.speaker}` : 'Click Play to listen with dual synthesized clinician & physicist voices.'}
                   </div>
                 </div>
@@ -692,7 +695,7 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                   setIsPlayingPodcast(false);
                   setActivePodcastScript(null);
                 }}
-                style={{ background: 'none', border: 'none', color: '#047857', cursor: 'pointer', fontSize: '0.75rem' }}
+                style={{ background: 'none', border: 'none', color: 'var(--status-success)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '600', textDecoration: 'underline', textUnderlineOffset: '2px' }}
               >
                 Close Player
               </button>
@@ -701,13 +704,9 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
           {/* Messages Window */}
           <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '18px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            background: '#F8FAFC'
+            flex: 1, overflowY: 'auto', padding: '24px',
+            display: 'flex', flexDirection: 'column', gap: '20px',
+            background: 'var(--bg-card)'
           }}>
             {messages.map((msg, idx) => (
               <div
@@ -719,54 +718,57 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
               >
                 <div style={{
                   maxWidth: msg.isStudioAction ? '92%' : '82%',
-                  padding: '14px 18px',
-                  borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  background: msg.role === 'user' ? 'var(--classical-color)' : '#FFFFFF',
+                  padding: '18px 22px',
+                  borderRadius: msg.role === 'user' ? 'var(--radius-lg) 12px 12px 12px' : '12px var(--radius-lg) 12px 12px',
+                  background: msg.role === 'user' ? 'var(--brand-primary)' : 'var(--bg-card-solid)',
                   color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
                   border: msg.role === 'assistant' ? '1px solid var(--border-color)' : 'none',
-                  fontSize: '0.875rem',
-                  lineHeight: '1.55',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                  fontSize: '0.9rem',
+                  lineHeight: '1.65',
+                  boxShadow: msg.role === 'user' ? '0 4px 12px rgba(16, 185, 129, 0.15)' : 'var(--shadow-card)'
                 }}>
                   {/* Chain-of-Thought Reasoning Accordion for Assistant */}
                   {msg.role === 'assistant' && msg.reasoning_trace && (
                     <div style={{
-                      background: '#F1F5F9',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '6px',
-                      marginBottom: '12px',
+                      background: 'var(--bg-inset)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      marginBottom: '14px',
                       overflow: 'hidden'
                     }}>
                       <div
                         onClick={() => toggleThought(idx)}
                         style={{
-                          padding: '6px 10px',
+                          padding: '10px 14px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          color: '#475569'
+                          fontSize: '0.78rem',
+                          fontWeight: '600',
+                          color: 'var(--text-secondary)',
+                          transition: 'background 0.2s ease'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-card-solid)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Lightbulb size={13} style={{ color: '#EAB308' }} />
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Lightbulb size={14} style={{ color: '#EAB308' }} />
                           🧠 Deep Chain-of-Thought Reasoning Trace
                         </span>
-                        {expandedThoughts[idx] ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        {expandedThoughts[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </div>
 
                       {expandedThoughts[idx] && (
                         <div style={{
-                          padding: '10px 12px',
-                          borderTop: '1px solid #E2E8F0',
-                          fontSize: '0.78rem',
-                          color: '#334155',
-                          fontFamily: 'monospace',
+                          padding: '14px',
+                          borderTop: '1px solid var(--border-color)',
+                          fontSize: '0.82rem',
+                          color: 'var(--text-secondary)',
+                          fontFamily: 'Consolas, Monaco, monospace',
                           whiteSpace: 'pre-wrap',
-                          background: '#F8FAFC',
-                          lineHeight: '1.4'
+                          background: 'var(--bg-card)',
+                          lineHeight: '1.5'
                         }}>
                           {msg.reasoning_trace}
                         </div>
@@ -779,11 +781,11 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                     dangerouslySetInnerHTML={{
                       __html: msg.role === 'assistant'
                         ? msg.content
-                            .replace(/### (.+)/g, '<h4 style="margin: 12px 0 6px 0; color: var(--text-primary); font-size: 0.98rem; font-weight: 700; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px;">$1</h4>')
-                            .replace(/#### (.+)/g, '<h5 style="margin: 10px 0 4px 0; color: #1E293B; font-size: 0.9rem; font-weight: 600;">$1</h5>')
-                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/### (.+)/g, '<h4 style="margin: 14px 0 8px 0; color: var(--text-primary); font-size: 1rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">$1</h4>')
+                            .replace(/#### (.+)/g, '<h5 style="margin: 12px 0 6px 0; color: var(--text-primary); font-size: 0.92rem; font-weight: 600;">$1</h5>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong style="color: inherit;">$1</strong>')
                             .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                            .replace(/`([^`]+)`/g, '<code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px; color: var(--classical-color); font-size: 0.85em; font-family: monospace;">$1</code>')
+                            .replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; color: var(--classical-color); font-size: 0.85em; font-family: Consolas, monospace;">$1</code>')
                             .replace(/\n- /g, '<br/>• ')
                             .replace(/\n\n/g, '<br/><br/>')
                         : msg.content
@@ -792,17 +794,17 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
                   {/* Citations & Source Badges */}
                   {msg.role === 'assistant' && msg.citations && msg.citations.length > 0 && (
-                    <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #F1F5F9', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Grounded References:</span>
+                    <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: `1px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.2)' : 'var(--border-color)'}`, display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: '600', color: msg.role === 'user' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>Grounded References:</span>
                       {msg.citations.map((c, cIdx) => (
                         <span key={cIdx} style={{
-                          background: 'var(--brand-bg)',
-                          border: '1px solid var(--brand-glow)',
+                          background: msg.role === 'user' ? 'rgba(255,255,255,0.15)' : 'var(--brand-bg)',
+                          border: `1px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.2)' : 'var(--brand-glow)'}`,
                           borderRadius: '12px',
-                          padding: '2px 8px',
-                          fontSize: '0.68rem',
-                          fontWeight: 600,
-                          color: 'var(--brand-primary)'
+                          padding: '3px 10px',
+                          fontSize: '0.7rem',
+                          fontWeight: '600',
+                          color: msg.role === 'user' ? '#FFFFFF' : 'var(--brand-primary)'
                         }}>
                           📌 {c.type}: {c.reference}
                         </span>
@@ -812,15 +814,17 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
                   {/* Metadata Footer */}
                   <div style={{
-                    fontSize: '0.7rem',
-                    color: msg.role === 'user' ? 'rgba(255,255,255,0.8)' : 'var(--text-secondary)',
-                    marginTop: '8px',
+                    fontSize: '0.72rem',
+                    color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-tertiary)',
+                    marginTop: '12px',
                     display: 'flex',
                     justifyContent: msg.role === 'user' ? 'flex-end' : 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px'
                   }}>
                     {msg.metadata && (
-                      <span style={{ color: '#64748B' }}>
+                      <span>
                         {msg.metadata.provider} • {msg.metadata.model}
                       </span>
                     )}
@@ -832,7 +836,13 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
             {loading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <div className="card" style={{ padding: '12px 16px', color: 'var(--classical-color)', fontSize: '0.85rem', fontStyle: 'italic', background: 'var(--bg-card-solid)' }}>
+                <div style={{
+                  padding: '14px 20px', borderRadius: '12px var(--radius-lg) 12px 12px',
+                  background: 'var(--bg-card-solid)', border: '1px solid var(--border-color)',
+                  color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic',
+                  display: 'flex', alignItems: 'center', gap: '10px', boxShadow: 'var(--shadow-card)'
+                }}>
+                  <RefreshCw size={16} className="spinning" style={{ color: 'var(--brand-primary)' }} />
                   Quddos AI is evaluating context artifacts & generating grounded answer...
                 </div>
               </div>
@@ -841,7 +851,10 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
           </div>
 
           {/* Input Box */}
-          <div style={{ padding: '14px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-card-solid)', display: 'flex', gap: '10px' }}>
+          <div style={{
+            padding: '20px 24px', borderTop: '1px solid var(--border-color)',
+            background: 'var(--bg-inset)', display: 'flex', gap: '12px', alignItems: 'flex-end'
+          }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -853,21 +866,29 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
               }}
               placeholder="Ask any research, circuit, or clinical question (e.g., 'Derive ZZFeatureMap statevector equation')..."
               style={{
-                flex: 1,
-                padding: '10px 14px',
-                background: 'var(--bg-card-solid)',
-                border: '1px solid var(--border-color)',
-                fontSize: '0.875rem',
-                outline: 'none'
+                flex: 1, padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none',
+                resize: 'none', transition: 'all 0.2s ease', minHeight: '48px', maxHeight: '120px',
+                fontFamily: 'inherit'
               }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--brand-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--brand-glow)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={loading || !inputText.trim()}
-              className="btn btn-primary"
-              style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{
+                height: '48px', padding: '0 24px', borderRadius: 'var(--radius-md)', border: 'none',
+                background: loading || !inputText.trim() ? 'var(--brand-hover)' : 'var(--brand-primary)',
+                color: '#fff', fontSize: '0.9rem', fontWeight: '600', cursor: loading || !inputText.trim() ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { if (!loading && inputText.trim()) e.currentTarget.style.background = 'var(--brand-hover)'; }}
+              onMouseLeave={(e) => { if (!loading && inputText.trim()) e.currentTarget.style.background = 'var(--brand-primary)'; }}
             >
-              <Send size={15} /> Send
+              <Send size={16} fill="#fff" /> Send
             </button>
           </div>
         </div>
@@ -876,107 +897,81 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
       {/* AI Model & Free API Key Configuration Modal */}
       {showSettingsModal && (
         <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          padding: '20px'
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '24px'
         }}>
-          <div className="card" style={{
-            width: '100%',
-            maxWidth: '580px',
-            background: '#FFFFFF',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-            margin: 0
+          <div style={{
+            width: '100%', maxWidth: '600px', background: 'var(--bg-card)',
+            backdropFilter: 'blur(16px)', borderRadius: 'var(--radius-lg)',
+            padding: '28px', border: '1px solid var(--border-color)',
+            boxShadow: 'var(--shadow-card)', animation: 'stageFadeIn 0.2s ease-out'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Key size={20} style={{ color: 'var(--classical-color)' }} />
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Quddos AI Reasoning Model & Free API Keys</h3>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '700', color: 'var(--text-primary)' }}>Quddos AI Reasoning Model & Free API Keys</h3>
               </div>
               <button
                 onClick={() => setShowSettingsModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px', borderRadius: '6px', display: 'flex', alignItems: 'center', transition: 'all 0.2s ease' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'none'; }}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Provider Selector */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                  Reasoning AI Provider:
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '10px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Reasoning AI Provider
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setAiConfig(prev => ({ ...prev, provider: 'gemini', model: 'gemini-3.6-flash' }))}
-                    style={{
-                      padding: '10px 8px',
-                      borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'gemini' ? 'var(--brand-primary)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'gemini' ? 'var(--brand-bg)' : 'var(--bg-card-solid)',
-                      cursor: 'pointer',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--brand-primary)' }}>✨ Google Gemini</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '2px' }}>1M Ctx • 100% Free</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setAiConfig(prev => ({ ...prev, provider: 'groq', model: 'qwen/qwen3.8-27b' }))}
-                    style={{
-                      padding: '10px 8px',
-                      borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'groq' ? 'var(--hybrid-color)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'groq' ? 'var(--hybrid-bg)' : 'var(--bg-card-solid)',
-                      cursor: 'pointer',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#B45309' }}>⚡ Groq Cloud</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Ultra-Fast • 300 t/s</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setAiConfig(prev => ({ ...prev, provider: 'builtin', model: 'quddos-grounded-reasoning-v2.5' }))}
-                    style={{
-                      padding: '10px 8px',
-                      borderRadius: '8px',
-                      border: `2px solid ${aiConfig.provider === 'builtin' ? 'var(--brand-primary)' : 'var(--border-color)'}`,
-                      background: aiConfig.provider === 'builtin' ? 'var(--brand-bg)' : 'var(--bg-card-solid)',
-                      cursor: 'pointer',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--brand-primary)' }}>🔬 360° Grounded</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Zero Setup • Offline</div>
-                  </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  {[
+                    { id: 'gemini', label: '✨ Google Gemini', sub: '1M Ctx • 100% Free', color: 'var(--brand-primary)', bg: 'var(--brand-bg)' },
+                    { id: 'groq', label: '⚡ Groq Cloud', sub: 'Ultra-Fast • 300 t/s', color: '#B45309', bg: 'rgba(245, 158, 11, 0.12)' },
+                    { id: 'builtin', label: '🔬 360° Grounded', sub: 'Zero Setup • Offline', color: 'var(--text-secondary)', bg: 'var(--bg-inset)' }
+                  ].map((provider) => (
+                    <button
+                      key={provider.id}
+                      type="button"
+                      onClick={() => setAiConfig(prev => ({ ...prev, provider: provider.id, model: provider.id === 'gemini' ? 'gemini-3.6-flash' : provider.id === 'groq' ? 'qwen/qwen3.8-27b' : 'quddos-grounded-reasoning-v2.5' }))}
+                      style={{
+                        padding: '16px 12px', borderRadius: 'var(--radius-md)',
+                        border: aiConfig.provider === provider.id ? `2px solid ${provider.color}` : '1px solid var(--border-color)',
+                        background: aiConfig.provider === provider.id ? provider.bg : 'var(--bg-inset)',
+                        cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => { if (aiConfig.provider !== provider.id) e.currentTarget.style.background = 'var(--bg-card-solid)'; }}
+                      onMouseLeave={(e) => { if (aiConfig.provider !== provider.id) e.currentTarget.style.background = 'var(--bg-inset)'; }}
+                    >
+                      <div style={{ fontWeight: '700', fontSize: '0.85rem', color: provider.color, marginBottom: '4px' }}>{provider.label}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{provider.sub}</div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* Model Choice */}
               {aiConfig.provider === 'gemini' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>
-                    Google Gemini Model:
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '8px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Google Gemini Model
                   </label>
                   <select
                     value={aiConfig.model}
                     onChange={(e) => setAiConfig(prev => ({ ...prev, model: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
+                    style={{
+                      width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none',
+                      transition: 'all 0.2s ease', cursor: 'pointer'
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'var(--brand-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--brand-glow)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                   >
                     <option value="gemini-3.6-flash">Gemini 3.6 Flash (Recommended - Ultra-Fast & Grounded)</option>
                     <option value="gemini-3.5-flash">Gemini 3.5 Flash (High Speed Multimodal)</option>
@@ -988,13 +983,20 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
               {aiConfig.provider === 'groq' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>
-                    Groq Model:
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '8px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Groq Model
                   </label>
                   <select
                     value={aiConfig.model}
                     onChange={(e) => setAiConfig(prev => ({ ...prev, model: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
+                    style={{
+                      width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none',
+                      transition: 'all 0.2s ease', cursor: 'pointer'
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = '#F59E0B'; e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.2)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                   >
                     <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (Recommended - Deep Multimodal & Reasoning)</option>
                     <option value="openai/gpt-oss-120b">OpenAI GPT-OSS 120B (Flagship Deep Reasoning)</option>
@@ -1006,14 +1008,14 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
 
               {/* API Key Input Section */}
               {aiConfig.provider === 'gemini' && (
-                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>Google AI Studio API Key:</label>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-primary)' }}>Google AI Studio API Key:</label>
                     <a
                       href="https://aistudio.google.com/app/apikey"
                       target="_blank"
                       rel="noreferrer"
-                      style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                      style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '600' }}
                     >
                       Get 100% Free Key <ExternalLink size={12} />
                     </a>
@@ -1023,23 +1025,30 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                     value={aiConfig.geminiKey}
                     onChange={(e) => setAiConfig(prev => ({ ...prev, geminiKey: e.target.value }))}
                     placeholder="AIzaSy..."
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
+                    style={{
+                      width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none',
+                      transition: 'all 0.2s ease', boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'var(--brand-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--brand-glow)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                   />
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
                     No credit card required. Free tier includes 15 RPM, 1M TPM, 1,500 RPD.
                   </div>
                 </div>
               )}
 
               {aiConfig.provider === 'groq' && (
-                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>Groq Cloud API Key:</label>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-primary)' }}>Groq Cloud API Key:</label>
                     <a
                       href="https://console.groq.com/keys"
                       target="_blank"
                       rel="noreferrer"
-                      style={{ fontSize: '0.75rem', color: '#B45309', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                      style={{ fontSize: '0.75rem', color: '#B45309', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '600' }}
                     >
                       Get 100% Free Key <ExternalLink size={12} />
                     </a>
@@ -1049,9 +1058,16 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                     value={aiConfig.groqKey}
                     onChange={(e) => setAiConfig(prev => ({ ...prev, groqKey: e.target.value }))}
                     placeholder="gsk_..."
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
+                    style={{
+                      width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none',
+                      transition: 'all 0.2s ease', boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = '#F59E0B'; e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.2)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                   />
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
                     Instant key generation with 30 RPM and 14,400 RPD free tier.
                   </div>
                 </div>
@@ -1060,33 +1076,46 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
               {/* Test Status */}
               {testConnStatus && (
                 <div style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  background: testConnStatus.success ? '#F0FDF4' : '#FEF2F2',
-                  border: `1px solid ${testConnStatus.success ? '#BBF7D0' : '#FECACA'}`,
-                  color: testConnStatus.success ? '#15803D' : '#B91C1C',
-                  fontSize: '0.78rem'
+                  padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                  background: testConnStatus.success ? 'var(--status-success-bg)' : 'var(--status-danger-bg)',
+                  border: `1px solid ${testConnStatus.success ? 'rgba(22, 163, 74, 0.25)' : 'rgba(220, 38, 38, 0.25)'}`,
+                  color: testConnStatus.success ? 'var(--status-success)' : 'var(--status-danger)',
+                  fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '8px'
                 }}>
+                  {testConnStatus.success ? <Check size={16} /> : <AlertCircle size={16} />}
                   {testConnStatus.message}
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
                 <button
                   type="button"
                   onClick={handleTestConnection}
-                  className="btn btn-sm btn-outline"
-                  style={{ fontSize: '0.8rem' }}
+                  style={{
+                    height: '40px', padding: '0 16px', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)', background: 'var(--bg-inset)',
+                    color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-card-solid)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                 >
-                  Test Connection
+                  <RefreshCw size={15} /> Test Connection
                 </button>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
                   <button
                     type="button"
                     onClick={() => setShowSettingsModal(false)}
-                    className="btn btn-sm btn-outline"
-                    style={{ fontSize: '0.8rem' }}
+                    style={{
+                      height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)', background: 'transparent',
+                      color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600',
+                      cursor: 'pointer', transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                   >
                     Cancel
                   </button>
@@ -1096,10 +1125,16 @@ I am your **360-Degree Context-Aware Research Assistant & NotebookLM Studio** fo
                       saveAiConfig(aiConfig);
                       setShowSettingsModal(false);
                     }}
-                    className="btn btn-sm btn-primary"
-                    style={{ fontSize: '0.8rem' }}
+                    style={{
+                      height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)', border: 'none',
+                      background: 'var(--brand-primary)', color: '#fff', fontSize: '0.85rem', fontWeight: '600',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)', transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-primary)'; }}
                   >
-                    Save & Apply
+                    <Check size={15} /> Save & Apply
                   </button>
                 </div>
               </div>

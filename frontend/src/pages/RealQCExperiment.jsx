@@ -1,28 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Cpu,
-  Key,
-  Server,
-  Zap,
-  CheckCircle2,
-  AlertCircle,
-  Play,
-  RotateCcw,
-  Layers,
-  Activity,
-  Code2,
-  ExternalLink,
-  Shield,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  Radio,
-  Eye,
-  EyeOff,
-  Trash2,
-  Share2,
-  Sparkles,
-  Info
+  Cpu, Key, Server, Zap, CheckCircle2, AlertCircle, Play, RotateCcw,
+  Layers, Activity, Code2, ExternalLink, Shield, HelpCircle, ChevronDown,
+  ChevronUp, Eye, EyeOff, Trash2, Sparkles, Info, Database, Settings, BarChart2
 } from 'lucide-react';
 import CardActionMenu from '../components/CardActionMenu';
 import {
@@ -151,7 +131,6 @@ export default function RealQCExperiment() {
     setIsExecuting(true);
     setExecutionError(null);
     setExperimentResult(null);
-
     try {
       const payload = {
         experiment_id: selectedExperiment,
@@ -161,7 +140,6 @@ export default function RealQCExperiment() {
         force_simulation: forceSimulation,
         channel: qcStatus?.active_account?.channel || 'ibm_quantum_platform'
       };
-
       const result = await runRealQCExperiment(payload);
       if (result.status === 'SUCCESS') {
         setExperimentResult(result);
@@ -211,86 +189,89 @@ export default function RealQCExperiment() {
   const currentBackendDetails = backends.find(b => b.name === selectedBackend);
 
   return (
-    <div className="real-qc-page" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="hub-section active" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      
       {/* Top Banner & Header */}
       <div style={{
-        background: 'var(--card-bg)',
-        borderRadius: '12px',
-        padding: '24px',
+        background: 'var(--bg-card)',
+        backdropFilter: 'blur(16px)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '32px',
         border: '1px solid var(--border-color)',
         marginBottom: '24px',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: 'var(--shadow-card)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+        {/* Animated accent bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+          background: 'linear-gradient(90deg, var(--quantum-color), transparent)',
+          animation: 'pulse 2s ease-in-out infinite'
+        }} />
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
+          <div style={{ flex: 1, minWidth: '300px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <div style={{
-                background: 'rgba(99, 102, 241, 0.12)',
-                color: 'var(--primary-color)',
-                padding: '8px',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                width: '48px', height: '48px', borderRadius: '12px',
+                background: 'var(--quantum-bg)', border: '1px solid var(--quantum-glow)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                <Cpu size={24} />
+                <Cpu size={24} style={{ color: 'var(--quantum-color)' }} />
               </div>
-              <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                IBM Quantum Hardware & Runtime Engine
-              </h1>
-              <span className="badge-sih" style={{ fontSize: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)' }}>
-                PHYSICAL QPU INTEGRATION
-              </span>
+              <div>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                  IBM Quantum Hardware & Runtime Engine
+                </h1>
+                <span style={{
+                  display: 'inline-block', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px',
+                  background: 'rgba(13, 148, 136, 0.12)', color: 'var(--quantum-color)',
+                  border: '1px solid rgba(13, 148, 136, 0.25)', borderRadius: '6px', marginTop: '6px'
+                }}>
+                  PHYSICAL QPU INTEGRATION
+                </span>
+              </div>
             </div>
-            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '900px', lineHeight: '1.5' }}>
-              Execute authentic clinical quantum circuits directly on physical superconducting transmon QPUs (Eagle & Heron architectures) via IBM Quantum Runtime or verify gate fidelity with high-precision Qiskit SamplerV2 primitives.
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '800px', lineHeight: '1.6' }}>
+              Execute authentic clinical quantum circuits directly on physical superconducting transmon QPUs (Eagle & Heron architectures) via IBM Quantum Runtime, or verify gate fidelity with high-precision Qiskit SamplerV2 primitives.
             </p>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             <div style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              background: qcStatus?.authenticated ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-              border: `1px solid ${qcStatus?.authenticated ? 'var(--status-success)' : 'var(--status-warning)'}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.85rem',
-              fontWeight: '600',
-              color: qcStatus?.authenticated ? 'var(--status-success)' : 'var(--status-warning)'
+              padding: '8px 14px', borderRadius: '8px',
+              background: qcStatus?.authenticated ? 'var(--status-success-bg)' : 'rgba(245, 158, 11, 0.12)',
+              border: `1px solid ${qcStatus?.authenticated ? 'rgba(22, 163, 74, 0.25)' : 'rgba(245, 158, 11, 0.25)'}`,
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '0.82rem', fontWeight: '600',
+              color: qcStatus?.authenticated ? 'var(--status-success)' : '#F59E0B'
             }}>
               <span style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: qcStatus?.authenticated ? 'var(--status-success)' : 'var(--status-warning)'
+                width: '8px', height: '8px', borderRadius: '50%',
+                backgroundColor: qcStatus?.authenticated ? 'var(--status-success)' : '#F59E0B',
+                boxShadow: qcStatus?.authenticated ? '0 0 8px var(--status-success)' : '0 0 8px #F59E0B'
               }} />
               {qcStatus?.authenticated ? (
-                <span>IBM Runtime: Authenticated ({qcStatus.active_account?.channel})</span>
+                <span>Authenticated ({qcStatus.active_account?.channel})</span>
               ) : (
-                <span>IBM Runtime: Simulation / Unauthenticated</span>
+                <span>Simulation / Unauthenticated</span>
               )}
             </div>
-
             <button
               onClick={() => setShowGuide(!showGuide)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontWeight: '500'
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px',
+                borderRadius: '8px', border: '1px solid var(--border-color)',
+                background: 'var(--bg-inset)', color: 'var(--text-primary)',
+                fontSize: '0.82rem', cursor: 'pointer', fontWeight: '500',
+                transition: 'all 0.2s ease'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-card-solid)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg-inset)'}
             >
               <HelpCircle size={15} />
-              <span>IBM Cloud / IAM Guide</span>
+              <span>Setup Guide</span>
               {showGuide ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
           </div>
@@ -300,157 +281,135 @@ export default function RealQCExperiment() {
       {/* Expandable Step-by-Step Setup Guide */}
       {showGuide && (
         <div style={{
-          background: 'var(--card-bg)',
-          borderRadius: '12px',
-          padding: '24px',
-          border: '1px solid var(--primary-color)',
-          marginBottom: '24px',
-          boxShadow: 'var(--shadow-md)'
+          background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+          borderRadius: 'var(--radius-lg)', padding: '28px',
+          border: '1px solid var(--quantum-glow)', marginBottom: '24px',
+          boxShadow: 'var(--shadow-card)', animation: 'stageFadeIn 0.2s ease-out'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Key size={20} color="var(--primary-color)" />
-              <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Key size={20} style={{ color: 'var(--quantum-color)' }} />
+              <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 600 }}>
                 Step-by-Step IBM Quantum Setup & Credential Acquisition
               </h3>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-inset)', padding: '4px', borderRadius: '8px' }}>
               <button
                 onClick={() => setGuideTab('quantum_platform')}
                 style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: guideTab === 'quantum_platform' ? 'var(--primary-color)' : 'var(--bg-secondary)',
+                  padding: '6px 14px', borderRadius: '6px', border: 'none',
+                  background: guideTab === 'quantum_platform' ? 'var(--quantum-color)' : 'transparent',
                   color: guideTab === 'quantum_platform' ? '#fff' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  fontWeight: '600'
+                  cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                IBM Quantum Platform (Free Open Plan)
+                IBM Quantum Platform
               </button>
               <button
                 onClick={() => setGuideTab('ibm_cloud')}
                 style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: guideTab === 'ibm_cloud' ? 'var(--primary-color)' : 'var(--bg-secondary)',
+                  padding: '6px 14px', borderRadius: '6px', border: 'none',
+                  background: guideTab === 'ibm_cloud' ? 'var(--quantum-color)' : 'transparent',
                   color: guideTab === 'ibm_cloud' ? '#fff' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  fontWeight: '600'
+                  cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                IBM Cloud (IAM API Key & CRN)
+                IBM Cloud (IAM)
               </button>
             </div>
           </div>
-
-          {guideTab === 'quantum_platform' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>1. Create IBM Quantum Account</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
-                  Register for a free IBM Quantum account at the official portal to receive 10 free minutes of physical transmon QPU quantum compute time per month.
-                </p>
-                <a
-                  href="https://quantum.ibm.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}
-                >
-                  Go to quantum.ibm.com <ExternalLink size={13} />
-                </a>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>2. Copy Your API Token</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
-                  On the IBM Quantum dashboard, find the <strong>API token</strong> card. Click <strong>Generate / Copy API token</strong>.
-                </p>
-                <code style={{ fontSize: '0.78rem', background: 'var(--card-bg)', padding: '4px 8px', borderRadius: '4px', display: 'block', color: 'var(--text-primary)' }}>
-                  Format: 64-character hexadecimal string
-                </code>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>3. Save via Python or Form Below</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
-                  Paste into the Credentials Manager below, or save permanently in Python via Qiskit Runtime:
-                </p>
-                <pre style={{ margin: 0, fontSize: '0.75rem', background: 'var(--card-bg)', padding: '8px', borderRadius: '4px', overflowX: 'auto', color: 'var(--text-primary)' }}>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            {guideTab === 'quantum_platform' ? (
+              <>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>1. Create IBM Quantum Account</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+                    Register for a free IBM Quantum account at the official portal to receive 10 free minutes of physical transmon QPU quantum compute time per month.
+                  </p>
+                  <a href="https://quantum.ibm.com/" target="_blank" rel="noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--quantum-color)', textDecoration: 'none', fontWeight: '600' }}>
+                    Go to quantum.ibm.com <ExternalLink size={13} />
+                  </a>
+                </div>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>2. Copy Your API Token</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+                    On the IBM Quantum dashboard, find the <strong>API token</strong> card. Click <strong>Generate / Copy API token</strong>.
+                  </p>
+                  <code style={{ fontSize: '0.78rem', background: 'var(--bg-card-solid)', padding: '6px 10px', borderRadius: '6px', display: 'block', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>
+                    Format: 64-character hexadecimal string
+                  </code>
+                </div>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>3. Save via Python or Form</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+                    Paste into the Credentials Manager below, or save permanently in Python:
+                  </p>
+                  <pre style={{ margin: 0, fontSize: '0.75rem', background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '6px', overflowX: 'auto', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
 {`from qiskit_ibm_runtime import QiskitRuntimeService
 QiskitRuntimeService.save_account(
     channel="ibm_quantum_platform",
     token="<your-api-token>",
-    overwrite=True,
-    set_as_default=True
+    overwrite=True
 )`}
-                </pre>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>1. Create IBM Cloud IAM Key</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
-                  Log in to IBM Cloud console → <strong>Manage</strong> → <strong>Access (IAM)</strong> → <strong>API Keys</strong> → <strong>Create an IBM Cloud API key</strong>.
-                </p>
-                <a
-                  href="https://cloud.ibm.com/iam/apikeys"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}
-                >
-                  Open IBM Cloud IAM API Keys <ExternalLink size={13} />
-                </a>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>2. Retrieve Cloud Resource Name (CRN)</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
-                  Under <strong>Resource List</strong>, find your Qiskit Runtime instance and copy its CRN (starts with <code>crn:v1:bluemix:public:quantum-computing...</code>).
-                </p>
-                <code style={{ fontSize: '0.78rem', background: 'var(--card-bg)', padding: '4px 8px', borderRadius: '4px', display: 'block', color: 'var(--text-primary)' }}>
-                  crn:v1:bluemix:public:quantum-computing:us-east:...
-                </code>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: '600', color: 'var(--primary-color)', marginBottom: '6px' }}>3. Save via Python or Form Below</div>
-                <pre style={{ margin: 0, fontSize: '0.75rem', background: 'var(--card-bg)', padding: '8px', borderRadius: '4px', overflowX: 'auto', color: 'var(--text-primary)' }}>
+                  </pre>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>1. Create IBM Cloud IAM Key</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+                    Log in to IBM Cloud console → <strong>Manage</strong> → <strong>Access (IAM)</strong> → <strong>API Keys</strong> → <strong>Create an IBM Cloud API key</strong>.
+                  </p>
+                  <a href="https://cloud.ibm.com/iam/apikeys" target="_blank" rel="noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--quantum-color)', textDecoration: 'none', fontWeight: '600' }}>
+                    Open IBM Cloud IAM API Keys <ExternalLink size={13} />
+                  </a>
+                </div>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>2. Retrieve Cloud Resource Name (CRN)</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+                    Under <strong>Resource List</strong>, find your Qiskit Runtime instance and copy its CRN.
+                  </p>
+                  <code style={{ fontSize: '0.78rem', background: 'var(--bg-card-solid)', padding: '6px 10px', borderRadius: '6px', display: 'block', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>
+                    crn:v1:bluemix:public:quantum-computing:...
+                  </code>
+                </div>
+                <div style={{ background: 'var(--bg-inset)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--quantum-color)', marginBottom: '8px', fontSize: '0.9rem' }}>3. Save via Python or Form</div>
+                  <pre style={{ margin: 0, fontSize: '0.75rem', background: 'var(--bg-card-solid)', padding: '10px', borderRadius: '6px', overflowX: 'auto', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
 {`from qiskit_ibm_runtime import QiskitRuntimeService
 QiskitRuntimeService.save_account(
     channel="ibm_cloud",
     token="<your-iam-api-key>",
     instance="<your-instance-crn>",
-    overwrite=True,
-    set_as_default=True
+    overwrite=True
 )`}
-                </pre>
-              </div>
-            </div>
-          )}
+                  </pre>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 
       {/* Main Grid: Credentials Manager & Backend Fleet */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px', marginBottom: '24px' }}>
-
+        
         {/* Credentials Manager Card */}
         <div style={{
-          background: 'var(--card-bg)',
-          borderRadius: '12px',
-          padding: '24px',
-          border: '1px solid var(--border-color)',
-          boxShadow: 'var(--shadow-sm)'
+          background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+          borderRadius: 'var(--radius-lg)', padding: '28px',
+          border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Shield size={20} color="var(--primary-color)" />
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Shield size={20} style={{ color: 'var(--quantum-color)' }} />
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                 Qiskit Runtime Credentials
               </h2>
             </div>
@@ -458,16 +417,13 @@ QiskitRuntimeService.save_account(
               <button
                 onClick={handleDeleteCredentials}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--status-danger)',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  fontWeight: '600'
+                  display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+                  border: '1px solid rgba(220, 38, 38, 0.2)', color: 'var(--status-danger)',
+                  fontSize: '0.78rem', cursor: 'pointer', fontWeight: '600', padding: '6px 12px',
+                  borderRadius: '6px', transition: 'all 0.2s ease'
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--status-danger-bg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <Trash2 size={14} /> Remove Saved Account
               </button>
@@ -475,60 +431,34 @@ QiskitRuntimeService.save_account(
           </div>
 
           <form onSubmit={handleSaveCredentials}>
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Channel Type
               </label>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <label style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: `1px solid ${authForm.channel === 'ibm_quantum_platform' ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                  background: authForm.channel === 'ibm_quantum_platform' ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  color: 'var(--text-primary)'
-                }}>
-                  <input
-                    type="radio"
-                    name="channel"
-                    value="ibm_quantum_platform"
-                    checked={authForm.channel === 'ibm_quantum_platform'}
-                    onChange={(e) => setAuthForm(prev => ({ ...prev, channel: e.target.value }))}
-                  />
-                  <span>IBM Quantum Platform (Open Plan)</span>
-                </label>
-                <label style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: `1px solid ${authForm.channel === 'ibm_cloud' ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                  background: authForm.channel === 'ibm_cloud' ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  color: 'var(--text-primary)'
-                }}>
-                  <input
-                    type="radio"
-                    name="channel"
-                    value="ibm_cloud"
-                    checked={authForm.channel === 'ibm_cloud'}
-                    onChange={(e) => setAuthForm(prev => ({ ...prev, channel: e.target.value }))}
-                  />
-                  <span>IBM Cloud (IAM)</span>
-                </label>
+                {['ibm_quantum_platform', 'ibm_cloud'].map((channel) => (
+                  <label key={channel} style={{
+                    flex: 1, display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                    borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: '0.85rem',
+                    border: `1px solid ${authForm.channel === channel ? 'var(--quantum-glow)' : 'var(--border-color)'}`,
+                    background: authForm.channel === channel ? 'var(--quantum-bg)' : 'var(--bg-inset)',
+                    color: authForm.channel === channel ? 'var(--quantum-color)' : 'var(--text-primary)',
+                    transition: 'all 0.2s ease', fontWeight: 500
+                  }}>
+                    <input
+                      type="radio" name="channel" value={channel}
+                      checked={authForm.channel === channel}
+                      onChange={(e) => setAuthForm(prev => ({ ...prev, channel: e.target.value }))}
+                      style={{ accentColor: 'var(--quantum-color)' }}
+                    />
+                    <span>{channel === 'ibm_quantum_platform' ? 'IBM Quantum Platform' : 'IBM Cloud (IAM)'}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {authForm.channel === 'ibm_quantum_platform' ? 'API Token' : 'IBM Cloud IAM API Key'}
               </label>
               <div style={{ position: 'relative' }}>
@@ -538,30 +468,20 @@ QiskitRuntimeService.save_account(
                   value={authForm.token}
                   onChange={(e) => setAuthForm(prev => ({ ...prev, token: e.target.value }))}
                   style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                    boxSizing: 'border-box'
+                    width: '100%', padding: '12px 44px 12px 14px', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box',
+                    transition: 'all 0.2s ease', outline: 'none'
                   }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = 'var(--quantum-color)'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
                 />
                 <button
-                  type="button"
-                  onClick={() => setShowToken(!showToken)}
+                  type="button" onClick={() => setShowToken(!showToken)}
                   style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center'
+                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-tertiary)',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center'
                   }}
                 >
                   {showToken ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -570,83 +490,63 @@ QiskitRuntimeService.save_account(
             </div>
 
             {authForm.channel === 'ibm_cloud' && (
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Cloud Resource Name (CRN) / Instance (Optional)
                 </label>
                 <input
-                  type="text"
-                  placeholder="crn:v1:bluemix:public:quantum-computing:..."
+                  type="text" placeholder="crn:v1:bluemix:public:quantum-computing:..."
                   value={authForm.instance}
                   onChange={(e) => setAuthForm(prev => ({ ...prev, instance: e.target.value }))}
                   style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                    boxSizing: 'border-box'
+                    width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box',
+                    transition: 'all 0.2s ease', outline: 'none'
                   }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = 'var(--quantum-color)'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
                 />
               </div>
             )}
 
             {authFeedback && (
               <div style={{
-                padding: '10px 14px',
-                borderRadius: '8px',
-                marginBottom: '14px',
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: authFeedback.type === 'success' ? 'rgba(34, 197, 94, 0.12)' : (authFeedback.type === 'info' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)'),
+                padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: '16px',
+                fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '10px',
+                background: authFeedback.type === 'success' ? 'var(--status-success-bg)' : (authFeedback.type === 'info' ? 'rgba(16, 185, 129, 0.12)' : 'var(--status-danger-bg)'),
                 color: authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? 'var(--brand-primary)' : 'var(--status-danger)'),
-                border: `1px solid ${authFeedback.type === 'success' ? 'var(--status-success)' : (authFeedback.type === 'info' ? 'var(--brand-primary)' : 'var(--status-danger)')}`
+                border: `1px solid ${authFeedback.type === 'success' ? 'rgba(22, 163, 74, 0.25)' : (authFeedback.type === 'info' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(220, 38, 38, 0.25)')}`
               }}>
                 {authFeedback.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
                 <span>{authFeedback.message}</span>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button
-                type="submit"
-                disabled={savingAuth}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: 'var(--primary-color)',
-                  color: '#fff',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  cursor: savingAuth ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  opacity: savingAuth ? 0.7 : 1
-                }}
-              >
-                <Key size={16} />
-                <span>{savingAuth ? 'Saving to Qiskit Runtime...' : 'Save & Authenticate Qiskit Runtime'}</span>
-              </button>
-            </div>
+            <button
+              type="submit" disabled={savingAuth}
+              style={{
+                width: '100%', padding: '14px 16px', borderRadius: 'var(--radius-md)', border: 'none',
+                background: savingAuth ? 'var(--quantum-color-dim)' : 'var(--quantum-color)',
+                color: '#fff', fontWeight: '600', fontSize: '0.9rem', cursor: savingAuth ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                boxShadow: '0 4px 12px rgba(13, 148, 136, 0.25)', transition: 'all 0.2s ease'
+              }}
+            >
+              {savingAuth ? <RotateCcw className="spinning" size={16} /> : <Key size={16} />}
+              <span>{savingAuth ? 'Saving to Qiskit Runtime...' : 'Save & Authenticate Qiskit Runtime'}</span>
+            </button>
           </form>
 
           {qcStatus?.saved_accounts_count > 0 && (
-            <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span>Active Qiskit Config:</span>
-                <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>~/.qiskit/qiskit-ibm.json</span>
+                <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontFamily: 'monospace' }}>~/.qiskit/qiskit-ibm.json</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Registered Channels:</span>
-                <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                <span style={{ fontWeight: '600', color: 'var(--quantum-color)' }}>
                   {Object.keys(qcStatus.saved_accounts_summary || {}).join(', ') || 'ibm_quantum_platform'}
                 </span>
               </div>
@@ -656,25 +556,24 @@ QiskitRuntimeService.save_account(
 
         {/* Backend Fleet Monitor */}
         <div style={{
-          background: 'var(--card-bg)',
-          borderRadius: '12px',
-          padding: '24px',
-          border: '1px solid var(--border-color)',
-          boxShadow: 'var(--shadow-sm)'
+          background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+          borderRadius: 'var(--radius-lg)', padding: '28px',
+          border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)',
+          display: 'flex', flexDirection: 'column'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Server size={20} color="var(--primary-color)" />
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Server size={20} style={{ color: 'var(--quantum-color)' }} />
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                 IBM QPU Backend Fleet
               </h2>
             </div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', background: 'var(--bg-inset)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
               {backends.length} Systems Available
             </span>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '330px', overflowY: 'auto' }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '380px', overflowY: 'auto', paddingRight: '4px' }}>
             {backends.map((backend) => {
               const isSelected = selectedBackend === backend.name;
               return (
@@ -682,56 +581,54 @@ QiskitRuntimeService.save_account(
                   key={backend.name}
                   onClick={() => setSelectedBackend(backend.name)}
                   style={{
-                    padding: '12px 14px',
-                    borderRadius: '8px',
-                    border: `1.5px solid ${isSelected ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                    background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    padding: '14px 16px', borderRadius: 'var(--radius-md)',
+                    border: `1.5px solid ${isSelected ? 'var(--quantum-glow)' : 'var(--border-color)'}`,
+                    background: isSelected ? 'var(--quantum-bg)' : 'var(--bg-inset)',
+                    cursor: 'pointer', transition: 'all 0.2s ease'
                   }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-card-solid)'; }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-inset)'; }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: backend.status === 'active' ? 'var(--status-success)' : 'var(--status-warning)'
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        backgroundColor: backend.status === 'active' ? 'var(--status-success)' : 'var(--status-warning)',
+                        boxShadow: backend.status === 'active' ? '0 0 6px var(--status-success)' : '0 0 6px var(--status-warning)'
                       }} />
-                      <span style={{ fontWeight: '700', fontSize: '0.92rem', color: isSelected ? 'var(--primary-color)' : 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: '700', fontSize: '0.92rem', color: isSelected ? 'var(--quantum-color)' : 'var(--text-primary)' }}>
                         {backend.name}
                       </span>
                       <span style={{
-                        fontSize: '0.7rem',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        background: backend.simulator ? 'rgba(20, 184, 166, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                        color: backend.simulator ? '#0D9488' : 'var(--primary-color)',
-                        fontWeight: '600'
+                        fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px',
+                        background: backend.simulator ? 'rgba(20, 184, 166, 0.15)' : 'rgba(13, 148, 136, 0.15)',
+                        color: backend.simulator ? '#0D9488' : 'var(--quantum-color)', fontWeight: '600'
                       }}>
-                        {backend.simulator ? 'SIMULATOR' : backend.processor_type}
+                        {backend.simulator ? 'SIMULATOR' : (backend.processor_type || 'QPU')}
                       </span>
                     </div>
-
-                    <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
                       {backend.qubits} Qubits
                     </span>
                   </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                     <div>
                       <span>Queue: </span>
-                      <strong style={{ color: backend.pending_jobs > 15 ? 'var(--status-warning)' : 'var(--text-primary)' }}>
+                      <strong style={{ color: backend.pending_jobs > 15 ? 'var(--status-warning)' : 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
                         {backend.pending_jobs} jobs
                       </strong>
                     </div>
                     <div>
                       <span>Avg T1: </span>
-                      <strong style={{ color: 'var(--text-primary)' }}>{backend.avg_t1_us?.toFixed(1) || '280'} μs</strong>
+                      <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                        {backend.avg_t1_us?.toFixed(1) || '280'} μs
+                      </strong>
                     </div>
                     <div>
-                      <span>2Q Gate Err: </span>
-                      <strong style={{ color: 'var(--text-primary)' }}>{((backend.avg_2q_error || 0.008) * 100).toFixed(2)}%</strong>
+                      <span>2Q Err: </span>
+                      <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                        {((backend.avg_2q_error || 0.008) * 100).toFixed(2)}%
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -743,37 +640,31 @@ QiskitRuntimeService.save_account(
 
       {/* Predefined Medical Experiments & Job Control */}
       <div style={{
-        background: 'var(--card-bg)',
-        borderRadius: '12px',
-        padding: '24px',
-        border: '1px solid var(--border-color)',
-        marginBottom: '24px',
-        boxShadow: 'var(--shadow-sm)'
+        background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+        borderRadius: 'var(--radius-lg)', padding: '32px',
+        border: '1px solid var(--border-color)', marginBottom: '24px',
+        boxShadow: 'var(--shadow-card)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Predefined Medical Quantum Experiments
             </h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-              Select a clinical quantum circuit formulation to transpile and execute on <strong>{selectedBackend}</strong>.
+            <p style={{ margin: '6px 0 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+              Select a clinical quantum circuit formulation to transpile and execute on <strong style={{ color: 'var(--quantum-color)' }}>{selectedBackend}</strong>.
             </p>
           </div>
-
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Dataset Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Cohort:</label>
+          
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cohort Dataset</label>
               <select
                 value={selectedDataset}
                 onChange={(e) => setSelectedDataset(e.target.value)}
                 style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.85rem'
+                  padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                  background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem',
+                  cursor: 'pointer', outline: 'none', minWidth: '180px'
                 }}
               >
                 {datasets.map(ds => (
@@ -781,20 +672,16 @@ QiskitRuntimeService.save_account(
                 ))}
               </select>
             </div>
-
-            {/* Shots Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Shots:</label>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Measurement Shots</label>
               <select
                 value={shots}
                 onChange={(e) => setShots(Number(e.target.value))}
                 style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.85rem'
+                  padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                  background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem',
+                  cursor: 'pointer', outline: 'none', minWidth: '160px'
                 }}
               >
                 <option value={512}>512 shots</option>
@@ -804,20 +691,18 @@ QiskitRuntimeService.save_account(
               </select>
             </div>
 
-            {/* Force Simulation Toggle */}
             <label style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.82rem',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              userSelect: 'none'
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+              borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+              background: forceSimulation ? 'var(--quantum-bg)' : 'var(--bg-inset)',
+              color: forceSimulation ? 'var(--quantum-color)' : 'var(--text-secondary)',
+              cursor: 'pointer', userSelect: 'none', fontSize: '0.85rem', fontWeight: '500',
+              transition: 'all 0.2s ease', marginBottom: '1px'
             }}>
               <input
-                type="checkbox"
-                checked={forceSimulation}
+                type="checkbox" checked={forceSimulation}
                 onChange={(e) => setForceSimulation(e.target.checked)}
+                style={{ accentColor: 'var(--quantum-color)' }}
               />
               <span>High-Precision Local Sim</span>
             </label>
@@ -825,7 +710,7 @@ QiskitRuntimeService.save_account(
         </div>
 
         {/* Experiment Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '28px' }}>
           {experimentsList.map((exp) => {
             const isSelected = selectedExperiment === exp.id;
             return (
@@ -833,43 +718,35 @@ QiskitRuntimeService.save_account(
                 key={exp.id}
                 onClick={() => setSelectedExperiment(exp.id)}
                 style={{
-                  padding: '16px',
-                  borderRadius: '10px',
-                  border: `2px solid ${isSelected ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                  background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-secondary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.15s ease'
+                  padding: '20px', borderRadius: 'var(--radius-md)',
+                  border: `1.5px solid ${isSelected ? 'var(--quantum-glow)' : 'var(--border-color)'}`,
+                  background: isSelected ? 'var(--quantum-bg)' : 'var(--bg-inset)',
+                  cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                  transition: 'all 0.2s ease', minHeight: '160px'
                 }}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-card-solid)'; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-inset)'; }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <span style={{
-                      fontSize: '0.7rem',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      background: 'rgba(99, 102, 241, 0.15)',
-                      color: 'var(--primary-color)',
-                      fontWeight: '700'
+                      fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px',
+                      background: 'rgba(13, 148, 136, 0.15)', color: 'var(--quantum-color)', fontWeight: '700'
                     }}>
                       {exp.category}
                     </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
                       {exp.qubits} Qubits
                     </span>
                   </div>
-
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '0.98rem', fontWeight: '700', color: isSelected ? 'var(--primary-color)' : 'var(--text-primary)' }}>
+                  <h3 style={{ margin: '0 0 8px 0', fontSize: '0.98rem', fontWeight: '700', color: isSelected ? 'var(--quantum-color)' : 'var(--text-primary)', lineHeight: '1.3' }}>
                     {exp.name}
                   </h3>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                     {exp.description}
                   </p>
                 </div>
-
-                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', color: isSelected ? 'var(--primary-color)' : 'transparent' }}>
+                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', color: isSelected ? 'var(--quantum-color)' : 'transparent' }}>
                   <CheckCircle2 size={18} />
                 </div>
               </div>
@@ -879,51 +756,40 @@ QiskitRuntimeService.save_account(
 
         {/* Run Experiment Action Trigger */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px 20px',
-          background: 'var(--bg-secondary)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color)'
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '20px 24px', background: 'var(--bg-inset)',
+          borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+          flexWrap: 'wrap', gap: '16px'
         }}>
           <div>
-            <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>
               Ready to dispatch job to {selectedBackend}
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              {currentExpDetails?.name} • {shots} shots • {selectedDataset.toUpperCase()} cohort
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              {currentExpDetails?.name} • {shots} shots • {datasets.find(d => d.id === selectedDataset)?.name?.toUpperCase() || selectedDataset.toUpperCase()} cohort
             </div>
           </div>
-
           <button
             onClick={handleRunExperiment}
             disabled={isExecuting}
             style={{
-              padding: '12px 24px',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'var(--primary-color)',
-              color: '#fff',
-              fontSize: '0.95rem',
-              fontWeight: '700',
-              cursor: isExecuting ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-              opacity: isExecuting ? 0.7 : 1
+              padding: '0 32px', height: '52px', borderRadius: 'var(--radius-md)', border: 'none',
+              background: isExecuting ? 'var(--quantum-color-dim)' : 'var(--quantum-color)',
+              color: '#fff', fontSize: '0.95rem', fontWeight: '700', cursor: isExecuting ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '10px',
+              boxShadow: '0 4px 16px rgba(13, 148, 136, 0.3)', transition: 'all 0.2s ease',
+              letterSpacing: '-0.01em'
             }}
           >
             {isExecuting ? (
               <>
                 <RotateCcw className="spinning" size={18} />
-                <span>Transpiling & Transmitting to QPU...</span>
+                <span>Transpiling & Transmitting...</span>
               </>
             ) : (
               <>
                 <Play size={18} fill="#fff" />
-                <span>Execute Quantum Job on {selectedBackend}</span>
+                <span>Execute Quantum Job</span>
               </>
             )}
           </button>
@@ -933,72 +799,59 @@ QiskitRuntimeService.save_account(
       {/* Execution Error Alert */}
       {executionError && (
         <div style={{
-          padding: '16px',
-          borderRadius: '10px',
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid var(--status-danger)',
-          color: 'var(--status-danger)',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '12px'
+          padding: '16px 20px', borderRadius: 'var(--radius-md)',
+          background: 'var(--status-danger-bg)', border: '1px solid rgba(220, 38, 38, 0.25)',
+          color: 'var(--status-danger)', marginBottom: '24px',
+          display: 'flex', alignItems: 'flex-start', gap: '12px',
+          animation: 'fadeIn 0.2s ease-out'
         }}>
           <AlertCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
             <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '4px' }}>Quantum Execution Error</div>
-            <div style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>{executionError}</div>
+            <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>{executionError}</div>
           </div>
         </div>
       )}
 
       {/* Experiment Results Section */}
       {experimentResult && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'stageFadeIn 0.3s ease-out' }}>
+          
           {/* Top Results Metrics Bar */}
           <div style={{
-            background: 'var(--card-bg)',
-            borderRadius: '12px',
-            padding: '20px 24px',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow-sm)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px'
+            background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+            borderRadius: 'var(--radius-lg)', padding: '24px 32px',
+            border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{
-                background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(20, 184, 166, 0.15)',
+                background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success-bg)' : 'rgba(20, 184, 166, 0.15)',
                 color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#0D9488',
-                padding: '8px',
-                borderRadius: '8px'
+                padding: '12px', borderRadius: '12px',
+                border: `1px solid ${experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(22, 163, 74, 0.25)' : 'rgba(20, 184, 166, 0.25)'}`
               }}>
-                <Zap size={22} />
+                <Zap size={24} />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                     Job Results: {experimentResult.experiment_name}
                   </span>
                   <span style={{
-                    fontSize: '0.72rem',
-                    fontWeight: '700',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(20, 184, 166, 0.2)',
-                    color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#0D9488'
+                    fontSize: '0.7rem', fontWeight: '700', padding: '3px 10px', borderRadius: '6px',
+                    background: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success-bg)' : 'rgba(20, 184, 166, 0.15)',
+                    color: experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'var(--status-success)' : '#0D9488',
+                    border: `1px solid ${experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'rgba(22, 163, 74, 0.25)' : 'rgba(20, 184, 166, 0.25)'}`
                   }}>
                     {experimentResult.mode === 'REAL_IBM_HARDWARE' ? 'PHYSICAL QPU EXECUTED' : 'QISKIT SAMPLERV2 SIMULATION'}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  Backend: <strong>{experimentResult.backend}</strong> • Job ID: <code>{experimentResult.job_id}</code> • Shots: <strong>{experimentResult.shots}</strong>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>
+                  Backend: <strong style={{ color: 'var(--text-primary)' }}>{experimentResult.backend}</strong> • Job ID: <code style={{ background: 'var(--bg-inset)', padding: '2px 6px', borderRadius: '4px', color: 'var(--quantum-color)' }}>{experimentResult.job_id}</code> • Shots: <strong style={{ color: 'var(--text-primary)' }}>{experimentResult.shots}</strong>
                 </div>
               </div>
             </div>
-
             <CardActionMenu
               title={`Real QC: ${experimentResult.experiment_name} (${experimentResult.backend})`}
               category="quantum_experiment"
@@ -1014,57 +867,49 @@ QiskitRuntimeService.save_account(
 
           {/* Results Grid: Bitstring Histogram & Circuit Diagram */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px' }}>
-
+            
             {/* Measurement Bitstrings & Probabilities */}
             <div style={{
-              background: 'var(--card-bg)',
-              borderRadius: '12px',
-              padding: '24px',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)'
+              background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+              borderRadius: 'var(--radius-lg)', padding: '28px',
+              border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Activity size={18} color="var(--primary-color)" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Activity size={20} style={{ color: 'var(--quantum-color)' }} />
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                    Physical Measurement Distribution (Bitstrings)
+                    Physical Measurement Distribution
                   </h3>
                 </div>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  Total States Sampled: {Object.keys(experimentResult.counts || {}).length}
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+                  Total States: {Object.keys(experimentResult.counts || {}).length}
                 </span>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {Object.entries(experimentResult.probabilities || {}).map(([state, prob]) => {
                   const count = experimentResult.counts?.[state] || 0;
                   const isTopState = state === experimentResult.top_state;
                   const percent = (prob * 100).toFixed(2);
-
                   return (
-                    <div key={state} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: isTopState ? 'var(--primary-color)' : 'var(--text-primary)' }}>
-                          |{state}⟩ {isTopState && <span style={{ fontSize: '0.7rem', color: 'var(--primary-color)' }}>(Dominant Eigenstate)</span>}
+                    <div key={state} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ 
+                          fontFamily: 'monospace', fontWeight: '700', 
+                          color: isTopState ? 'var(--quantum-color)' : 'var(--text-primary)',
+                          fontVariantNumeric: 'tabular-nums'
+                        }}>
+                          |{state}⟩ {isTopState && <span style={{ fontSize: '0.7rem', color: 'var(--quantum-color)', marginLeft: '6px' }}>(Dominant Eigenstate)</span>}
                         </span>
-                        <span style={{ color: 'var(--text-secondary)' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
                           <strong>{count}</strong> shots ({percent}%)
                         </span>
                       </div>
-                      <div style={{
-                        height: '10px',
-                        borderRadius: '5px',
-                        background: 'var(--bg-secondary)',
-                        overflow: 'hidden'
-                      }}>
+                      <div style={{ height: '8px', borderRadius: '4px', background: 'var(--bg-inset)', overflow: 'hidden' }}>
                         <div style={{
-                          height: '100%',
-                          width: `${percent}%`,
-                          borderRadius: '5px',
-                          background: isTopState
-                            ? 'linear-gradient(90deg, var(--primary-color), #818cf8)'
-                            : 'rgba(99, 102, 241, 0.4)',
-                          transition: 'width 0.5s ease'
+                          height: '100%', width: `${percent}%`, borderRadius: '4px',
+                          background: isTopState ? 'linear-gradient(90deg, var(--quantum-color), #2DD4BF)' : 'rgba(13, 148, 136, 0.4)',
+                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
                         }} />
                       </div>
                     </div>
@@ -1075,90 +920,64 @@ QiskitRuntimeService.save_account(
               {/* Quantum Diagnostics Summary */}
               {experimentResult.quantum_diagnostics && (
                 <div style={{
-                  marginTop: '20px',
-                  paddingTop: '16px',
-                  borderTop: '1px solid var(--border-color)',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                  gap: '12px'
+                  marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)',
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px'
                 }}>
-                  <div style={{ background: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Shannon Entropy</div>
-                    <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                      {experimentResult.quantum_diagnostics.shannon_entropy_bits} bits
+                  {[
+                    { label: 'Shannon Entropy', value: `${experimentResult.quantum_diagnostics.shannon_entropy_bits} bits`, color: 'var(--text-primary)' },
+                    { label: 'Dominant State Prob', value: `${(experimentResult.quantum_diagnostics.dominant_state_probability * 100).toFixed(1)}%`, color: 'var(--quantum-color)' },
+                    { label: 'Circuit Depth', value: `${experimentResult.circuit_depth} gates`, color: 'var(--text-primary)' }
+                  ].map((item, i) => (
+                    <div key={i} style={{ background: 'var(--bg-inset)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>{item.label}</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: '700', color: item.color, fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
                     </div>
-                  </div>
-                  <div style={{ background: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Dominant State Prob</div>
-                    <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary-color)' }}>
-                      {(experimentResult.quantum_diagnostics.dominant_state_probability * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div style={{ background: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Circuit Depth</div>
-                    <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                      {experimentResult.circuit_depth} gates
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
 
             {/* Circuit Schematic & Execution Diagnostics */}
             <div style={{
-              background: 'var(--card-bg)',
-              borderRadius: '12px',
-              padding: '24px',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)'
+              background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+              borderRadius: 'var(--radius-lg)', padding: '28px',
+              border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Code2 size={18} color="var(--primary-color)" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Code2 size={20} style={{ color: 'var(--quantum-color)' }} />
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                     Transpiled Qiskit Circuit Diagram
                   </h3>
                 </div>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
                   {experimentResult.num_qubits} Qubits • {experimentResult.circuit_depth} Depth
                 </span>
               </div>
-
+              
               <pre style={{
-                background: 'var(--bg-secondary)',
-                padding: '16px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-                fontFamily: 'monospace',
-                fontSize: '0.78rem',
-                overflowX: 'auto',
-                lineHeight: '1.4',
-                maxHeight: '260px'
+                background: '#0F172A', padding: '20px', borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(20, 184, 166, 0.3)', color: '#5EEAD4',
+                fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.78rem',
+                overflowX: 'auto', lineHeight: '1.5', maxHeight: '280px', margin: 0
               }}>
                 {experimentResult.circuit_ascii || '// Circuit representation available'}
               </pre>
 
               {/* Gate Count Breakdown */}
               {experimentResult.gate_counts && (
-                <div style={{ marginTop: '16px' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                <div style={{ marginTop: '20px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-tertiary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     Physical Gate Decomposition:
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {Object.entries(experimentResult.gate_counts).map(([gate, count]) => (
-                      <span
-                        key={gate}
-                        style={{
-                          fontSize: '0.75rem',
-                          background: 'var(--bg-secondary)',
-                          border: '1px solid var(--border-color)',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          color: 'var(--text-primary)'
-                        }}
-                      >
-                        <strong>{gate.toUpperCase()}</strong>: {count}
+                      <span key={gate} style={{
+                        fontSize: '0.78rem', background: 'var(--bg-inset)', border: '1px solid var(--border-color)',
+                        padding: '6px 12px', borderRadius: '6px', color: 'var(--text-primary)', fontWeight: 500,
+                        fontVariantNumeric: 'tabular-nums'
+                      }}>
+                        <strong style={{ color: 'var(--quantum-color)' }}>{gate.toUpperCase()}</strong>: {count}
                       </span>
                     ))}
                   </div>
@@ -1169,15 +988,13 @@ QiskitRuntimeService.save_account(
 
           {/* Clinical Interpretation & Quantum Meaning Card */}
           <div style={{
-            background: 'var(--card-bg)',
-            borderRadius: '12px',
-            padding: '24px',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow-sm)'
+            background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+            borderRadius: 'var(--radius-lg)', padding: '28px',
+            border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={20} color="var(--primary-color)" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Sparkles size={20} style={{ color: 'var(--quantum-color)' }} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                   Clinical & Quantum Diagnostic Synthesis
                 </h3>
@@ -1192,11 +1009,15 @@ QiskitRuntimeService.save_account(
                 }}
               />
             </div>
-
-            <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
+            <div style={{
+              padding: '20px', background: 'rgba(13, 148, 136, 0.08)',
+              border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: 'var(--radius-md)',
+              fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: '1.7'
+            }}>
               {experimentResult.clinical_interpretation}
-            </p>
+            </div>
           </div>
+
         </div>
       )}
     </div>

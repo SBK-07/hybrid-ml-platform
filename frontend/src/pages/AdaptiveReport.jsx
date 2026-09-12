@@ -406,25 +406,32 @@ export default function AdaptiveReport() {
   };
 
   return (
-    <div className="hub-section active">
-      <div className="section-header">
-        <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FileText size={24} style={{ color: 'var(--classical-color)' }} />
-            Adaptive Report Builder
-          </h1>
-          <p className="subtitle">
-            Customizable publication-ready clinical diagnostic synthesizer. Dynamically annotate live findings, reorder analytical sections, and export reports in PDF and Markdown formats.
-          </p>
-        </div>
+    <div className="hub-section active" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      
+      {/* Section Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <FileText size={26} style={{ color: 'var(--classical-color)' }} />
+          Adaptive Report Builder
+        </h1>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '800px', lineHeight: '1.6' }}>
+          Customizable publication-ready clinical diagnostic synthesizer. Dynamically annotate live findings, reorder analytical sections, and export reports in PDF and Markdown formats.
+        </p>
       </div>
 
-      {/* Top Action Header Bar: Preview and Export Buttons Grouped Right */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', margin: '0 0 20px 0', flexWrap: 'wrap' }}>
+      {/* Top Action Header Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', margin: '0 0 24px 0', flexWrap: 'wrap' }}>
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="btn btn-outline"
-          style={{ padding: '9px 16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', fontWeight: 600 }}
+          style={{
+            height: '44px', padding: '0 16px', borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-color)', background: showPreview ? 'var(--classical-bg)' : 'transparent',
+            color: showPreview ? 'var(--classical-color)' : 'var(--text-secondary)',
+            fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => { if (!showPreview) e.currentTarget.style.background = 'var(--bg-inset)'; }}
+          onMouseLeave={(e) => { if (!showPreview) e.currentTarget.style.background = 'transparent'; }}
         >
           {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
           {showPreview ? 'Hide Preview' : 'Preview Compiled Report'}
@@ -432,16 +439,28 @@ export default function AdaptiveReport() {
 
         <button
           onClick={handleDownloadMarkdown}
-          className="btn btn-outline"
-          style={{ padding: '9px 16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', fontWeight: 600, borderColor: 'var(--classical-color)', color: 'var(--classical-color)' }}
+          style={{
+            height: '44px', padding: '0 16px', borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--classical-color)', background: 'transparent',
+            color: 'var(--classical-color)', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--classical-bg)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
           <Download size={16} /> Export Markdown (.md)
         </button>
 
         <button
           onClick={handleExportPDF}
-          className="btn btn-primary"
-          style={{ padding: '9px 20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', fontWeight: 600 }}
+          style={{
+            height: '44px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none',
+            background: 'var(--classical-color)', color: '#fff', fontSize: '0.85rem', fontWeight: '600',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)', transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-hover)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--classical-color)'; }}
         >
           <Printer size={16} /> Export PDF Report
         </button>
@@ -449,73 +468,86 @@ export default function AdaptiveReport() {
 
       {/* Collapsible Preview Panel */}
       {showPreview && (
-        <div className="card" style={{
-          marginBottom: '24px',
-          border: '2px solid var(--classical-color)',
-          background: 'var(--bg-inset)',
-          padding: '24px'
+        <div style={{
+          background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+          borderRadius: 'var(--radius-lg)', padding: '24px',
+          border: '1px solid var(--classical-glow)', marginBottom: '24px',
+          boxShadow: 'var(--shadow-card)', animation: 'stageFadeIn 0.2s ease-out'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600 }}>
+            <h3 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: '600' }}>
               <Eye size={18} style={{ color: 'var(--classical-color)' }} /> Compiled Report Markdown Preview
             </h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', background: 'var(--bg-card-solid)', padding: '4px 10px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <span style={{
+              fontSize: '0.72rem', color: 'var(--text-tertiary)', background: 'var(--bg-inset)',
+              padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
+              fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px'
+            }}>
               Live Structured Text Output
             </span>
           </div>
 
           <div style={{
-            fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
-            fontSize: '0.85rem',
-            lineHeight: '1.6',
-            whiteSpace: 'pre-wrap',
-            background: 'var(--bg-card-solid)',
-            padding: '18px',
-            borderRadius: '6px',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            maxHeight: '450px',
-            overflowY: 'auto'
+            fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.82rem', lineHeight: '1.6',
+            whiteSpace: 'pre-wrap', background: '#0F172A', padding: '20px',
+            borderRadius: 'var(--radius-md)', border: '1px solid rgba(20, 184, 166, 0.2)',
+            color: '#E2E8F0', maxHeight: '450px', overflowY: 'auto'
           }}>
             {generateMarkdownString()}
           </div>
         </div>
       )}
 
-      {/* Report Title & Metadata Card Container */}
-      <div className="card" style={{ marginBottom: '20px' }}>
-        <label style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontSize: '0.875rem' }}>
-          <FileText size={16} style={{ color: 'var(--classical-color)' }} /> Report Title (Live Editable):
+      {/* Report Title & Metadata Card */}
+      <div style={{
+        background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+        borderRadius: 'var(--radius-lg)', padding: '24px',
+        border: '1px solid var(--border-color)', marginBottom: '24px',
+        boxShadow: 'var(--shadow-card)'
+      }}>
+        <label style={{
+          fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)',
+          textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex',
+          alignItems: 'center', gap: '8px', marginBottom: '10px'
+        }}>
+          <FileText size={16} style={{ color: 'var(--classical-color)' }} /> Report Title (Live Editable)
         </label>
         <input
           type="text"
           value={reportTitle}
           onChange={(e) => setReportTitle(e.target.value)}
           style={{
-            width: '100%',
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            padding: '10px 14px',
-            background: 'var(--bg-card-solid)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            color: 'var(--text-primary)',
-            outline: 'none',
-            transition: 'border-color 0.15s ease'
+            width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+            color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: '600',
+            outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box'
           }}
-          onFocus={(e) => e.target.style.borderColor = 'var(--classical-color)'}
-          onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
+          onFocus={(e) => { e.target.style.borderColor = 'var(--classical-color)'; e.target.style.boxShadow = '0 0 0 3px var(--classical-glow)'; }}
+          onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
         />
       </div>
 
       {/* Append Custom Section Form */}
-      <div className="card" style={{ marginBottom: '24px', border: '1px dashed var(--border-color)' }}>
-        <h4 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '0.95rem', fontWeight: 600 }}>
+      <div style={{
+        background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+        borderRadius: 'var(--radius-lg)', padding: '24px',
+        border: '1px dashed var(--border-color)', marginBottom: '24px',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--classical-color)'}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+      >
+        <h4 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', fontSize: '0.95rem', fontWeight: '600' }}>
           <Plus size={16} style={{ color: 'var(--classical-color)' }} /> Append Custom Report Section
         </h4>
         <form onSubmit={handleAddItem}>
-          <div className="form-group" style={{ marginBottom: '14px' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Section Title:</label>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)',
+              textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px'
+            }}>
+              Section Title
+            </label>
             <input
               type="text"
               placeholder="e.g., Clinical Recommendation / Secondary Biomarker Analysis"
@@ -523,46 +555,64 @@ export default function AdaptiveReport() {
               onChange={(e) => setNewItemTitle(e.target.value)}
               required
               style={{
-                width: '100%',
-                padding: '8px 12px',
-                background: 'var(--bg-card-solid)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                color: 'var(--text-primary)',
-                outline: 'none'
+                width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none',
+                transition: 'all 0.2s ease', boxSizing: 'border-box'
               }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--classical-color)'; e.target.style.boxShadow = '0 0 0 3px var(--classical-glow)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
-          <div className="form-group" style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Content / Observations:</label>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{
+              fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)',
+              textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px'
+            }}>
+              Content / Observations
+            </label>
             <textarea
               rows={3}
               placeholder="Enter custom findings, clinical notes, statistical data, or annotations..."
               value={newItemText}
               onChange={(e) => setNewItemText(e.target.value)}
               style={{
-                width: '100%',
-                padding: '8px 12px',
-                background: 'var(--bg-card-solid)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                color: 'var(--text-primary)',
-                fontFamily: 'inherit',
-                outline: 'none'
+                width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                color: 'var(--text-primary)', fontSize: '0.88rem', fontFamily: 'inherit',
+                outline: 'none', resize: 'vertical', transition: 'all 0.2s ease', boxSizing: 'border-box'
               }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--classical-color)'; e.target.style.boxShadow = '0 0 0 3px var(--classical-glow)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
-          <button type="submit" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            type="submit"
+            style={{
+              height: '44px', padding: '0 20px', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--classical-color)', background: 'var(--classical-bg)',
+              color: 'var(--classical-color)', fontSize: '0.88rem', fontWeight: '600',
+              cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--classical-color)'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--classical-bg)'; e.currentTarget.style.color = 'var(--classical-color)'; }}
+          >
             <Plus size={16} /> Append Section to Report
           </button>
         </form>
       </div>
 
-      {/* Report Items List */}
-      <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem' }}>
+      {/* Report Items List Header */}
+      <h3 style={{
+        color: 'var(--text-primary)', margin: '0 0 16px 0',
+        display: 'flex', alignItems: 'center', gap: '8px',
+        fontSize: '1.1rem', fontWeight: '700'
+      }}>
         <FileText size={18} style={{ color: 'var(--classical-color)' }} /> Live Report Sections ({reportItems.length} Blocks)
       </h3>
 
+      {/* Report Items List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {reportItems.map((item, idx) => {
           const duplicateOf = getDuplicateInfo(item, idx, reportItems);
@@ -571,39 +621,59 @@ export default function AdaptiveReport() {
           return (
             <div
               key={item.id}
-              className="card"
               style={{
                 position: 'relative',
-                borderLeft: item.isPinned ? '4px solid var(--classical-color)' : (isProv ? '4px solid #ffc107' : undefined),
-                background: item.isPinned ? 'var(--bg-inset)' : undefined
+                background: item.isPinned ? 'var(--classical-bg)' : (isProv ? 'rgba(245, 158, 11, 0.05)' : 'var(--bg-card)'),
+                backdropFilter: 'blur(16px)',
+                borderRadius: 'var(--radius-lg)', padding: '24px',
+                border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)',
+                borderLeft: item.isPinned ? '4px solid var(--classical-color)' : (isProv ? '4px solid #F59E0B' : '1px solid var(--border-color)'),
+                transition: 'all 0.2s ease'
               }}
             >
-              {/* Action Buttons Top Right: Move Up, Move Down, Delete */}
+              {/* Action Buttons Top Right */}
               <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => moveUp(idx)}
                   disabled={idx === 0}
-                  className="btn btn-sm btn-outline"
-                  style={{ padding: '4px 8px', opacity: idx === 0 ? 0.4 : 1, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                    background: 'var(--bg-inset)', color: idx === 0 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                    cursor: idx === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { if (idx !== 0) { e.currentTarget.style.background = 'var(--bg-card-solid)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
+                  onMouseLeave={(e) => { if (idx !== 0) { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
                   title="Move section up"
                 >
-                  <ChevronUp size={14} />
+                  <ChevronUp size={16} />
                 </button>
 
                 <button
                   onClick={() => moveDown(idx)}
                   disabled={idx === reportItems.length - 1}
-                  className="btn btn-sm btn-outline"
-                  style={{ padding: '4px 8px', opacity: idx === reportItems.length - 1 ? 0.4 : 1, cursor: idx === reportItems.length - 1 ? 'not-allowed' : 'pointer' }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                    background: 'var(--bg-inset)', color: idx === reportItems.length - 1 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                    cursor: idx === reportItems.length - 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { if (idx !== reportItems.length - 1) { e.currentTarget.style.background = 'var(--bg-card-solid)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
+                  onMouseLeave={(e) => { if (idx !== reportItems.length - 1) { e.currentTarget.style.background = 'var(--bg-inset)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
                   title="Move section down"
                 >
-                  <ChevronDown size={14} />
+                  <ChevronDown size={16} />
                 </button>
 
                 <button
                   onClick={() => handleRemoveItem(item.id)}
-                  className="btn btn-sm btn-outline-danger"
-                  style={{ padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{
+                    height: '32px', padding: '0 12px', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)',
+                    background: 'transparent', color: 'var(--status-danger)', fontSize: '0.78rem', fontWeight: '600',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--status-danger-bg)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   title="Remove section"
                 >
                   <Trash2 size={14} /> Remove
@@ -611,54 +681,61 @@ export default function AdaptiveReport() {
               </div>
 
               {/* Title & Badges */}
-              <div style={{ paddingRight: '180px', marginBottom: '12px' }}>
-                <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <span>{idx + 1}. {item.title}</span>
+              <div style={{ paddingRight: '160px', marginBottom: '16px' }}>
+                <h4 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', margin: 0, fontWeight: '700', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ color: 'var(--classical-color)' }}>{idx + 1}.</span> {item.title}
 
                   {item.isPinned && (
-                    <span style={{ background: 'var(--classical-color)', color: '#fff', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{
+                      fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px',
+                      background: 'var(--classical-bg)', color: 'var(--classical-color)',
+                      border: '1px solid var(--classical-glow)', fontWeight: '700',
+                      display: 'inline-flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase', letterSpacing: '0.5px'
+                    }}>
                       <Pin size={12} /> Pinned Executive Summary
                     </span>
                   )}
 
                   {duplicateOf && (
-                    <span style={{ fontSize: '0.75rem', background: '#fff3cd', color: '#856404', padding: '2px 8px', borderRadius: '4px', border: '1px solid #ffeeba', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <AlertTriangle size={12} /> Possible duplicate of Section {duplicateOf}
+                    <span style={{
+                      fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px',
+                      background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B',
+                      border: '1px solid rgba(245, 158, 11, 0.25)', fontWeight: '600',
+                      display: 'inline-flex', alignItems: 'center', gap: '4px'
+                    }}>
+                      <AlertTriangle size={12} /> Duplicate of Section {duplicateOf}
                     </span>
                   )}
                 </h4>
               </div>
 
               {/* Section Body */}
-              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '0.875rem', margin: '8px 0', whiteSpace: 'pre-wrap' }}>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', fontSize: '0.9rem', margin: '0 0 16px 0', whiteSpace: 'pre-wrap' }}>
                 {item.content}
               </p>
 
               {/* Provenance Footnote Banner */}
               {isProv && (
                 <div style={{
-                  marginTop: '12px',
-                  padding: '8px 12px',
-                  background: 'rgba(255, 193, 7, 0.1)',
-                  borderLeft: '3px solid #ffc107',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  marginTop: '16px', padding: '14px 16px',
+                  background: 'var(--banner-warn-bg)', border: '1px solid var(--banner-warn-border)',
+                  borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: 'var(--banner-warn-text)',
+                  display: 'flex', alignItems: 'flex-start', gap: '10px'
                 }}>
-                  <AlertTriangle size={15} style={{ color: '#ffc107', flexShrink: 0 }} />
+                  <AlertTriangle size={16} style={{ color: 'var(--banner-warn-text)', flexShrink: 0, marginTop: '2px' }} />
                   <span>
                     <strong>Provenance Footnote:</strong> Quantum model metrics in this section are derived from documented 4-qubit Hilbert space simulation baselines, not from a fresh hardware execution run.
                   </span>
                 </div>
               )}
 
-              {/* Note taking field (Resizable Textarea) */}
-              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
-                  Section Annotations:
+              {/* Note taking field */}
+              <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                <label style={{
+                  fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-tertiary)',
+                  textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px'
+                }}>
+                  Section Annotations
                 </label>
                 <textarea
                   rows={2}
@@ -666,17 +743,13 @@ export default function AdaptiveReport() {
                   value={item.notes || ''}
                   onChange={(e) => handleNoteChange(item.id, e.target.value)}
                   style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    background: 'var(--bg-card-solid)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '6px',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.85rem',
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    resize: 'vertical'
+                    width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'inherit',
+                    outline: 'none', resize: 'vertical', transition: 'all 0.2s ease', boxSizing: 'border-box'
                   }}
+                  onFocus={(e) => { e.target.style.borderColor = 'var(--classical-color)'; e.target.style.boxShadow = '0 0 0 3px var(--classical-glow)'; }}
+                  onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
             </div>
