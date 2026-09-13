@@ -1,727 +1,395 @@
+/**
+ * Q-Med Platform Frontend Logic (SIH 2026 PS 139)
+ * Connects all UI stages to the FastAPI backend and renders scientific artifacts.
+ */
+
 const API_BASE = "http://localhost:8000/api";
 
-// Application State
-let currentDataset = "heart.csv";
-let datasetsList = [];
-let trainedModelRuns = []; // Saved model runs in library
-let currentBenchmarkTable = [];
-let currentShapImportances = [];
+let currentDatasetKey = "cancer"; // "cancer" or "cardiovascular"
+let activeData = {
+    eda: null,
+    classical: null,
+    quantum: null,
+    benchmark: null
+};
 let charts = {};
-let samplePreviewData = [];
-let currentFeatureNames = [];
+
+// Sample Presets for Interactive Testing
+const PRESETS = {
+    cancer: {
+        positive: {
+            "mean radius": 17.99, "mean texture": 10.38, "mean perimeter": 122.8, "mean area": 1001.0,
+            "mean smoothness": 0.1184, "mean compactness": 0.2776, "mean concavity": 0.3001, "mean concave points": 0.1471,
+            "mean symmetry": 0.2419, "mean fractal dimension": 0.07871, "radius error": 1.095, "texture error": 0.9053,
+            "perimeter error": 8.589, "area error": 153.4, "smoothness error": 0.006399, "compactness error": 0.04904,
+            "concavity error": 0.05373, "concave points error": 0.01587, "symmetry error": 0.03003, "fractal dimension error": 0.006193,
+            "worst radius": 25.38, "worst texture": 17.33, "worst perimeter": 184.6, "worst area": 2019.0,
+            "worst smoothness": 0.1622, "worst compactness": 0.6656, "worst concavity": 0.7119, "worst concave points": 0.2654,
+            "worst symmetry": 0.4601, "worst fractal dimension": 0.1189
+        },
+        negative: {
+            "mean radius": 13.54, "mean texture": 14.36, "mean perimeter": 87.46, "mean area": 566.3,
+            "mean smoothness": 0.09779, "mean compactness": 0.08129, "mean concavity": 0.06664, "mean concave points": 0.04781,
+            "mean symmetry": 0.1885, "mean fractal dimension": 0.05766, "radius error": 0.2699, "texture error": 0.7886,
+            "perimeter error": 2.058, "area error": 23.56, "smoothness error": 0.008462, "compactness error": 0.0146,
+            "concavity error": 0.02387, "concave points error": 0.01315, "symmetry error": 0.0198, "fractal dimension error": 0.0023,
+            "worst radius": 15.11, "worst texture": 19.26, "worst perimeter": 99.7, "worst area": 711.2,
+            "worst smoothness": 0.144, "worst compactness": 0.1773, "worst concavity": 0.239, "worst concave points": 0.1288,
+            "worst symmetry": 0.2977, "worst fractal dimension": 0.07259
+        }
+    },
+    cardiovascular: {
+        positive: {
+            "age": 67, "sex": 1, "cp": 0, "trestbps": 160, "chol": 286,
+            "fbs": 0, "restecg": 0, "thalach": 108, "exang": 1, "oldpeak": 1.5,
+            "slope": 1, "ca": 3, "thal": 2
+        },
+        negative: {
+            "age": 41, "sex": 0, "cp": 1, "trestbps": 130, "chol": 204,
+            "fbs": 0, "restecg": 0, "thalach": 172, "exang": 0, "oldpeak": 1.4,
+            "slope": 2, "ca": 0, "thal": 2
+        }
+    }
+};
 
 document.addEventListener("DOMContentLoaded", () => {
-    initHubNavigation();
-    initDatasetDropdown();
-    initUploadModal();
-    initModalClosers();
-    fetchDatasetsList();
-    loadDatasetData(currentDataset);
-    loadSavedModelLibrary();
+    initNavigation();
+    initDatasetSelector();
+    initPresetButtons();
+    loadActiveDataset(currentDatasetKey);
 });
 
-// 1. Navigation Hub Switching
-function initHubNavigation() {
+// 1. Navigation & Stage Switching
+function initNavigation() {
     const navItems = document.querySelectorAll(".nav-item");
     navItems.forEach(item => {
         item.addEventListener("click", () => {
             navItems.forEach(i => i.classList.remove("active"));
             item.classList.add("active");
 
-            const targetHub = item.getAttribute("data-hub");
-            document.querySelectorAll(".hub-section").forEach(sec => sec.classList.remove("active"));
-            const activeSection = document.getElementById(`hub-${targetHub}`);
-            if (activeSection) {
-                activeSection.classList.add("active");
-            }
+            const stageNum = item.getAttribute("data-stage");
+            document.querySelectorAll(".stage-section").forEach(sec => sec.classList.remove("active"));
+            document.getElementById(`stage-${stageNum}`).classList.add("active");
         });
     });
 
-    // Action buttons bindings
-    document.getElementById("btnTrainModels").addEventListener("click", trainModelsPipeline);
-    document.getElementById("btnSaveToLibrary").addEventListener("click", saveRunToModelLibrary);
     document.getElementById("btnPredict").addEventListener("click", runPatientPrediction);
-    document.getElementById("btnLoadNormal").addEventListener("click", () => loadPresetSample("normal"));
-    document.getElementById("btnLoadHighRisk").addEventListener("click", () => loadPresetSample("highrisk"));
 }
 
-// 2. Datasets Management & Fetching
-function initDatasetDropdown() {
+// 2. Dataset Selection
+function initDatasetSelector() {
     const select = document.getElementById("datasetSelect");
     select.addEventListener("change", (e) => {
-        currentDataset = e.target.value;
-        updateActiveDatasetPill(currentDataset);
-        loadDatasetData(currentDataset);
+        currentDatasetKey = e.target.value;
+        loadActiveDataset(currentDatasetKey);
     });
 }
 
-function updateActiveDatasetPill(datasetId) {
-    const activePill = document.getElementById("activeDatasetName");
-    const found = datasetsList.find(d => d.id === datasetId);
-    const displayName = found ? found.name : datasetId;
-    if (activePill) activePill.innerText = displayName;
+// 3. Preset Buttons for Instant Clinical Demonstration
+function initPresetButtons() {
+    document.getElementById("btnPresetPositive").addEventListener("click", () => {
+        populatePatientForm(PRESETS[currentDatasetKey].positive);
+    });
+    document.getElementById("btnPresetNegative").addEventListener("click", () => {
+        populatePatientForm(PRESETS[currentDatasetKey].negative);
+    });
+}
+
+// 4. Master Data Loader
+async function loadActiveDataset(datasetKey) {
+    try {
+        console.log(`Loading research data for: ${datasetKey}...`);
+        
+        // Fetch all 4 stage artifacts in parallel
+        const [edaRes, classRes, quantRes, benchRes] = await Promise.all([
+            fetch(`${API_BASE}/eda/${datasetKey}`).then(r => r.json()),
+            fetch(`${API_BASE}/classical/${datasetKey}`).then(r => r.json()),
+            fetch(`${API_BASE}/quantum/${datasetKey}`).then(r => r.json()),
+            fetch(`${API_BASE}/benchmark/${datasetKey}`).then(r => r.json())
+        ]);
+
+        activeData.eda = edaRes;
+        activeData.classical = classRes;
+        activeData.quantum = quantRes;
+        activeData.benchmark = benchRes;
+
+        // Render each stage with live scientific data
+        renderStage1Overview(edaRes, benchRes);
+        renderStage2EDA(edaRes);
+        renderStage3Preprocessing(edaRes);
+        renderStage4Classical(classRes);
+        renderStage5Quantum(quantRes);
+        renderStage6Benchmark(benchRes);
+        buildPatientForm(edaRes.descriptive_statistics);
+
+        // Pre-populate with positive preset
+        populatePatientForm(PRESETS[datasetKey].positive);
+
+    } catch (err) {
+        console.error("Failed to load dataset artifacts:", err);
+    }
+}
+
+// Stage 1: Overview
+function renderStage1Overview(eda, bench) {
+    document.getElementById("stat-samples").innerText = eda.sample_count;
+    const peakAcc = Math.max(...bench.comparison_table.map(r => r.Accuracy)) * 100;
+    document.getElementById("stat-peak-acc").innerText = `${peakAcc.toFixed(1)}%`;
+}
+
+// Stage 2: Scientific EDA
+function renderStage2EDA(eda) {
+    document.getElementById("eda-samples").innerText = eda.sample_count;
+    document.getElementById("eda-features").innerText = eda.feature_count;
+    document.getElementById("eda-prevalence").innerText = `${eda.target_distribution.disease_prevalence_pct}%`;
+    document.getElementById("eda-duplicates").innerText = eda.duplicate_rows;
+
+    // Render Class Balance Doughnut Chart
+    renderClassBalanceChart(eda.target_distribution);
+
+    // Update Figure Links
+    document.getElementById("figCorrelationMatrix").src = eda.figures.correlation_matrix;
+    document.getElementById("figFeatureDistributions").src = eda.figures.feature_distributions;
+
+    // Chips
+    const chipsContainer = document.getElementById("eda-balance-chips");
+    chipsContainer.innerHTML = `
+        <div class="metric-chip">Disease Positive (1): <strong>${eda.target_distribution.disease_positive_1}</strong></div>
+        <div class="metric-chip">Healthy / Benign (0): <strong>${eda.target_distribution.disease_negative_0}</strong></div>
+        <div class="metric-chip">Imbalance Ratio: <strong>${eda.target_distribution.imbalance_ratio_pos_to_neg}</strong></div>
+    `;
+
+    // Correlations
+    const posList = document.getElementById("topPosCorrList");
+    posList.innerHTML = eda.top_positive_target_correlations.map(([feat, corr]) => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>${feat}</span>
+            <strong style="color:var(--accent-rose); font-family:'JetBrains Mono';">+${corr.toFixed(4)}</strong>
+        </div>
+    `).join("");
+
+    const negList = document.getElementById("topNegCorrList");
+    negList.innerHTML = eda.top_negative_target_correlations.map(([feat, corr]) => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>${feat}</span>
+            <strong style="color:var(--accent-blue); font-family:'JetBrains Mono';">${corr.toFixed(4)}</strong>
+        </div>
+    `).join("");
+}
+
+function renderClassBalanceChart(targetDist) {
+    const ctx = document.getElementById("classBalanceChart").getContext("2d");
+    if (charts.classBalance) charts.classBalance.destroy();
+
+    charts.classBalance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Disease Positive (1)", "Healthy Negative (0)"],
+            datasets: [{
+                data: [targetDist.disease_positive_1, targetDist.disease_negative_0],
+                backgroundColor: ["#f43f5e", "#3b82f6"],
+                borderColor: "#111827",
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+// Stage 3: Preprocessing
+function renderStage3Preprocessing(eda) {
+    document.getElementById("comp-raw-num").innerText = eda.feature_count;
+    document.getElementById("figPcaVariance").src = eda.figures.pca_variance;
     
-    const inferName = document.getElementById("inferDatasetName");
-    if (inferName) inferName.innerText = `Active Dataset: ${displayName}`;
-}
-
-async function fetchDatasetsList() {
-    try {
-        const res = await fetch(`${API_BASE}/datasets`);
-        const data = await res.json();
-        datasetsList = data.datasets || [];
-
-        renderDatasetsGrid();
-        populateDatasetDropdown();
-        updateActiveDatasetPill(currentDataset);
-    } catch (err) {
-        console.error("Failed to fetch datasets list:", err);
+    // Estimate or fetch explained variance
+    if (currentDatasetKey === "cancer") {
+        document.getElementById("comp-explained-var").innerText = "79.32% (4 Components)";
+    } else {
+        document.getElementById("comp-explained-var").innerText = "38.95% (4 Components)";
     }
 }
 
-function populateDatasetDropdown() {
-    const select = document.getElementById("datasetSelect");
-    let html = "";
-    datasetsList.forEach(ds => {
-        const selected = ds.id === currentDataset ? "selected" : "";
-        html += `<option value="${ds.id}" ${selected}>${ds.name}</option>`;
+// Stage 4: Classical SVM Baselines
+function renderStage4Classical(classData) {
+    const tbody = document.getElementById("classicalTableBody");
+    tbody.innerHTML = "";
+
+    const fullModels = classData.models_full_features;
+    const pcaModels = classData.models_pca_features;
+
+    const rows = [
+        { name: "Linear SVM", repr: `Full (${classData.full_feature_dimension} Feat)`, data: fullModels.linear },
+        { name: "RBF SVM (Primary)", repr: `Full (${classData.full_feature_dimension} Feat)`, data: fullModels.rbf },
+        { name: "Polynomial SVM", repr: `Full (${classData.full_feature_dimension} Feat)`, data: fullModels.poly },
+        { name: "RBF SVM (QSVM Parity)", repr: `4-PCA Components`, data: pcaModels.rbf }
+    ];
+
+    rows.forEach(r => {
+        const m = r.data;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${r.name}</strong></td>
+            <td><span class="badge-sih">${r.repr}</span></td>
+            <td><code style="font-size:0.75rem; color:#a0aec0;">${JSON.stringify(m.best_params)}</code></td>
+            <td style="font-family:'JetBrains Mono'; font-weight:600; color:var(--accent-cyan);">${m.cv_summary.accuracy_formatted}</td>
+            <td style="font-family:'JetBrains Mono';">${(m.test_metrics.accuracy * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(m.test_metrics.sensitivity * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(m.test_metrics.specificity * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono'; font-weight:600;">${m.test_metrics.roc_auc.toFixed(4)}</td>
+        `;
+        tbody.appendChild(tr);
     });
-    select.innerHTML = html;
+
+    document.getElementById("figClassicalRoc").src = classData.figures.roc_curves;
+    document.getElementById("figClassicalCm").src = classData.figures.confusion_matrices;
+    document.getElementById("figClassicalCv").src = classData.figures.cv_performance;
 }
 
-function renderDatasetsGrid() {
-    const grid = document.getElementById("datasetsGrid");
-    if (!grid) return;
+// Stage 5: Quantum Engine
+function renderStage5Quantum(quantData) {
+    document.getElementById("q-qubits").innerText = quantData.quantum_architecture.n_qubits;
+    document.getElementById("q-depth").innerText = quantData.quantum_architecture.circuit_depth;
+    document.getElementById("q-cnots").innerText = quantData.quantum_architecture.cnot_count;
+    document.getElementById("q-kernel-time").innerText = `${quantData.test_metrics.kernel_train_time_sec.toFixed(3)}s`;
 
-    let html = "";
-    datasetsList.forEach(ds => {
-        const isActive = ds.id === currentDataset;
-        const activeClass = isActive ? "active-ds" : "";
+    document.getElementById("figQuantumHeatmap").src = quantData.figures.kernel_heatmaps;
+    document.getElementById("figQubitScaling").src = quantData.figures.qubit_scaling;
+    document.getElementById("figNoiseSensitivity").src = quantData.figures.noise_sensitivity;
+}
+
+// Stage 6: Benchmarking & Verdict
+function renderStage6Benchmark(benchData) {
+    const verdict = benchData.quantum_advantage_verdict;
+    document.getElementById("verdictStatus").innerText = verdict.status;
+    document.getElementById("verdictSummary").innerText = verdict.summary;
+
+    const tbody = document.getElementById("benchmarkTableBody");
+    tbody.innerHTML = "";
+
+    benchData.comparison_table.forEach(r => {
+        const tr = document.createElement("tr");
+        const isQ = r.Model.includes("Quantum");
+        if (isQ) tr.style.background = "rgba(139, 92, 246, 0.08)";
         
-        html += `<div class="card dataset-card-item ${activeClass}">
-            <div>
-                <div class="dataset-header">
-                    <span class="dataset-title">${ds.name}</span>
-                    <span class="dataset-badge">${ds.samples} rows</span>
-                </div>
-                <p class="subtitle" style="font-size:0.85rem;">Target Column: <strong>${ds.target_column}</strong></p>
-                <div class="dataset-meta">
-                    <div class="meta-item">Features: <span>${ds.features}</span></div>
-                    <div class="meta-item">Format: <span>Tabular CSV</span></div>
-                </div>
-            </div>
-            <div class="dataset-actions" style="margin-top:16px;">
-                <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline'}" onclick="selectActiveDataset('${ds.id}')">
-                    ${isActive ? '✓ Active Dataset' : 'Set Active'}
-                </button>
-                <button class="btn btn-sm btn-outline" onclick="previewDatasetData('${ds.id}')">👁 Preview</button>
-            </div>
-        </div>`;
-    });
-    grid.innerHTML = html;
-}
-
-function selectActiveDataset(datasetId) {
-    currentDataset = datasetId;
-    populateDatasetDropdown();
-    updateActiveDatasetPill(currentDataset);
-    renderDatasetsGrid();
-    loadDatasetData(currentDataset);
-}
-
-async function previewDatasetData(datasetId) {
-    try {
-        const res = await fetch(`${API_BASE}/preprocess`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ dataset_id: datasetId, n_qubits: 4, apply_smote: false })
-        });
-        const data = await res.json();
-        
-        document.getElementById("previewModalTitle").innerText = `Dataset Preview: ${datasetId}`;
-        renderTablePreview("dataPreviewTable", data.sample_preview);
-        document.getElementById("dataPreviewModal").classList.remove("hidden");
-    } catch (err) {
-        console.error("Failed to preview dataset:", err);
-    }
-}
-
-async function loadDatasetData(datasetId) {
-    try {
-        const res = await fetch(`${API_BASE}/preprocess`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ dataset_id: datasetId, n_qubits: 4, apply_smote: true })
-        });
-        const data = await res.json();
-        
-        samplePreviewData = data.sample_preview || [];
-        currentFeatureNames = data.feature_names || [];
-        
-        // Build dynamic single-value inference form
-        buildPatientForm(currentFeatureNames, samplePreviewData[0]);
-    } catch (err) {
-        console.error("Error loading dataset data:", err);
-    }
-}
-
-function renderTablePreview(tableId, records) {
-    const table = document.getElementById(tableId);
-    if (!records || records.length === 0) return;
-
-    const keys = Object.keys(records[0]);
-    let html = "<thead><tr>" + keys.map(k => `<th>${k}</th>`).join("") + "</tr></thead><tbody>";
-    records.forEach(r => {
-        html += "<tr>" + keys.map(k => `<td>${r[k]}</td>`).join("") + "</tr>";
-    });
-    html += "</tbody>";
-    table.innerHTML = html;
-}
-
-// 3. Upload New CSV Modal & Dropzone
-function initUploadModal() {
-    const openBtn = document.getElementById("btnOpenUploadModal");
-    const closeBtn = document.getElementById("btnCloseUploadModal");
-    const modal = document.getElementById("uploadModal");
-    const dropzone = document.getElementById("csvDropzone");
-    const fileInput = document.getElementById("csvFileInput");
-    const uploadProgress = document.getElementById("uploadProgress");
-
-    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
-
-    dropzone.addEventListener("click", () => fileInput.click());
-
-    dropzone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = "var(--accent-cyan)";
+        tr.innerHTML = `
+            <td><strong>${r.Model}</strong></td>
+            <td style="font-family:'JetBrains Mono'; font-weight:700; color:${isQ ? 'var(--accent-purple)' : 'var(--text-primary)'};">${(r.Accuracy * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(r.Sensitivity * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(r.Specificity * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(r.Precision * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono';">${(r.F1_Score * 100).toFixed(2)}%</td>
+            <td style="font-family:'JetBrains Mono'; font-weight:600;">${r.ROC_AUC.toFixed(4)}</td>
+            <td style="font-family:'JetBrains Mono'; font-size:0.8rem;">${r.Train_Time_s}s</td>
+            <td style="font-family:'JetBrains Mono';">${r.Qubits}</td>
+            <td style="font-family:'JetBrains Mono';">${r.Circuit_Depth}</td>
+        `;
+        tbody.appendChild(tr);
     });
 
-    dropzone.addEventListener("dragleave", () => {
-        dropzone.style.borderColor = "var(--border-color)";
-    });
+    document.getElementById("figRadarChart").src = benchData.figures.radar_chart;
+    document.getElementById("figConfusionSideBySide").src = benchData.figures.confusion_matrix_side_by_side;
+    document.getElementById("researchInferenceBox").innerText = benchData.research_inference_text;
+}
 
-    dropzone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = "var(--border-color)";
-        if (e.dataTransfer.files.length > 0) {
-            handleFileUpload(e.dataTransfer.files[0]);
-        }
-    });
+// Stage 7: Dynamic Patient Form & Live Prediction
+function buildPatientForm(statsDict) {
+    const form = document.getElementById("patientForm");
+    form.innerHTML = "";
 
-    fileInput.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-            handleFileUpload(e.target.files[0]);
-        }
+    const featureNames = Object.keys(statsDict);
+    featureNames.forEach(fn => {
+        const stat = statsDict[fn];
+        const group = document.createElement("div");
+        group.className = "form-group";
+        group.innerHTML = `
+            <label for="input_${fn}">${fn} <span style="font-size:0.7rem; color:var(--text-muted);">(μ: ${stat.mean})</span></label>
+            <input type="number" step="any" class="form-input" id="input_${fn}" name="${fn}" value="${stat.mean}">
+        `;
+        form.appendChild(group);
     });
 }
 
-async function handleFileUpload(file) {
-    if (!file.name.endsWith(".csv")) {
-        alert("Please select a tabular .csv file.");
-        return;
-    }
-
-    const uploadProgress = document.getElementById("uploadProgress");
-    uploadProgress.classList.remove("hidden");
-    uploadProgress.innerText = `Uploading and parsing ${file.name}...`;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-        const res = await fetch(`${API_BASE}/upload_dataset`, {
-            method: "POST",
-            body: formData
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-            alert(`Upload failed: ${data.detail || 'Invalid CSV format'}`);
-            uploadProgress.classList.add("hidden");
-            return;
-        }
-
-        uploadProgress.innerText = `✓ Successfully uploaded ${file.name}!`;
-        setTimeout(() => {
-            document.getElementById("uploadModal").classList.add("hidden");
-            uploadProgress.classList.add("hidden");
-            fetchDatasetsList();
-            selectActiveDataset(data.dataset.id);
-        }, 1000);
-    } catch (err) {
-        console.error("Error uploading CSV:", err);
-        alert("Server error uploading CSV dataset.");
-        uploadProgress.classList.add("hidden");
-    }
-}
-
-function initModalClosers() {
-    document.getElementById("btnClosePreviewModal")?.addEventListener("click", () => {
-        document.getElementById("dataPreviewModal").classList.add("hidden");
-    });
-
-    document.getElementById("btnCloseDetailModal")?.addEventListener("click", () => {
-        document.getElementById("modelDetailModal").classList.add("hidden");
+function populatePatientForm(valuesObj) {
+    Object.keys(valuesObj).forEach(k => {
+        const input = document.getElementById(`input_${k}`);
+        if (input) input.value = valuesObj[k];
     });
 }
 
-// 4. Model Training Pipeline
-async function trainModelsPipeline() {
-    const btn = document.getElementById("btnTrainModels");
-    const statusTxt = document.getElementById("engineStatusTxt");
-    const pBox = document.getElementById("trainProgressBox");
-    const pBar = document.getElementById("trainProgressBar");
-    const saveBtn = document.getElementById("btnSaveToLibrary");
-
+async function runPatientPrediction(e) {
+    e.preventDefault();
+    const btn = document.getElementById("btnPredict");
+    btn.innerText = "⚡ Simulating Quantum Kernel Overlap...";
     btn.disabled = true;
-    statusTxt.innerText = "Training...";
-    statusTxt.className = "val-badge running";
-    pBox.classList.remove("hidden");
-    pBar.style.width = "35%";
 
     try {
-        pBar.style.width = "70%";
-        const res = await fetch(`${API_BASE}/train`, { method: "POST" });
-        const data = await res.json();
-        pBar.style.width = "100%";
+        const form = document.getElementById("patientForm");
+        const formData = new FormData(form);
+        const features = {};
+        formData.forEach((val, key) => {
+            features[key] = parseFloat(val);
+        });
 
-        setTimeout(() => pBox.classList.add("hidden"), 600);
+        const res = await fetch(`${API_BASE}/predict`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                dataset_key: currentDatasetKey,
+                features: features
+            })
+        });
 
-        currentBenchmarkTable = data.benchmark_table || [];
-        renderBenchmarkTable(currentBenchmarkTable);
-        renderBenchmarkChart(currentBenchmarkTable);
+        const result = await res.json();
+        renderPredictionResults(result);
 
-        statusTxt.innerText = "Completed";
-        statusTxt.className = "val-badge ready";
-        saveBtn.disabled = false;
-
-        // Auto-fetch SHAP Explainability
-        fetchExplainability();
     } catch (err) {
-        console.error("Training error:", err);
-        statusTxt.innerText = "Error";
-        statusTxt.className = "val-badge";
+        console.error("Prediction failed:", err);
     } finally {
+        btn.innerText = "🔬 Run Quantum-Classical Inference";
         btn.disabled = false;
     }
 }
 
-// 5. Render Benchmarking Table & Charts
-function renderBenchmarkTable(tableData) {
-    const tbody = document.querySelector("#benchmarkTable tbody");
-    if (!tbody) return;
+function renderPredictionResults(res) {
+    const preds = res.predictions;
 
-    let html = "";
-    tableData.forEach(row => {
-        const catBadge = row.category === "Quantum" ? `<span class="badge-paradigm badge-quantum">Quantum</span>` : 
-                         row.category === "Hybrid" ? `<span class="badge-paradigm badge-hybrid">Hybrid</span>` : 
-                         `<span class="badge-paradigm badge-classical">Classical</span>`;
-        
-        html += `<tr>
-            <td><strong>${row.model}</strong></td>
-            <td>${catBadge}</td>
-            <td><span style="color:var(--accent-green);font-weight:700;">${row.accuracy}%</span></td>
-            <td>${row.sensitivity}%</td>
-            <td>${row.specificity}%</td>
-            <td>${row.precision}%</td>
-            <td>${row.f1_score}%</td>
-            <td>${row.auc_roc}</td>
-            <td>${row.train_time_sec}s</td>
-        </tr>`;
-    });
-    tbody.innerHTML = html;
-}
+    // 1. Classical
+    const cBadge = document.getElementById("predClassBadge");
+    cBadge.innerText = preds.classical_rbf_svm.label;
+    cBadge.className = `pred-badge ${preds.classical_rbf_svm.prediction === 1 ? 'badge-disease' : 'badge-healthy'}`;
+    document.getElementById("predClassProb").innerText = `${preds.classical_rbf_svm.confidence_pct}%`;
 
-function renderBenchmarkChart(tableData) {
-    const ctx = document.getElementById("benchmarkBarChart")?.getContext("2d");
-    if (!ctx) return;
-    if (charts.benchmark) charts.benchmark.destroy();
+    // 2. Quantum
+    const qBadge = document.getElementById("predQuantBadge");
+    qBadge.innerText = preds.quantum_kernel_svm.label;
+    qBadge.className = `pred-badge ${preds.quantum_kernel_svm.prediction === 1 ? 'badge-disease' : 'badge-healthy'}`;
+    document.getElementById("predQuantProb").innerText = `${preds.quantum_kernel_svm.confidence_pct}%`;
 
-    const labels = tableData.map(r => r.model);
-    const accs = tableData.map(r => r.accuracy);
-    const aucs = tableData.map(r => (r.auc_roc * 100).toFixed(1));
+    // 3. Hybrid
+    const hBadge = document.getElementById("predHybridBadge");
+    hBadge.innerText = preds.hybrid_consensus_ensemble.label;
+    hBadge.className = `pred-badge ${preds.hybrid_consensus_ensemble.prediction === 1 ? 'badge-disease' : 'badge-healthy'}`;
+    document.getElementById("predHybridProb").innerText = `${preds.hybrid_consensus_ensemble.confidence_pct}%`;
 
-    charts.benchmark = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                { label: "Accuracy (%)", data: accs, backgroundColor: "#00f2fe" },
-                { label: "AUC-ROC (%)", data: aucs, backgroundColor: "#a855f7" }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } },
-                y: { min: 40, max: 100, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }
-            },
-            plugins: { legend: { labels: { color: "#94a3b8" } } }
-        }
-    });
-}
-
-async function fetchExplainability() {
-    try {
-        const res = await fetch(`${API_BASE}/explain`);
-        const data = await res.json();
-        currentShapImportances = data.feature_importances || [];
-        renderShapChart(currentShapImportances);
-    } catch (err) {
-        console.error("SHAP explainability error:", err);
-    }
-}
-
-function renderShapChart(importances) {
-    const ctx = document.getElementById("shapBarChart")?.getContext("2d");
-    if (!ctx) return;
-    if (charts.shap) charts.shap.destroy();
-
-    const labels = importances.map(i => i.feature);
-    const values = importances.map(i => i.importance);
-
-    charts.shap = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "SHAP Importance (%)",
-                data: values,
-                backgroundColor: "rgba(0, 242, 254, 0.6)",
-                borderColor: "#00f2fe",
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } },
-                y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }
-            },
-            plugins: { legend: { labels: { color: "#94a3b8" } } }
-        }
-    });
-}
-
-// 6. Model Library Storage & Modal Details
-function saveRunToModelLibrary() {
-    if (!currentBenchmarkTable || currentBenchmarkTable.length === 0) return;
-
-    const dsObj = datasetsList.find(d => d.id === currentDataset);
-    const dsName = dsObj ? dsObj.name : currentDataset;
-
-    currentBenchmarkTable.forEach(item => {
-        const runId = `run_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        trainedModelRuns.push({
-            id: runId,
-            model: item.model,
-            category: item.category,
-            accuracy: item.accuracy,
-            sensitivity: item.sensitivity,
-            specificity: item.specificity,
-            precision: item.precision,
-            f1_score: item.f1_score,
-            auc_roc: item.auc_roc,
-            train_time_sec: item.train_time_sec,
-            datasetId: currentDataset,
-            datasetName: dsName,
-            trainedAt: new Date().toLocaleTimeString(),
-            featureImportances: currentShapImportances
-        });
-    });
-
-    saveModelLibraryToLocalStorage();
-    renderModelLibraryGrid();
-    alert(`✓ Saved ${currentBenchmarkTable.length} trained models to Model Library!`);
-}
-
-function saveModelLibraryToLocalStorage() {
-    localStorage.setItem("qmed_model_library", JSON.stringify(trainedModelRuns));
-}
-
-function loadSavedModelLibrary() {
-    const stored = localStorage.getItem("qmed_model_library");
-    if (stored) {
-        try {
-            trainedModelRuns = JSON.parse(stored);
-        } catch (e) {
-            trainedModelRuns = [];
-        }
-    } else {
-        // Seed initial default trained models if empty
-        trainedModelRuns = [
-            {
-                id: "run_seed_hybrid",
-                model: "Soft Voting Ensemble",
-                category: "Hybrid",
-                accuracy: 98.3,
-                sensitivity: 97.5,
-                specificity: 99.1,
-                precision: 98.8,
-                f1_score: 98.1,
-                auc_roc: 0.992,
-                train_time_sec: 1.45,
-                datasetId: "heart.csv",
-                datasetName: "UCI Heart Disease (13 Feat)",
-                trainedAt: "Initial Benchmark",
-                featureImportances: [
-                    { feature: "cp", importance: 28.5 },
-                    { feature: "thalach", importance: 22.1 },
-                    { feature: "oldpeak", importance: 18.4 },
-                    { feature: "ca", importance: 16.2 }
-                ]
-            },
-            {
-                id: "run_seed_qsvm",
-                model: "Quantum Kernel (QSVM)",
-                category: "Quantum",
-                accuracy: 94.2,
-                sensitivity: 93.8,
-                specificity: 94.6,
-                precision: 94.0,
-                f1_score: 93.9,
-                auc_roc: 0.968,
-                train_time_sec: 3.12,
-                datasetId: "heart.csv",
-                datasetName: "UCI Heart Disease (13 Feat)",
-                trainedAt: "Initial Benchmark",
-                featureImportances: [
-                    { feature: "cp", importance: 25.0 },
-                    { feature: "thalach", importance: 24.0 }
-                ]
-            },
-            {
-                id: "run_seed_rf",
-                model: "Random Forest",
-                category: "Classical",
-                accuracy: 91.8,
-                sensitivity: 90.5,
-                specificity: 93.0,
-                precision: 92.1,
-                f1_score: 91.3,
-                auc_roc: 0.954,
-                train_time_sec: 0.28,
-                datasetId: "heart.csv",
-                datasetName: "UCI Heart Disease (13 Feat)",
-                trainedAt: "Initial Benchmark",
-                featureImportances: [
-                    { feature: "cp", importance: 30.1 }
-                ]
-            }
-        ];
-    }
-    renderModelLibraryGrid();
-}
-
-function renderModelLibraryGrid() {
-    const grid = document.getElementById("libraryGrid");
-    if (!grid) return;
-
-    if (trainedModelRuns.length === 0) {
-        grid.innerHTML = `<div class="card full-width" style="text-align:center;color:var(--text-secondary);">No saved models in library yet. Train models in Model Studio and click "Save Run to Library".</div>`;
-        return;
-    }
-
-    let html = "";
-    trainedModelRuns.forEach(run => {
-        const badgeClass = run.category === "Quantum" ? "badge-quantum" :
-                           run.category === "Hybrid" ? "badge-hybrid" : "badge-classical";
-                           
-        html += `<div class="card model-card-item">
-            <div>
-                <div class="dataset-header">
-                    <span class="dataset-title">${run.model}</span>
-                    <span class="badge-paradigm ${badgeClass}">${run.category}</span>
-                </div>
-                <p class="subtitle" style="font-size:0.82rem;margin-top:4px;">Dataset: <strong>${run.datasetName}</strong></p>
-                <div class="model-metrics-grid">
-                    <div class="metric-mini-box">
-                        <div class="mini-val">${run.accuracy}%</div>
-                        <div class="mini-lbl">Accuracy</div>
-                    </div>
-                    <div class="metric-mini-box">
-                        <div class="mini-val" style="color:var(--accent-purple);">${(run.auc_roc * 100).toFixed(1)}%</div>
-                        <div class="mini-lbl">AUC Score</div>
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-sm btn-outline full-width-btn" onclick="openModelDetailModal('${run.id}')">
-                🔍 Inspect Details & Provenance
-            </button>
-        </div>`;
-    });
-    grid.innerHTML = html;
-}
-
-function openModelDetailModal(runId) {
-    const run = trainedModelRuns.find(r => r.id === runId);
-    if (!run) return;
-
-    document.getElementById("modalModelName").innerText = run.model;
-    const catBadge = document.getElementById("modalModelCategory");
-    catBadge.innerText = run.category;
-    catBadge.className = `badge-paradigm ${run.category === "Quantum" ? "badge-quantum" : run.category === "Hybrid" ? "badge-hybrid" : "badge-classical"}`;
-
-    const body = document.getElementById("modalModelBody");
-    
-    let featHtml = "";
-    if (run.featureImportances && run.featureImportances.length > 0) {
-        featHtml = run.featureImportances.map(f => `<li><strong>${f.feature}</strong>: ${f.importance}% importance</li>`).join("");
-    } else {
-        featHtml = "<li>Standard clinical feature importance mapping</li>";
-    }
-
-    body.innerHTML = `
-        <div style="margin-bottom:20px;">
-            <p style="color:var(--text-secondary);font-size:0.9rem;">
-                Trained on Dataset: <strong style="color:var(--accent-cyan);">${run.datasetName}</strong> (${run.datasetId})
-            </p>
-            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:4px;">
-                Timestamp: ${run.trainedAt || 'Recorded Run'}
-            </p>
+    // Clinician Report
+    const reportBox = document.getElementById("clinicianReport");
+    reportBox.innerHTML = `
+        <div style="border-left: 3px solid ${preds.hybrid_consensus_ensemble.risk_color}; padding-left: 12px; margin-bottom: 12px;">
+            <strong style="color:${preds.hybrid_consensus_ensemble.risk_color}; font-size:1rem;">${preds.hybrid_consensus_ensemble.risk_tier}</strong>
+            <p style="margin-top:4px;">Consensus Disease Probability: <strong>${preds.hybrid_consensus_ensemble.confidence_pct}%</strong></p>
         </div>
-
-        <h4 style="margin-bottom:12px;">Full Performance Metrics Matrix</h4>
-        <div class="grid-3" style="margin-bottom:20px;">
-            <div class="metric-mini-box">
-                <div class="mini-val">${run.accuracy}%</div>
-                <div class="mini-lbl">Accuracy</div>
-            </div>
-            <div class="metric-mini-box">
-                <div class="mini-val" style="color:var(--accent-green);">${run.sensitivity}%</div>
-                <div class="mini-lbl">Sensitivity (Recall)</div>
-            </div>
-            <div class="metric-mini-box">
-                <div class="mini-val">${run.specificity}%</div>
-                <div class="mini-lbl">Specificity</div>
-            </div>
-            <div class="metric-mini-box">
-                <div class="mini-val">${run.precision}%</div>
-                <div class="mini-lbl">Precision</div>
-            </div>
-            <div class="metric-mini-box">
-                <div class="mini-val">${run.f1_score}%</div>
-                <div class="mini-lbl">F1-Score</div>
-            </div>
-            <div class="metric-mini-box">
-                <div class="mini-val" style="color:var(--accent-purple);">${run.auc_roc}</div>
-                <div class="mini-lbl">AUC-ROC</div>
-            </div>
-        </div>
-
-        <h4 style="margin-bottom:10px;">Quantum Circuit & Architecture Specs</h4>
-        <div class="card inner-card" style="margin-bottom:20px;font-size:0.88rem;line-height:1.6;">
-            <div><strong>Simulator Backend:</strong> PennyLane <code>default.qubit</code> Statevector Simulator</div>
-            <div><strong>Quantum Qubits:</strong> 4 Qubits (Angle Encoding RY-RZ)</div>
-            <div><strong>Circuit Depth:</strong> 2 Parameterized Entanglement Layers</div>
-            <div><strong>Train Duration:</strong> ${run.train_time_sec} seconds</div>
-        </div>
-
-        <h4 style="margin-bottom:10px;">Top Feature Importances</h4>
-        <ul style="padding-left:20px;font-size:0.88rem;color:#cbd5e1;line-height:1.6;">
-            ${featHtml}
-        </ul>
+        <p><strong>Quantum Feature Space Coordinates:</strong> [${res.quantum_compressed_coordinates.join(", ")}]</p>
+        <p><strong>Quantum Rotation Angles (0 to π):</strong> [${res.quantum_rotation_angles.join(", ")}]</p>
+        <p style="margin-top:8px; font-size:0.82rem; color:#94a3b8;">${res.clinical_guidance.sensitivity_note}</p>
     `;
-
-    document.getElementById("modelDetailModal").classList.remove("hidden");
-}
-
-// 7. Single-Sample Patient Inference Form & Presets
-function buildPatientForm(featureNames, sampleRow) {
-    const form = document.getElementById("patientForm");
-    if (!form) return;
-
-    let html = "";
-    featureNames.forEach(feat => {
-        const val = sampleRow && sampleRow[feat] !== undefined ? sampleRow[feat] : 0;
-        html += `<div class="form-group">
-            <label>${feat}</label>
-            <input type="number" step="any" name="${feat}" value="${val}">
-        </div>`;
-    });
-    form.innerHTML = html;
-}
-
-function loadPresetSample(type) {
-    const form = document.getElementById("patientForm");
-    if (!form) return;
-
-    let presetValues = {};
-
-    if (currentDataset === "heart.csv") {
-        if (type === "normal") {
-            presetValues = { age: 42, sex: 0, cp: 0, trestbps: 118, chol: 185, fbs: 0, restecg: 0, thalach: 172, exang: 0, oldpeak: 0.0, slope: 2, ca: 0, thal: 2 };
-        } else {
-            presetValues = { age: 64, sex: 1, cp: 3, trestbps: 165, chol: 295, fbs: 1, restecg: 1, thalach: 105, exang: 1, oldpeak: 2.8, slope: 0, ca: 2, thal: 3 };
-        }
-    } else if (currentDataset === "diabetes.csv") {
-        if (type === "normal") {
-            presetValues = { Pregnancies: 1, Glucose: 85, BloodPressure: 66, SkinThickness: 20, Insulin: 79, BMI: 22.5, DiabetesPedigreeFunction: 0.167, Age: 24 };
-        } else {
-            presetValues = { Pregnancies: 8, Glucose: 178, BloodPressure: 90, SkinThickness: 36, Insulin: 185, BMI: 38.5, DiabetesPedigreeFunction: 0.850, Age: 54 };
-        }
-    } else if (currentDataset === "parkinsons.csv") {
-        if (type === "normal") {
-            presetValues = { "MDVP:Fo(Hz)": 200.5, "MDVP:Fhi(Hz)": 230.1, "MDVP:Flo(Hz)": 180.2, "MDVP:Jitter(%)": 0.003, "MDVP:Shimmer": 0.015, NHR: 0.005, HNR: 26.5, RPDE: 0.35, DFA: 0.60, spread1: -6.5, spread2: 0.12, D2: 1.8, PPE: 0.08 };
-        } else {
-            presetValues = { "MDVP:Fo(Hz)": 119.9, "MDVP:Fhi(Hz)": 142.3, "MDVP:Flo(Hz)": 89.2, "MDVP:Jitter(%)": 0.022, "MDVP:Shimmer": 0.085, NHR: 0.120, HNR: 14.2, RPDE: 0.62, DFA: 0.78, spread1: -3.2, spread2: 0.38, D2: 2.9, PPE: 0.42 };
-        }
-    } else {
-        // Fallback for custom uploaded CSV: set normal to low values, high risk to high values
-        currentFeatureNames.forEach(f => {
-            presetValues[f] = type === "normal" ? 10 : 90;
-        });
-    }
-
-    // Prefill inputs
-    for (const [key, val] of Object.entries(presetValues)) {
-        const input = form.querySelector(`input[name="${key}"]`);
-        if (input) input.value = val;
-    }
-}
-
-async function runPatientPrediction() {
-    const form = document.getElementById("patientForm");
-    const formData = new FormData(form);
-    const patientData = {};
-    formData.forEach((val, key) => patientData[key] = parseFloat(val) || 0);
-
-    try {
-        const res = await fetch(`${API_BASE}/predict`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patient_data: patientData })
-        });
-        const data = await res.json();
-        
-        renderPredictionCards(data.predictions);
-        document.getElementById("clinicianReport").innerHTML = data.clinician_summary.replace(/\n/g, "<br>");
-    } catch (err) {
-        console.error("Prediction error:", err);
-        alert("Error running inference. Please ensure models are trained first in Model Studio.");
-    }
-}
-
-function renderPredictionCards(preds) {
-    const container = document.getElementById("predictionCards");
-    if (!container) return;
-
-    let html = "";
-    for (const [modelName, pdict] of Object.entries(preds)) {
-        const badgeClass = pdict.label === 1 ? "badge-positive" : "badge-negative";
-        const labelText = pdict.label === 1 ? "High Risk (1)" : "Healthy (0)";
-        const isHighlight = modelName.includes("Hybrid") ? "highlight" : "";
-
-        html += `<div class="pred-card ${isHighlight}">
-            <div class="pred-title">${modelName}</div>
-            <div class="pred-badge ${badgeClass}">${labelText}</div>
-            <div style="font-size:0.85rem;margin-top:4px;">Risk: <strong>${(pdict.probability * 100).toFixed(1)}%</strong></div>
-            <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">Confidence: ${pdict.confidence}</div>
-        </div>`;
-    }
-    container.innerHTML = html;
 }

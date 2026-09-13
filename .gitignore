@@ -1,33 +1,70 @@
-# Python cache
+# Python cache & compiled files
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+
+# C extensions
 *.so
 
 # Environments
 .venv/
 venv/
 ENV/
-.env
-.env*
-frontend/.env*
+env/
+venv.bak/
+env.bak/
 
-# Node & Build artifacts
+# Unit test & coverage outputs
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Node.js & Frontend build artifacts
 node_modules/
 frontend/node_modules/
-dist/
 frontend/dist/
-build/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Logs
-*.log
+# Environment & Secret files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+frontend/.env
+.env.example
 
 # OS specific files
 desktop.ini
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
 
-# IDE settings
+# IDE & Assistant settings
 .vscode/
 .idea/
 .gemini/
+*.swp
+*.swo
+
+# Generated Model Weights & Binaries
+*.joblib
+*.pkl
+backend/models/*.joblib
+
+# Generated Figures, Benchmark JSON Results & Markdown Export Reports
+backend/figures/
+backend/results/
+backend/reports/
+*_complete_report.md
+*_fusion_report.md

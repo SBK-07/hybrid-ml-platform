@@ -1,47 +1,56 @@
-import React from 'react';
-import { Atom, Zap, Database, BookOpen, Activity, Radio } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Compass, Database, Zap, BarChart3, Activity, Cpu, FileText, Bot, Radio, Sun, Moon } from 'lucide-react';
+import Atom4Orbits from './Atom4Orbits';
 
-export default function Sidebar({ activeHub, setActiveHub, activeDataset, datasetsList }) {
-  const activeDsObj = datasetsList.find(d => d.id === activeDataset);
-  const displayName = activeDsObj ? activeDsObj.name : activeDataset;
+export default function Sidebar({ activeTab, setActiveTab, isBackendOnline = true }) {
+  const [isDark, setIsDark] = useState(() => {
+    const stored = localStorage.getItem('quddos-theme') || localStorage.getItem('qmed-theme');
+    return stored === 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('quddos-theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   const navItems = [
-    { id: 'studio', icon: <Zap size={18} />, label: 'Model Studio' },
-    { id: 'datasets', icon: <Database size={18} />, label: 'Datasets Hub' },
-    { id: 'library', icon: <BookOpen size={18} />, label: 'Model Library' },
-    { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' }
+    { id: 'overview', icon: <Compass size={18} />, label: 'Overview & Workflow' },
+    { id: 'dataset-overview', icon: <Database size={18} />, label: 'Dataset Overview & EDA', badge: 'DEEP EDA' },
+    { id: 'individual', icon: <Zap size={18} />, label: 'Individual Experiment' },
+    { id: 'cumulative', icon: <BarChart3 size={18} />, label: 'Cumulative Benchmark' },
+    { id: 'inference', icon: <Activity size={18} />, label: 'Live Patient Risk Predictor', badge: 'LIVE DEMO' },
+    { id: 'real-qc', icon: <Cpu size={18} />, label: 'Real QC Hardware', badge: 'IBM QPU' },
+    { id: 'report', icon: <FileText size={18} />, label: 'Adaptive Report Builder' },
+    { id: 'quddos', icon: <Bot size={18} />, label: 'Quddos AI Assistant' }
   ];
 
   return (
     <aside className="sidebar">
       <div className="brand">
         <div className="logo-icon" style={{ display: 'flex', alignItems: 'center' }}>
-          <Atom size={28} />
+          <Atom4Orbits size={28} color="var(--brand-primary)" animated />
         </div>
-        <div>
-          <h2>Q-Med AI Studio</h2>
-          <span className="badge-sih">SIH 2026 PS 139</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <h2>Quddos</h2>
+          <span className="badge-sih" style={{ fontSize: '0.62rem', padding: '1px 6px', letterSpacing: '0.04em' }}>
+            STUDIO
+          </span>
         </div>
       </div>
-
-      <div className="active-dataset-pill">
-        <span className="pill-label">Active Dataset:</span>
-        <span className="pill-value">{displayName}</span>
-      </div>
+      <div className="brand-tagline">Hybrid Quantum-Classical Intelligence Platform</div>
 
       <nav className="nav-menu">
         {navItems.map(item => (
           <button
             key={item.id}
-            className={`nav-item ${activeHub === item.id ? 'active' : ''}`}
-            onClick={() => setActiveHub(item.id)}
-            style={{ position: 'relative' }}
+            className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(item.id)}
           >
             <span className="nav-icon">{item.icon}</span>
             <span>{item.label}</span>
             {item.badge && (
-              <span className="badge-sih" style={{ marginLeft: 'auto', fontSize: '0.62rem', background: 'rgba(236, 72, 153, 0.15)', color: 'var(--accent-pink)', borderColor: 'rgba(236, 72, 153, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Radio size={10} className="pulse-btn" /> {item.badge}
+              <span className="badge-sih" style={{ marginLeft: 'auto', fontSize: '0.6rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Radio size={9} /> {item.badge}
               </span>
             )}
           </button>
@@ -49,8 +58,23 @@ export default function Sidebar({ activeHub, setActiveHub, activeDataset, datase
       </nav>
 
       <div className="sidebar-footer">
+        <div className="theme-toggle">
+          <span className="theme-toggle-label">
+            {isDark ? <Moon size={14} /> : <Sun size={14} />}
+            <span>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+          </span>
+          <label className="theme-switch" title="Toggle theme">
+            <input
+              type="checkbox"
+              checked={isDark}
+              onChange={() => setIsDark(!isDark)}
+            />
+            <span className="theme-slider" />
+          </label>
+        </div>
         <div className="quantum-status">
-          <span className="status-dot"></span> PennyLane QML Simulator
+          <span className="status-dot" style={{ backgroundColor: isBackendOnline ? 'var(--status-success)' : 'var(--status-danger)' }}></span>
+          {isBackendOnline ? 'IBM Quantum & PennyLane Online' : 'Backend Disconnected'}
         </div>
       </div>
     </aside>

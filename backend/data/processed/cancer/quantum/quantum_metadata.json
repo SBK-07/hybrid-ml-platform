@@ -1,0 +1,15 @@
+{
+    "dataset_name": "Breast Cancer Wisconsin Diagnostic (WDBC)",
+    "dataset_key": "Cancer",
+    "n_qubits": 4,
+    "pca_components": 4,
+    "cumulative_explained_variance": 0.7931718711164906,
+    "component_variance_ratios": [
+        0.4459352220227063,
+        0.18545255453685278,
+        0.09584641206459542,
+        0.06593768249233611
+    ],
+    "quantum_angle_range": "[0, pi]",
+    "random_state": 42
+}

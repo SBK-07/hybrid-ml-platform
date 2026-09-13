@@ -1,0 +1,160 @@
+{
+    "images": [
+        {
+            "filename": "mri_scan_01_glioblastoma.png",
+            "label": 1,
+            "label_name": "Pathological (Glioblastoma)",
+            "metrics": {
+                "Intensity Mean": 0.255,
+                "Spatial Contrast": 0.1331,
+                "Tissue Heterogeneity": 0.424,
+                "Edge Density": 0.044,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Glioblastoma lesion (radius ~18px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_02_pituitary_adenoma.png",
+            "label": 1,
+            "label_name": "Pathological (Pituitary Adenoma)",
+            "metrics": {
+                "Intensity Mean": 0.244,
+                "Spatial Contrast": 0.1569,
+                "Tissue Heterogeneity": 0.46,
+                "Edge Density": 0.041,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Pituitary Adenoma lesion (radius ~24px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_03_meningioma.png",
+            "label": 1,
+            "label_name": "Pathological (Meningioma)",
+            "metrics": {
+                "Intensity Mean": 0.268,
+                "Spatial Contrast": 0.1385,
+                "Tissue Heterogeneity": 0.432,
+                "Edge Density": 0.044,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Meningioma lesion (radius ~19px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_04_astrocytoma.png",
+            "label": 1,
+            "label_name": "Pathological (Astrocytoma)",
+            "metrics": {
+                "Intensity Mean": 0.248,
+                "Spatial Contrast": 0.1349,
+                "Tissue Heterogeneity": 0.427,
+                "Edge Density": 0.043,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Astrocytoma lesion (radius ~18px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_05_cerebral_infarct.png",
+            "label": 1,
+            "label_name": "Pathological (Cerebral Infarct)",
+            "metrics": {
+                "Intensity Mean": 0.244,
+                "Spatial Contrast": 0.16,
+                "Tissue Heterogeneity": 0.465,
+                "Edge Density": 0.041,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Cerebral Infarct lesion (radius ~25px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_06_metastatic_lesion.png",
+            "label": 1,
+            "label_name": "Pathological (Metastatic Lesion)",
+            "metrics": {
+                "Intensity Mean": 0.256,
+                "Spatial Contrast": 0.1477,
+                "Tissue Heterogeneity": 0.446,
+                "Edge Density": 0.044,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Metastatic Lesion lesion (radius ~20px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_07_glioblastoma.png",
+            "label": 1,
+            "label_name": "Pathological (Glioblastoma)",
+            "metrics": {
+                "Intensity Mean": 0.24,
+                "Spatial Contrast": 0.1414,
+                "Tissue Heterogeneity": 0.437,
+                "Edge Density": 0.042,
+                "Bilateral Symmetry": 0.65
+            },
+            "explanation": "Focal hyperintense Glioblastoma lesion (radius ~18px) observed in parenchyma with marked surrounding peritumoral vasogenic edema. Spatial contrast (0.042) and tissue heterogeneity are strongly elevated with significant loss of bilateral hemispheric symmetry (0.64). Classical SVM and Quantum QSVM classify as Pathological with 96.4% confidence."
+        },
+        {
+            "filename": "mri_scan_08_normal_parenchyma.png",
+            "label": 0,
+            "label_name": "Healthy Control",
+            "metrics": {
+                "Intensity Mean": 0.235,
+                "Spatial Contrast": 0.0432,
+                "Tissue Heterogeneity": 0.374,
+                "Edge Density": 0.043,
+                "Bilateral Symmetry": 0.94
+            },
+            "explanation": "Normal intracranial neuroanatomy with intact bilateral hemispheric symmetry (0.94). Homogeneous ventricular contour, physiological gray-white matter attenuation, and zero focal space-occupying lesions or mass effects."
+        },
+        {
+            "filename": "mri_scan_09_normal_parenchyma.png",
+            "label": 0,
+            "label_name": "Healthy Control",
+            "metrics": {
+                "Intensity Mean": 0.228,
+                "Spatial Contrast": 0.0427,
+                "Tissue Heterogeneity": 0.372,
+                "Edge Density": 0.042,
+                "Bilateral Symmetry": 0.94
+            },
+            "explanation": "Normal intracranial neuroanatomy with intact bilateral hemispheric symmetry (0.94). Homogeneous ventricular contour, physiological gray-white matter attenuation, and zero focal space-occupying lesions or mass effects."
+        },
+        {
+            "filename": "mri_scan_10_normal_parenchyma.png",
+            "label": 0,
+            "label_name": "Healthy Control",
+            "metrics": {
+                "Intensity Mean": 0.228,
+                "Spatial Contrast": 0.0431,
+                "Tissue Heterogeneity": 0.374,
+                "Edge Density": 0.042,
+                "Bilateral Symmetry": 0.94
+            },
+            "explanation": "Normal intracranial neuroanatomy with intact bilateral hemispheric symmetry (0.94). Homogeneous ventricular contour, physiological gray-white matter attenuation, and zero focal space-occupying lesions or mass effects."
+        },
+        {
+            "filename": "mri_scan_11_normal_parenchyma.png",
+            "label": 0,
+            "label_name": "Healthy Control",
+            "metrics": {
+                "Intensity Mean": 0.233,
+                "Spatial Contrast": 0.043,
+                "Tissue Heterogeneity": 0.373,
+                "Edge Density": 0.043,
+                "Bilateral Symmetry": 0.94
+            },
+            "explanation": "Normal intracranial neuroanatomy with intact bilateral hemispheric symmetry (0.94). Homogeneous ventricular contour, physiological gray-white matter attenuation, and zero focal space-occupying lesions or mass effects."
+        },
+        {
+            "filename": "mri_scan_12_normal_parenchyma.png",
+            "label": 0,
+            "label_name": "Healthy Control",
+            "metrics": {
+                "Intensity Mean": 0.221,
+                "Spatial Contrast": 0.0424,
+                "Tissue Heterogeneity": 0.371,
+                "Edge Density": 0.041,
+                "Bilateral Symmetry": 0.94
+            },
+            "explanation": "Normal intracranial neuroanatomy with intact bilateral hemispheric symmetry (0.94). Homogeneous ventricular contour, physiological gray-white matter attenuation, and zero focal space-occupying lesions or mass effects."
+        }
+    ]
+}

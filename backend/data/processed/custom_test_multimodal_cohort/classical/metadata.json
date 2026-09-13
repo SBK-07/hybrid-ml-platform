@@ -1,0 +1,61 @@
+{
+    "target_column": "diagnosis",
+    "total_samples": 20,
+    "total_features": 25,
+    "train_samples": 16,
+    "test_samples": 4,
+    "feature_names": [
+        "mean_radius",
+        "mean_texture",
+        "mean_perimeter",
+        "mri_intensity_mean",
+        "mri_intensity_std",
+        "mri_intensity_variance",
+        "mri_intensity_skewness",
+        "mri_intensity_kurtosis",
+        "mri_intensity_entropy",
+        "mri_intensity_energy",
+        "mri_intensity_rms",
+        "mri_intensity_p10",
+        "mri_intensity_p90",
+        "mri_dynamic_range",
+        "mri_edge_density",
+        "mri_laplacian_sharpness",
+        "mri_foreground_ratio",
+        "mri_spatial_contrast",
+        "mri_spatial_homogeneity",
+        "mri_spatial_dissimilarity",
+        "mri_spatial_correlation",
+        "mri_glcm_energy",
+        "mri_hemispheric_symmetry",
+        "mri_high_freq_fourier_ratio",
+        "mri_tissue_heterogeneity"
+    ],
+    "quantum_qubits": 4,
+    "pca_explained_variance_ratio": [
+        0.8801,
+        0.1199,
+        0.0,
+        0.0
+    ],
+    "pca_cumulative_variance": 1.0,
+    "class_distribution": {
+        "class_0_healthy": 10,
+        "class_1_diseased": 10,
+        "imbalance_ratio": 1.0,
+        "positive_label": "Positive (Class 1)",
+        "negative_label": "Control (Class 0)"
+    },
+    "disease_positive_label": "Disease Positive (Class 1)",
+    "disease_negative_label": "Healthy / Control (Class 0)",
+    "preprocessing_time_sec": 0.0118,
+    "status": "READY_FOR_BENCHMARK",
+    "filename": "test_multimodal_cohort.zip",
+    "dataset_name": "Custom Dataset (test_multimodal_cohort.zip)",
+    "dataset_key": "custom_test_multimodal_cohort",
+    "modalities_detected": [
+        "tabular",
+        "imaging"
+    ],
+    "ingestion_format": "multimodal_archive"
+}

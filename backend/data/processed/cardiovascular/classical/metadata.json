@@ -1,0 +1,25 @@
+{
+    "dataset_name": "UCI Heart Disease",
+    "dataset_key": "Cardiovascular",
+    "n_train_samples": 242,
+    "n_test_samples": 61,
+    "n_features": 13,
+    "feature_names": [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal"
+    ],
+    "scaler_type": "StandardScaler",
+    "random_state": 42,
+    "test_size": 0.2
+}
