@@ -39,7 +39,7 @@ Built to address **Smart India Hackathon 2026 (Problem Statement ID 26139)** in 
 
 Traditional diagnostic systems often operate as black-box models, struggle with high-dimensional non-linear feature interactions, and fail to provide clinicians with clear confidence metrics or actionable intervention targets. 
 
-**Q-Med solves this by providing:**
+**Quddos solves this by providing:**
 - **Multimodal Health Ingestion**: Analyzes patient clinical lab reports, CT/MRI medical image patches (extracting 24 IBSI-compliant radiomic texture biomarkers), and biosignals simultaneously.
 - **Hybrid Quantum-Classical Processing**: Processes continuous clinical biomarkers in parallel across classical AI algorithms and quantum Hilbert feature spaces ($\mathcal{H} = \mathbb{C}^{16}$), unlocking complex non-linear disease patterns.
 - **Adaptive Consensus Diagnosis**: Combines multiple diagnostic models using confidence-weighted late fusion to produce unified, robust risk predictions with automatic fallback if imaging or tabular data is unavailable.
@@ -380,7 +380,7 @@ hybrid-ml-platform/
 
 ## 🛡️ Clinical Safety & Governance
 
-1. **Clinical Decision Support**: Q-Med is engineered as an auxiliary Clinical Decision Support System (CDSS) designed to empower clinicians, not replace clinical judgment.
+1. **Clinical Decision Support**: Quddos is engineered as an auxiliary Clinical Decision Support System (CDSS) designed to empower clinicians, not replace clinical judgment.
 2. **Dual-Uncertainty Alerts**: Automatically flags high-ambiguity or paradigm-discordant cases ($U_{\text{epistemic}} > 0.35$) for human specialist secondary review.
 3. **Privacy & Data Security**: Runs 100% on-premise without external network calls when needed, keeping sensitive Protected Health Information (PHI) fully isolated.
 4. **Reproducibility**: Every diagnosis is tagged with an immutable SHA-256 cryptographic provenance hash linking predictions to exact model states and inputs.
