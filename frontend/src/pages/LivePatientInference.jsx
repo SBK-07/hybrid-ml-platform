@@ -4,7 +4,7 @@ import {
   Activity, ChevronDown, ChevronUp, UserCheck, ShieldAlert,
   BookOpen, Sliders, Stethoscope, AlertCircle, Compass,
   Loader2, Bot, ArrowRight, Cpu, Play, Sparkles, Award,
-  TrendingUp, Gauge, CheckCheck, Scale,
+  TrendingUp, Gauge, CheckCheck, Scale, Zap,
   Atom, Layers, CheckCircle, Brain, GraduationCap, Microscope,
   Image as ImageIcon, UploadCloud, FileImage, HeartHandshake,
   HelpCircle, ClipboardList, CheckCircle2, Info, Users, Eye,
@@ -2017,7 +2017,7 @@ export default function LivePatientInference() {
 
                   {showAdvancedResults && (
                     <div style={{ ...T.terminal, padding: '16px', marginTop: '10px', color: 'var(--quantum-color)' }}>
-                      <div style={{ color: '#94A3B8', marginBottom: '10px', ...T.eyebrow, color: '#94A3B8' }}>
+                      <div style={{ ...T.eyebrow, color: '#94A3B8', marginBottom: '10px' }}>
                         Quantum State Telemetry
                       </div>
                       <div style={{ marginBottom: '6px' }}>

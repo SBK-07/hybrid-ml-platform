@@ -1,6 +1,10 @@
-# Core Web & API Framework
+# ==============================================================================
+# Q-Med / QUDDOS: Hybrid Quantum-Classical Platform Dependencies
+# ==============================================================================
+
+# Core Web & API Microservice Framework
 fastapi>=0.100.0
-uvicorn>=0.20.0
+uvicorn[standard]>=0.20.0
 pydantic>=2.0.0
 python-multipart>=0.0.6
 requests>=2.28.0
@@ -12,10 +16,14 @@ scipy>=1.10.0
 scikit-learn>=1.2.0
 joblib>=1.2.0
 
-# Quantum Machine Learning
+# Quantum Machine Learning & Hardware Access
 qiskit>=1.0.0
 qiskit-aer>=0.13.0
+qiskit-ibm-runtime>=0.30.0
 
-# Visualization & Data Analysis
+# Multimodal Biomedical Image & Signal Processing
+pillow>=9.5.0
+
+# Data Visualization & Analytical Plotting
 matplotlib>=3.7.0
 seaborn>=0.12.0
