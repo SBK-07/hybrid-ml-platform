@@ -1,4 +1,4 @@
-# ⚛️ Q-Med / QUDDOS: Adaptive Multimodal Hybrid Quantum-Classical Biomedical Intelligence Platform
+# QUDDOS: Adaptive Multimodal Hybrid Quantum-Classical Biomedical Intelligence Platform
 
 [![SIH 2026](https://img.shields.io/badge/SIH%202026-Problem%20ID%2026139-blue?style=for-the-badge&logo=target)](https://sih.gov.in/)
 [![Theme](https://img.shields.io/badge/Theme-MedTech%20%2F%20HealthTech-green?style=for-the-badge&logo=health)](https://sih.gov.in/)
