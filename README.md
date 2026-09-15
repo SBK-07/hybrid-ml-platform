@@ -387,7 +387,7 @@ hybrid-ml-platform/
 
 ---
 
-## 📜 License & Acknowledgments
+## 📜 License and Acknowledgments
 
 Licensed under the **MIT License** with portions under **Apache License 2.0**.
 
