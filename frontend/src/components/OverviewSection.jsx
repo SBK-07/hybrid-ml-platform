@@ -169,7 +169,7 @@ export default function OverviewSection({ activeDataset }) {
 
   const stats = [
     { value: '5+', label: 'Datasets Supported', color: 'var(--brand-primary)' },
-    { value: '4', label: 'Models Benchmarked', color: 'var(--classical-color)' },
+    { value: '5', label: 'Models Benchmarked', color: 'var(--classical-color)' },
     { value: '4', label: 'Quantum Qubits', color: 'var(--quantum-color)' },
     { value: '7', label: 'Pipeline Stages', color: 'var(--hybrid-color)' }
   ];
@@ -208,13 +208,13 @@ export default function OverviewSection({ activeDataset }) {
             lineHeight: 1.08,
             color: 'var(--text-primary)'
           }}>
-            Benchmarking ML against quantum circuits for{' '}
+            Quddos for{' '}
             <span style={{ color: 'var(--brand-primary)' }}>early disease detection</span>.
           </h1>
 
           <p style={{ margin: '0 0 36px', fontSize: '0.98rem', lineHeight: 1.75, color: 'var(--text-secondary)', maxWidth: '560px' }}>
             An end-to-end platform comparing classical algorithms with quantum ML circuits across
-            tabular biomedical datasets — from ingestion through SHAP explainability to live
+            High dimensional biomedical datasets — from ingestion through SHAP explainability to live
             patient risk scoring.
           </p>
 
